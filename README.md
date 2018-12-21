@@ -33,3 +33,6 @@ Code for fitting ssMOReTreeS to case-crossover study data examining the effect o
 ## data_example_cv.R
 Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as descried in data_example_full.R.
 
+## simulations.R
+Code for running simulations described in the manuscript.
+
