@@ -282,7 +282,7 @@ pl2 <-   collapsibleTreeNetwork2(edgelist3,attribute="beta",aggFun=identity, fil
                                 nodeSizeScaleFun=silly_function,width=800,height=1000,fontSize=14)
 #htmlwidgets::saveWidget(as_widget(pl2), "/Users/emt380/Documents/emgthomas.github.io/moretrees_plots/data_example_individual_tree.html")
 setwd("./figures_and_tables/")
-htmlwidgets::saveWidget(as_widget(pl2), "data_example_collapsed_tree.html")
+htmlwidgets::saveWidget(as_widget(pl2), "data_example_individual_tree.html")
 setwd("../")
 
 ################### Table 1 #######################
