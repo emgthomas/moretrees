@@ -6,26 +6,59 @@ This repository contains the following files.
 ## VI_functions.R
 Functions necessary for fitting spike & slab MOReTreeS (ssMOReTreeS) model to pair matched case-control data, including:
 
-### adhoc_collapsing(Z,Y,pL,groups)
+### adhoc_collapsing()
 Computes log odds ratios for pair-matched case control data via conditional maximum likelihood and various adhoc collasping strategies specified by groups.
 
-### initial_node_coeffs(Z,Y,uncollapsed,p,pL,leaf.descendants,ancestors)
+### initial_node_coeffs()
 Computes appropriate initial values for the variational parameter mu_gamma based on conditional logistic regression estimates of the log odds ratio for different levels of collapsing according to the tree.
 
-### g_fun(eta)
+### g_fun()
 Evaluates the function g (defined on pg 5 of the Supplementary Material)
 
-### g_fun.vec(eta)
+### g_fun.vec()
 Vectorized version of g_fun.
 
-### ELBO.fun_ss(Y,Z,p,pL,n,ancestors,VI_params,hyperparams,ELBO_old,tol,update_hyper)
+### log1p.exp(), log1p.exp.vec(), loglogit()
+Functions for calculating the log of the logit of a value.
+
+### ELBO.fun_ss()
 Computes the evidence lower bound (ELBO) for ssMOReTreeS.
 
-### VI_step_ss(ELBO,VI_params,hyperparams,Z,Y,n,p,pL,ancestors,leaf.descendants,update_hyper,tol)
+### VI_step_ss()
 Performs updates for variational parameters and hyperparameters in the ssMOReTreeS model.
 
-### VI_binary_ss(Z,Y,n,p,pL,ancestors,leaf.descendants,cutoff,mu_gamma_init,tol,m.max,m.print,more,update_hyper,update_hyper_freq=)
+### VI_binary_ss()
 Runs variational inference algorithm until convergence.
+
+## processing_functions.R
+Functions for processing the output of VI_binary_ss()
+
+### indiv.beta.calc()
+Function for computing individual level beta estimates, as opposed to collapsed estimates (See Section 3.3 of the manuscript)
+
+### gamma.sim.fun()
+Function to help with producing simulated creddible intervals for individual beta estimates
+
+### indiv.beta.calc.ci()
+Function for computing individual level beta estimates along with 95% credible intervals (See Section 3.3 of the manuscript)
+
+### groups.calc.fun()
+Function for computing extracting collapsed beta estimates along with 95% credible intervals (See Section 3.3 of the manuscript) and putting them into an igraph tree
+
+### explainer.latex()
+Function for expanding ICD9 codes to print nicely as a LaTeX table
+
+### expand_groups_latex()
+Function for printing out a group of ICD9 codes in LaTeX formatted according to their place in the ICD9 heirarchy.
+
+### rmse.fun()
+Computes root mean squared error for a vector estimator
+
+### nunique.fun()
+Computes number of unique elements in a vector
+
+### bias_n_fun()
+Computes the average fractional bias of the top n largest estimates in a list of estimates.
 
 ## data_example_full.R
 Code for fitting ssMOReTreeS to case-crossover study data examining the effect of short-term exposure to PM2.5 on hospitalizations for cardiovascular disease (CVD) among Medicare enrollees.
@@ -33,6 +66,21 @@ Code for fitting ssMOReTreeS to case-crossover study data examining the effect o
 ## data_example_cv.R
 Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as descried in data_example_full.R.
 
+## data_example_figures_and_tables.R
+Code for reproducing tables and figures related to the data example.
+
 ## simulations.R
 Code for running simulations described in the manuscript.
+
+## simulations_figures_and_tables.R
+Code for reproducing tables and figures related to the simulations.
+
+## collapsibleTreeNetwork_modified.R
+Code for producing interactive trees. The main function in this file, collapsibleTreeNetwork2(), was adapted from the collapsibleTree package (version 0.1.6) created by Adeel Khan. The original version of this package is available via CRAN at the following link: https://CRAN.R-project.org/package=collapsibleTree.
+
+### explainer.zip(), expand_html(), expand_html_sims()
+Functions for formatting the output of simulations and data example for display on interactive trees.
+
+### collapsibleTreeNetwork2()
+Produces interactive tree in html format.
 

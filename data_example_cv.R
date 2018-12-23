@@ -2,34 +2,17 @@
 # ------- Data analysis - cross validation -------------- #
 # ------------------------------------------------------- #
 
-direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
+direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees/"
+# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
 setwd(direc)
 
 ##### Load functions ######
-# source("./Master/functions_MORETreeS_VI_case_control2.R")
-source("./moretrees/VI_functions.R")
+source("VI_functions.R")
+source("processing_functions.R")
 require(igraph)
-indiv.beta.calc <- function(VI_params,ancestors,pL,p){
-  pi_s <- 1/(1+exp(-VI_params$u_s))
-  mu_gamma <- VI_params$mu_gamma
-  beta_est <- numeric(length=pL)
-  for(v in 1:pL){
-    u <- ancestors[[v+p-pL]]
-    beta_est[v] <- sum(mu_gamma[u]*pi_s[u])
-  }
-  return(beta_est)
-}
 
 ### load ICD9 tree ###
-load("./Data/sim_trees_CC.Rdata")
-tree <- tree[[2]]
-p <- p[2]
-pL <- pL[2]
-ancestors <- ancestors[[2]]
-leaf.descendants <- leaf.descendants[[2]]
-n.leaf.descendants <- n.leaf.descendants[2]
-groups <- groups[[2]]
+load("./simulation_inputs/inputs.Rdata")
 # Extract list of relevant ICD9 codes
 codes <- names(V(tree)[V(tree)$leaf])
 
@@ -94,5 +77,4 @@ names(ll.cv) <- c("fold","moretrees_groups","moretrees_indiv","uncollapsed","sim
 
 ############### Save results ###############
 
-save(ll.cv,mod,file=paste0(direc,"Results/Data_Example/data_example2_cv_fold",fold,".Rdata"))
-#write.table(ll.cv,file=paste0(direc,"Results/Data_Example/data_example_cv_fold",fold,".csv"))
+save(ll.cv,mod,file=paste0(direc,"data_example_results/data_example_cv_fold",fold,".Rdata"))

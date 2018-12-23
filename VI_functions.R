@@ -170,6 +170,58 @@ g_fun.vec <- function(eta){
   }
 }
 
+log1p.exp <- function(x){
+  
+  ## Inputs ##
+  
+  # x = a numeric object of length 1
+  
+  ## Outputs ##
+  
+  # Returns the value log(1 + e^x)
+  
+  ## Code ##
+  
+  if(x > 20){
+    return(x)
+  } else {
+    return(log1p(exp(x)))
+  }
+}
+
+log1p.exp.vec <- function(x){
+  
+  ## Inputs ##
+  
+  # x = a numeric object of length > 1
+  
+  ## Outputs ##
+  
+  # Returns the value log(1 + e^x) for each element of x
+  
+  ## Code ##
+  
+  y <- x
+  which.small <- x <= 20
+  y[which.small] <- log1p(exp(x[which.small]))
+  return(y)
+}
+
+loglogit <- function(x){
+  
+  ## Inputs ##
+  
+  # x = a numeric object of length > 1
+  
+  ## Outputs ##
+  
+  # Returns the value -1*log(1 + 1/e^x) for each element of x
+  
+  ## Code ##
+  
+  -log1p.exp.vec(-x)
+}
+
 ELBO.fun_ss <- function(Y,Z,p,pL,n,ancestors,VI_params,hyperparams,ELBO_old=1,tol=1E-16,update_hyper=F){
   
   ## Inputs ##
@@ -360,7 +412,7 @@ VI_step_ss <- function(ELBO,VI_params,hyperparams,Z,Y,n,p,pL,ancestors,leaf.desc
 }
 
 VI_binary_ss <- function(Z,Y,n,p,pL,ancestors,leaf.descendants,cutoff=0.5,mu_gamma_init=NULL,
-                         tol=1E-16,m.max=10000,m.print=m.max+1,more=FALSE,update_hyper=T,update_hyper_freq=10){
+                         tol=1E-16,m.max=10000,m.print=m.max+1,more=FALSE,update_hyper=T,update_hyper_freq=10){e
   
   ## Inputs ##
   

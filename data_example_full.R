@@ -2,24 +2,17 @@
 # ------------------ Data analysis ---------------------- #
 # ------------------------------------------------------- #
 
-direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-#direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
+direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees/"
+#direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
 setwd(direc)
 
 ##### Load functions ######
-# source("./Master/functions_MORETreeS_VI_case_control2.R")
-source("./moretrees/VI_functions.R")
+source("VI_functions.R")
+source("processing_functions.R")
 require(igraph)
 
 ### load ICD9 tree ###
-load("./Data/sim_trees_CC.Rdata")
-tree <- tree[[2]]
-p <- p[2]
-pL <- pL[2]
-ancestors <- ancestors[[2]]
-leaf.descendants <- leaf.descendants[[2]]
-n.leaf.descendants <- n.leaf.descendants[2]
-groups <- groups[[2]]
+load("./simulation_inputs/inputs.Rdata")
 # Extract list of relevant ICD9 codes
 codes <- names(V(tree)[V(tree)$leaf])
 
@@ -90,4 +83,4 @@ for(g in 1:max(groups)){
 
 ############### Save results ###############
 
-save(beta_est,groups,beta.ml.groups,Y,final_ss,adhoc_coeffs,ELBOS,file = paste0(direc,"Results/data_example_full2.Rdata"))
+save(beta_est,groups,beta.ml.groups,Y,final_ss,adhoc_coeffs,ELBOS,file = paste0(direc,"data_example_results/data_example_full.Rdata"))

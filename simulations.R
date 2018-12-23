@@ -2,30 +2,25 @@
 # --------------------------- VI for MORETREES ----------------------- #
 # ------------- Case-control setting with spike & slab prior --------- #
 # -------------------------------------------------------------------- #
-# - 2/12/18 ---------------------------------------------------------- #
-# -------------------------------------------------------------------- #
 
-setwd("/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/")
-# setwd("/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/")
+setwd("/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees/")
+# setwd("/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/")
 
 ##### Load functions ######
-# source("./Master/functions_MORETreeS_VI_case_control2.R")
 source("./moretrees/VI_functions.R")
 require(igraph)
 
 ######################## SET UP TREE ########################
 
 ### load test tree ###
-load("./Data/sim_trees_CC2.Rdata")
+load("./simulation_inputs/inputs.Rdata")
 
 ######### Simulation parameters #########
 
 simArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE)))
-# simArgs <- c(2,10,1,1E5,1E-8,2)
-# 3, 9, 15, 21
+# simArgs <- c(0,10,1,1E5,1E-8,2)
 
 simidx <- simArgs[1] + 1 # which set of parameters to use
-#simidx <- simArgs[1] + 8 # re-running 8th simulation
 nsims <- simArgs[2] # number of sims
 nrestarts <- simArgs[3] # number of random restarts
 m.max <- simArgs[4] # maximum number of time steps
@@ -34,14 +29,9 @@ ncores <- simArgs[6] # number of cores
 
 # Retrieve simulation parameters using process number
 nsamp <- params[simidx,]$nsamp # sample size
-treew <- 2 # only using the big tree for these simulation
 whichbeta <- params[simidx,]$whichbeta # which set of betas to use: 1 (large beta) or 2 (smaller betas based on real data)
-evenness <- params[simidx,]$evenness # outcome sampling: 1 (equal prob for all outcomes) or 2 (unequal prob based on real data)
 
 # Retrieve inputs based on simulation parameters
-p <- p[treew]
-pL <- pL[treew]
-tree <- tree[[treew]]
 if(whichbeta==1){
   beta <- V(tree)$beta1[(p-pL+1):p]
 } else {
@@ -59,8 +49,7 @@ registerDoParallel(cores=ncores)
 
 # For storing results
 path_file <- "./Results/Simulations/Dec21_sims/"
-#path_file <- "./Results/"
-sim_params <- paste("n",nsamp,"_beta",whichbeta,"_evenness",evenness,sep="")
+sim_params <- paste("n",nsamp,"_beta",whichbeta,sep="")
 params$nsamp2 <- as.character(params$nsamp)
 params$nsamp2[params$nsamp==1E05] <- "1e\\+05"
 params$nsamp2[params$nsamp==1E06] <- "1e\\+06"
@@ -76,13 +65,13 @@ hyper_files <- list.files(path=path_file,pattern=paste("part_hyperparams_",sim_p
 sapply(hyper_files, function(fn) if (file.exists(fn)) file.remove(fn))
 
 # Creating log file
-logfile <- paste0(path_file,"log_n",nsamp,"_beta",whichbeta,"_evenness",evenness,".csv")
+logfile <- paste0(path_file,"log_n",nsamp,"_beta",whichbeta,".csv")
 file.create(logfile)
 
 ######################## LOAD DATA ########################
 
-# Load Z.sim and Y.sim- this depends on sample size and evenness value
-load(file=paste0("./Data/simdat_n",nsamp2,"_evenness",evenness,".Rdata"))
+# Load Z.sim and Y.sim- this depends on sample size
+load(file=paste0("./Data/simdat_n",nsamp2,".Rdata"))
 
 ######################## RUN SIMS ########################
 
@@ -133,7 +122,7 @@ foreach(i=1:nsims,.combine=rbind,.errorhandling="remove") %dopar% {
   close(outfile_reached_max)
 }
 
-### Append results together ###
+### Append results together and remove temporary files ###
 
 # betas
 beta_files <- list.files(path=path_file,pattern=paste("part_betasims_",sim_params2,"_*",sep=""))
@@ -143,6 +132,7 @@ write.table(rbind(c("sim","moretrees_est","uncollapse","truth","adhoc1","adhoc2"
 for(fn in beta_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_beta, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+  file.remove(fn)
 }
 
 # VI params
@@ -153,6 +143,7 @@ write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s")), file = outfile_VI, 
 for(fn in VI_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_VI, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+  file.remove(fn)
 }
 
 # hyperparams
@@ -163,6 +154,7 @@ write.table(rbind(c("sim","rho","tau")), file = outfile_hyper, row.names=FALSE, 
 for(fn in hyper_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_hyper, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+  file.remove(fn)
 }
 
 # reached max number of iterations
@@ -173,6 +165,7 @@ write.table(rbind(c("sim","reached_max")), file = outfile_reached_max, row.names
 for(fn in reached_max_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_reached_max, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+  file.remove(fn)
 }
 
 # Done.
