@@ -31,7 +31,7 @@ Performs updates for variational parameters and hyperparameters in the ssMOReTre
 Runs variational inference algorithm until convergence.
 
 ## processing_functions.R
-Functions for processing the output of VI_binary_ss()
+Functions for processing the output of VI_binary_ss(). These are mainly for use in analyzing the simulation results and producing relevant tables and figures.
 
 ### indiv.beta.calc()
 Function for computing individual level beta estimates, as opposed to collapsed estimates (See Section 3.3 of the manuscript)
@@ -61,19 +61,19 @@ Computes number of unique elements in a vector
 Computes the average fractional bias of the top n largest estimates in a list of estimates.
 
 ## data_example_full.R
-Code for fitting ssMOReTreeS to case-crossover study data examining the effect of short-term exposure to PM2.5 on hospitalizations for cardiovascular disease (CVD) among Medicare enrollees.
+Code for fitting ssMOReTreeS to case-crossover study data examining the effect of short-term exposure to PM2.5 on hospitalizations for cardiovascular disease (CVD) among Medicare enrollees. Results will be saved to a directory named data_example_results.
 
 ## data_example_cv.R
-Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as descried in data_example_full.R.
+Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as descried in data_example_full.R. Results will be saved to a directory named data_example_results.
 
 ## data_example_figures_and_tables.R
-Code for reproducing tables and figures related to the data example.
+Code for reproducing tables and figures related to the data example. Figures and tables created will be saved to a directory named figures_and_tables.
 
 ## simulations.R
 Code for running simulations described in the manuscript.
 
 ## simulations_figures_and_tables.R
-Code for reproducing tables and figures related to the simulations.
+Code for reproducing tables and figures related to the simulations. Figures and tables created will be saved to a directory named figures_and_tables.
 
 ## collapsibleTreeNetwork_modified.R
 Code for producing interactive trees. The main function in this file, collapsibleTreeNetwork2(), was adapted from the collapsibleTree package (version 0.1.6) created by Adeel Khan. The original version of this package is available via CRAN at the following link: https://CRAN.R-project.org/package=collapsibleTree.

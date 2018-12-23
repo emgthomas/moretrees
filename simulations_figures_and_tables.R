@@ -5,6 +5,9 @@
 rm(list=ls())
 setwd("/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/")
 
+#### Create directory for saving results ###
+if(!dir.exists("./figures_and_tables")) dir.create("./figures_and_tables")
+
 ### load test tree ###
 load("./moretrees/simulation_inputs/inputs.Rdata")
 params$nsamp <- as.character(params$nsamp)
@@ -285,7 +288,7 @@ bias_df2 <- dcast(bias_df[,c("whichbeta","mod_names","nsamp","bias")],whichbeta 
 
 require(xtable)
 bias_xtable <- xtable(bias_df2)
-write(print(bias_xtable,floating=FALSE,include.rownames = FALSE),file="./moretrees/tables_and_figures/tableA1.tex")
+write(print(bias_xtable,floating=FALSE,include.rownames = FALSE),file="./moretrees/figures_and_tables/tableA1.tex")
 
 ############ RMSE of group estimates for individual true betas ###########
 
@@ -333,7 +336,7 @@ rmse_plot <- ggplot(simres.long, aes(x=sq_rmse1, y=mod_names, col=mod)) +
   theme_bw(base_size=16) +
   theme(legend.position="none")
 
-pdf(file="./moretrees/tables_and_figures/figure3.pdf",width=9,height=8)
+pdf(file="./moretrees/figures_and_tables/figure3.pdf",width=9,height=8)
 rmse_plot
 dev.off()
 
@@ -350,7 +353,7 @@ plot_ARI_rmse <- ggplot(data=simres.long[simres.long$mod == 1,],aes(x=sq_ARI1,y=
   guides(col=guide_legend(title="Sample Size")) +
   facet_wrap(whichbeta~.)
 
-pdf(file="./moretrees/tables_and_figures/tableA2_a.pdf",width=12,height=6)
+pdf(file="./moretrees/figures_and_tables/tableA2_a.pdf",width=12,height=6)
 plot_ARI_rmse
 dev.off()
 
@@ -368,6 +371,114 @@ plot_nclust_rmse <- ggplot(data=simres.long[simres.long$mod == 1,],aes(x=sq_nclu
   geom_vline(xintercept=simres.long$fq_nclust1[simres.long$mod_name == "True Grouping"][1],col="red") +
   facet_wrap(whichbeta~.)
 
-pdf(file="./moretrees/tables_and_figures/tableA2_b.pdf",width=12,height=6)
+pdf(file="./moretrees/figures_and_tables/tableA2_b.pdf",width=12,height=6)
 plot_nclust_rmse
 dev.off()
+
+############# Figure S1: showing the simulation inputs on an interactive tree #######
+
+mult <- 10 # show results in units of 10 micrograms per cubic metre
+digits <- 3 # number of digits to display
+
+{
+  # Step 1: collapse to parent node when all children have same beta value
+  trPrune <- tree
+  V(trPrune)$outcomes <- sapply(V(trPrune)$name,list)
+  V(trPrune)$beta1_grouped <- V(trPrune)$beta1
+  V(trPrune)$beta2_grouped <- V(trPrune)$beta2
+  nodes <- V(trPrune)
+  iter <- 1
+  order <- 1000
+  while(iter < length(nodes)){
+    v <- nodes[iter]
+    children <- as.numeric(ego(trPrune,mode="out",nodes=v,order=order,mindist=1)[[1]])
+    beta1.children <- V(trPrune)$beta1_grouped[children]
+    beta2.children <- V(trPrune)$beta2_grouped[children]
+    if(sum(is.na(beta1.children))==0 & length(unique(beta1.children))==1){
+      # If all children have same beta value, merge them into parent
+      V(trPrune)$outcomes[v][[1]] <- unique(c(unlist(vertex.attributes(trPrune,children)$outcomes),names(v)))
+      V(trPrune)$leaf[v] <- TRUE
+      #V(trPrune)$beta.val[v] <- unique(beta.children)
+      V(trPrune)$beta1_grouped[v] <- unique(beta1.children)
+      V(trPrune)$beta2_grouped[v] <- unique(beta2.children)
+      trPrune <- delete.vertices(trPrune,children)
+      iter <- 1
+    } else {
+      iter <- iter + 1
+    }
+    nodes <- V(trPrune)
+  }
+  
+  # Step 2: merge leaf siblings with same values
+  iter <- 1
+  leaves <- as.numeric(V(trPrune)[V(trPrune)$leaf])
+  V(trPrune)$parent <- numeric(length(V(trPrune))) + NA # NA means no parent (root node)
+  for(v in V(trPrune)){
+    children <- ego(trPrune,order=1,mindist=1,nodes=v,mode="out")[[1]]
+    if(length(children)>0){
+      V(trPrune)$parent[children] <- as.numeric(v)
+    }
+  }
+  leaves <- V(trPrune)$name[V(trPrune)$leaf]
+  sibs.leaves <- vertex.attributes(trPrune,leaves)$parent
+  beta1.leaves <- vertex.attributes(trPrune,leaves)$beta1_grouped
+  beta2.leaves <- vertex.attributes(trPrune,leaves)$beta2_grouped
+  sibscols <- cbind(as.character(sibs.leaves),as.character(beta1.leaves))
+  require(glue)
+  groupings <- as.numeric(as.factor(apply(sibscols,1,collapse,sep=",")))
+}
+# groupings is a vector that uniquely identifies groups of leaf siblings with the same beta value.
+# These need to be merged.
+while(length(leaves)>0){
+  gr <- groupings[1]
+  nodes <- leaves[groupings==gr]
+  if(length(nodes)>1){
+    newOutcomes <- unlist(vertex.attributes(trPrune,nodes)$outcomes)
+    newOutcomes <- unique(c(newOutcomes,nodes))
+    n_new <- sum(V(trPrune)$nsamp[names(V(trPrune)) %in% nodes])
+    vertex_attr(trPrune,name="outcomes",index=nodes[1])[[1]] <- newOutcomes
+    trPrune <- delete.vertices(trPrune,nodes[-1])
+    vertex_attr(trPrune,name="nsamp",index=nodes[1]) <- n_new
+  }
+  leaves <- leaves[groupings!=gr]
+  groupings <- groupings[groupings!=gr]
+}
+
+require(collapsibleTree)
+require(circlize)
+edgelist2 <- as.data.frame(get.edgelist(trPrune),stringsAsFactors=F)
+names(edgelist2) <- c("parent","child")
+edgelist2 <- rbind(c(NA,root.node),edgelist2)
+edgelist2$beta1 <- get.vertex.attribute(trPrune,"beta1_grouped",edgelist2$child)*mult
+edgelist2$beta2 <- get.vertex.attribute(trPrune,"beta2_grouped",edgelist2$child)*mult
+edgelist2$nsamp <- get.vertex.attribute(trPrune,"nsamp",edgelist2$child)
+edgelist2$outcomes <- get.vertex.attribute(trPrune,"outcomes",edgelist2$child)
+leaves <- get.vertex.attribute(trPrune,"leaf",edgelist2$child)
+edgelist2$leaf <- leaves
+edgelist2$col <- "red"
+edgelist2$col[!leaves] <- "black"
+edgelist2$nodesize <- 1
+edgelist2$nodesize[!leaves] <- 0.001
+
+# html tooltip
+require(icd)
+source("./moretrees/collapsibleTreeNetwork_modified.R")
+edgelist2$tooltip <- character(length=nrow(edgelist2))
+for(i in 1:nrow(edgelist2)){
+  edgelist2$tooltip[i] <- expand_html_sims(edgelist2[i,],digits=digits,tr=tree)
+}
+edgelist2_parent <- as.character(icd_short_to_decimal(edgelist2$parent))
+edgelist2$parent[!is.na(edgelist2_parent)] <- edgelist2_parent[!is.na(edgelist2_parent)]
+edgelist2_child <- as.character(icd_short_to_decimal(edgelist2$child))
+edgelist2$child[!is.na(edgelist2_child)] <- edgelist2_child[!is.na(edgelist2_child)]
+
+# Plot
+require(plotly)
+silly_function <- function(x) 1
+pl <-   collapsibleTreeNetwork2(edgelist2,aggFun=identity, fill="col",
+                                tooltipHtml="tooltip",nodeSize="nodesize",nodeSizeAggFun=identity,
+                                nodeSizeScaleFun=silly_function,width=800,height=1200,fontSize=14)
+setwd("./moretrees/figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(pl), "interactive_tree_sims.html")
+
+

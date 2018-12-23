@@ -6,6 +6,9 @@
 direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
 setwd(direc)
 
+#### Create directory for saving results ###
+if(!dir.exists("./figures_and_tables")) dir.create("./figures_and_tables")
+
 ############################### Cross-validation results ###############################
 
 require(igraph)
@@ -40,7 +43,7 @@ cv.plot <- ggplot(cv.df,aes(x=mod,y=ll)) +
   xlab("Model") +
   ylab("Mean log likelihood in test set")
 
-pdf("./tables_and_figures/figure4.pdf",width=12,height=5)
+pdf("./figures_and_tables/figure4.pdf",width=12,height=5)
 cv.plot
 dev.off()
 
@@ -84,7 +87,7 @@ col1[col1==8] <- cols[7]
 col1[col1==7] <- "grey"
 col1[is.na(col1)] <- "white"
 
-pdf("./tables_and_figures/table1_tree.pdf",width=10,height=4)
+pdf("./figures_and_tables/table1_tree.pdf",width=10,height=4)
 plot(tree, layout = l.big, margin=c(1,1,1,1), rescale=F, xlim=c(min(l.big[,1]),max(l.big[,1])),
      ylim=c(max(l.big[,2]),min(l.big[,2])),
      #vertex.label=1:p,vertex.label.cex=0.1,
@@ -101,7 +104,7 @@ cols.box <- c(cols.box[1:6],NA,cols.box[7])
 cols.border <- rainbow(7, alpha = 0.8)
 cols.border <- c(cols.border[1:6],NA,cols.border[7])
 group.names <- c("Group 1","Group 2","Group 3","Group 4","Group 5","Group 6","Group 7","Group 8")
-pdf("./tables_and_figures/table1_legend.pdf",width=14,height=3)
+pdf("./figures_and_tables/table1_legend.pdf",width=14,height=3)
 plot(c(-1,1), c(-1,1), type = "n", ann = F, axes = F)
 legend('center',legend=group.names,col=cols.box,pch=19,pt.cex=3,y.intersp=2,x.intersp=1.5,bty="n",horiz=T,text.width=rep(0.15,8))
 legend('center',legend=group.names,col=cols.border,pch=1,pt.cex=3,pt.lwd=2,y.intersp=2,x.intersp=1.5,bty="n",horiz=T,text.width=rep(0.15,8))
@@ -113,7 +116,7 @@ col2[V(tree)$leaf] <- "red"
 l.big2 <- l.big
 l.big2[488:499,1] <- l.big2[488:499,1] + 6
 l.big2[,2] <- l.big2[,2]*2
-pdf("./tables_and_figures/figure2.pdf",width=10,height=4)
+pdf("./figures_and_tables/figure2.pdf",width=10,height=4)
 plot(tree, layout = l.big, margin=c(1,1,1,1), rescale=F, xlim=c(min(l.big[,1]),max(l.big[,1])),
      ylim=c(max(l.big[,2]),min(l.big[,2])),
      vertex.label=NA,edge.arrow.size=0.05,margin=c(0,0,0,0),vertex.size=300,
@@ -235,7 +238,10 @@ require(plotly)
 pl <-   collapsibleTreeNetwork2(edgelist2,attribute="beta",aggFun=identity, fill="col",
                                tooltipHtml="tooltip",nodeSize="nodesize",nodeSizeAggFun=identity,
                                nodeSizeScaleFun=max,width=800,height=1000,fontSize=14)
-htmlwidgets::saveWidget(as_widget(pl), "/Users/emt380/Documents/emgthomas.github.io/moretrees_plots/data_example_collapsed_tree.html")
+#htmlwidgets::saveWidget(as_widget(pl), "/Users/emt380/Documents/emgthomas.github.io/moretrees_plots/data_example_collapsed_tree.html")
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(pl), "data_example_collapsed_tree.html")
+setwd("../")
 
 #### Individual level tree ####
 edgelist3 <- as.data.frame(get.edgelist(tree),stringsAsFactors=F)
@@ -274,7 +280,10 @@ silly_function <- function(x) 1
 pl2 <-   collapsibleTreeNetwork2(edgelist3,attribute="beta",aggFun=identity, fill="col",
                                 tooltipHtml="tooltip",nodeSize="nodesize",nodeSizeAggFun=identity,
                                 nodeSizeScaleFun=silly_function,width=800,height=1000,fontSize=14)
-htmlwidgets::saveWidget(as_widget(pl2), "/Users/emt380/Documents/emgthomas.github.io/moretrees_plots/data_example_individual_tree.html")
+#htmlwidgets::saveWidget(as_widget(pl2), "/Users/emt380/Documents/emgthomas.github.io/moretrees_plots/data_example_individual_tree.html")
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(pl2), "data_example_collapsed_tree.html")
+setwd("../")
 
 ################### Table 1 #######################
 
@@ -316,7 +325,7 @@ for(g in 1:max(beta_groups)){
 }
 
 # write big table
-write(paste("\\renewcommand\\arraystretch{0.6}\\begin{longtable}{p{\\textwidth}} \\hline",paste(latex_groups,sep="",collapse=" \n \\hline \n \n "),"\\end{longtable}",sep="\n \n"),file="./tables_and_figures/tableC_supplementary_material.tex")
+write(paste("\\renewcommand\\arraystretch{0.6}\\begin{longtable}{p{\\textwidth}} \\hline",paste(latex_groups,sep="",collapse=" \n \\hline \n \n "),"\\end{longtable}",sep="\n \n"),file="./figures_and_tables/tableC_supplementary_material.tex")
 
 # write small table
 require(xtable)
@@ -325,7 +334,7 @@ small_xtable <- xtable(small_table,align=c("l","c","p{6cm}","c","c","c"),digits=
                        display=c("d","d","s","d","f","f"))
 names(small_xtable) <- c("Group","ICD9 codes","#Cases","OR (95%CI) MOReTreeS","OR (95% CI) Maximum Likelihood")
 
-write(print(small_xtable,floating=FALSE,include.rownames = FALSE),file="./tables_and_figures/table1.tex")
+write(print(small_xtable,floating=FALSE,include.rownames = FALSE),file="./figures_and_tables/table1.tex")
 
 
 
