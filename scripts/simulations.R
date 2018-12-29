@@ -3,8 +3,6 @@
 # ------------- Case-control setting with spike & slab prior --------- #
 # -------------------------------------------------------------------- #
 
-# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
 direc <- "../moretrees/" # path of the moretrees repository
 setwd(direc)
 

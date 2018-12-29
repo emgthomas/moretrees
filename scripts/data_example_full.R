@@ -2,8 +2,6 @@
 # ------------------ Data analysis ---------------------- #
 # ------------------------------------------------------- #
 
-# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
 direc <- "../moretrees/" # path of the moretrees repository
 setwd(direc)
 
@@ -31,7 +29,6 @@ tol <- datArgs[3] # tolerance for convergence
 ############### Prepare data ###############
 
 # Load data
-#load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
 load(file="data/moretrees_CC_data.Rdata")
 
 # Set seed
