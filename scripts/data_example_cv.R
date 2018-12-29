@@ -21,24 +21,22 @@ codes <- names(V(tree)[V(tree)$leaf])
 
 ######### Algorithm parameters #########
 
-datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE)))
-#datArgs <- c(10,1E5,1E-8)
+datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
+datArgs <- c(0,1E5,1E-8) # Alternatively, enter arguments directly in R
 
-fold <- datArgs[1]+1 # which fold for cv
+fold <- datArgs[1]+1 # which fold for cv (integer from 1 to 10)
 m.max <- datArgs[2] # maximum number of time steps
 tol <- datArgs[3] # tolerance for convergence
 
 ############### Prepare data ###############
 
 # Load data
-load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
-
+#load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
+load(file="data/moretrees_CC_data.Rdata")
 # Load cv folds
-load(file="./Data/cv_folds.Rdata")
+load(file="data/cv_folds.Rdata")
 
-source("./Master/functions_MORETreeS_VI_case_control2.R")
-
-############### GoF via 10-fold CV ###############
+############### Out-of-sample prediction via 10-fold CV ###############
 
 # Function for computing log-likelihood component for each outcome
 ll.fun <- function(v,beta,Z.test){ 

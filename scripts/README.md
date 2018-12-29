@@ -2,19 +2,21 @@
 
 This directory contains R scripts for implementing the spike and slab multi-outcome regression with tree-structured shrinkage (ssMOReTreeS) model. Scripts are also provided for reproducing the simulation and data application results shown in the manuscript, including relevant tables and figures.
 
+Summary of package dependencies and versions: igraph version (1.1.2), doParallel version (1.0.11), RColorBrewer (version 1.1-2), data.table (version 1.10.4-3), plotly (version 4.7.1), icd (version 2.3.1), circlize (version 0.4.1), collapsibleTree (version 0.1.6), glue (version 1.2.0), xtable (version 1.8-2), ggplot2 (version 3.0.0), reshape2 (version 1.4.3), mclust (version 5.4)
+
 The following files are in this directory:
 
 ## data_example_full.R
 Code for fitting ssMOReTreeS to case-crossover study data examining the effect of short-term exposure to PM2.5 on hospitalizations for cardiovascular disease (CVD) among Medicare enrollees. Results will be saved to a directory named data_example_results. Package dependencies: igraph, doParallel
 
 ## data_example_cv.R
-Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as descried in data_example_full.R. Results will be saved to a directory named data_example_results.
+Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as described in data_example_full.R. Model can be fit to data folds in parallel; recommend using a cluster if possible. Results will be saved to a directory named data_example_results.
 
 ## data_example_figures_and_tables.R
-Code for reproducing tables and figures related to the data example. Figures and tables created will be saved to a directory named figures_and_tables. This script produces Figure 2, Figure 4, Figure S2, Figure S4, Table 1 and Supplementary Material Section C. Package dependencies: igraph, data.table, ggplot2, RColorBrewer, glue, collapsibleTree, circlize, icd, plotly, xtable,
+Code for reproducing tables and figures related to the data example. Figures and tables created will be saved to a directory named figures_and_tables. This script produces Figure 2, Figure 4, Figure S2, Figure S4, Table 1 and Supplementary Material Section C. Package dependencies: igraph, data.table, ggplot2, RColorBrewer, glue, collapsibleTree, circlize, icd, plotly, xtable
 
 ## simulations.R
-Code for running simulations described in the manuscript. Package dependencies: igraph, doParallel
+Code for running simulations described in the manuscript. Simulations are parallelizable; recommend running this on a cluster, as largest simulations may take a week or more to run. Package dependencies: igraph, doParallel
 
 ## simulations_figures_and_tables.R
 Code for reproducing tables and figures related to the simulations. Figures and tables created will be saved to a directory named figures_and_tables. This script produces Figure 3, Figure S1 Figure A2 and Table A1. Package dependencies: mclust, igraph, reshape2, ggplot2, xtable, glue, icd, collapsibleTree, circlize, plotly

@@ -20,10 +20,10 @@ load("simulation_inputs/inputs.Rdata")
 
 ######### Simulation parameters #########
 
-# simArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE)))
-simArgs <- c(0,1000,1,1E5,1E-8,10)
+# simArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
+simArgs <- c(0,1000,1,1E5,1E-8,10) # Alternatively, enter arguments directly in R
 
-simidx <- simArgs[1] + 1 # which set of parameters to use. Can take integer values 0 through 7.
+simidx <- simArgs[1] + 1 # which set of parameters to use. Can take integer values 1 through 8.
 nsims <- simArgs[2] # number of sims
 nrestarts <- simArgs[3] # number of random restarts
 m.max <- simArgs[4] # maximum number of time steps

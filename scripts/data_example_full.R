@@ -21,8 +21,8 @@ codes <- names(V(tree)[V(tree)$leaf])
 
 ######### Algorithm parameters #########
 
-# datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE)))
-datArgs <- c(3,1E5,1E-16)
+# datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
+datArgs <- c(3,1E5,1E-16) # Alternatively, enter arguments directly in R
 
 nrestarts <- datArgs[1] # number of random restarts
 m.max <- datArgs[2] # maximum number of time steps
@@ -32,7 +32,7 @@ tol <- datArgs[3] # tolerance for convergence
 
 # Load data
 #load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
-load(file="/path_to_file/moretrees_CC_data.Rdata")
+load(file="data/moretrees_CC_data.Rdata")
 
 # Set seed
 set.seed(4958764)
