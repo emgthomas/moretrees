@@ -11,7 +11,7 @@ Code for fitting ssMOReTreeS to case-crossover study data examining the effect o
 Code for 10 fold cross-validation comparing predictive performance of ssMOReTreeS to various adhoc collapsing strategies with maximum likelihood fit. Models are fit to the same dataset as descried in data_example_full.R. Results will be saved to a directory named data_example_results.
 
 ## data_example_figures_and_tables.R
-Code for reproducing tables and figures related to the data example. Figures and tables created will be saved to a directory named figures_and_tables. This script produces Figure 2, Figure 4, Figure S2, Figure S4, Table 1 and Supplementary Material Section C. Package dependencies: igraph, data.table, ggplot2, RColorBrewer, glue, collapsibleTree, circlize, icd, plotly, xtable, 
+Code for reproducing tables and figures related to the data example. Figures and tables created will be saved to a directory named figures_and_tables. This script produces Figure 2, Figure 4, Figure S2, Figure S4, Table 1 and Supplementary Material Section C. Package dependencies: igraph, data.table, ggplot2, RColorBrewer, glue, collapsibleTree, circlize, icd, plotly, xtable,
 
 ## simulations.R
 Code for running simulations described in the manuscript. Package dependencies: igraph, doParallel
