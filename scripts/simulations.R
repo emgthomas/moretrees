@@ -3,7 +3,7 @@
 # ------------- Case-control setting with spike & slab prior --------- #
 # -------------------------------------------------------------------- #
 
-direc <- "../moretrees/" # path of the moretrees repository
+direc <- "~/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/" # set to path of the moretrees repository
 setwd(direc)
 
 
@@ -19,7 +19,7 @@ load("simulation_inputs/inputs.Rdata")
 ######### Simulation parameters #########
 
 # simArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-simArgs <- c(0,1000,1,1E5,1E-8,10) # Alternatively, enter arguments directly in R
+simArgs <- c(0,10,1,1E5,1E-8,2) # Alternatively, enter arguments directly in R
 
 simidx <- simArgs[1] + 1 # which set of parameters to use. Can take integer values 1 through 8.
 nsims <- simArgs[2] # number of sims
@@ -38,9 +38,6 @@ if(whichbeta==1){
 } else {
   beta <- V(tree)$beta2[(p-pL+1):p]
 }
-groups <- groups[[treew]]
-leaf.descendants <- leaf.descendants[[treew]]
-ancestors <- ancestors[[treew]]
 
 ######################## PREPARE FILES ########################
 
@@ -133,7 +130,7 @@ write.table(rbind(c("sim","moretrees_est","uncollapse","truth","adhoc1","adhoc2"
 for(fn in beta_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_beta, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-  file.remove(fn)
+  file.remove(paste0(path_file,fn))
 }
 
 # VI params
@@ -144,7 +141,7 @@ write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s")), file = outfile_VI, 
 for(fn in VI_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_VI, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-  file.remove(fn)
+  file.remove(paste0(path_file,fn))
 }
 
 # hyperparams
@@ -155,7 +152,7 @@ write.table(rbind(c("sim","rho","tau")), file = outfile_hyper, row.names=FALSE, 
 for(fn in hyper_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_hyper, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-  file.remove(fn)
+  file.remove(paste0(path_file,fn))
 }
 
 # reached max number of iterations
@@ -166,7 +163,7 @@ write.table(rbind(c("sim","reached_max")), file = outfile_reached_max, row.names
 for(fn in reached_max_files){
   sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
   write.table(sims, file=outfile_reached_max, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-  file.remove(fn)
+  file.remove(paste0(path_file,fn))
 }
 
 # Done.

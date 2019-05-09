@@ -412,7 +412,7 @@ VI_step_ss <- function(ELBO,VI_params,hyperparams,Z,Y,n,p,pL,ancestors,leaf.desc
 }
 
 VI_binary_ss <- function(Z,Y,n,p,pL,ancestors,leaf.descendants,cutoff=0.5,mu_gamma_init=NULL,
-                         tol=1E-16,m.max=10000,m.print=m.max+1,more=FALSE,update_hyper=T,update_hyper_freq=10){e
+                         tol=1E-16,m.max=10000,m.print=m.max+1,more=FALSE,update_hyper=T,update_hyper_freq=10){
   
   ## Inputs ##
   
