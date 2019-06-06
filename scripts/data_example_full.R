@@ -31,7 +31,7 @@ m.print <- datArgs[4] # print time step every m.print steps
 ############### Prepare data ###############
 
 # Load data
-load(file="data/moretrees_CC_data.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
 
 # Set seed
 set.seed(4958764)

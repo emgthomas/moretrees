@@ -4,7 +4,7 @@
 
 # direc <- "../moretrees/" # path of the moretrees repository
 direc <- "~/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
-direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees"
+direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/moretrees"
 setwd(direc)
 
 if(!dir.exists("./data_example_results")) dir.create("./data_example_results")
@@ -32,7 +32,7 @@ ping <- datArgs[4] # print progress report after ping samples
 ######################## Load data ########################
 
 # Load data
-load(file="data/moretrees_CC_data.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
 
 ######################## Load variational inference results ########################
 
@@ -57,7 +57,7 @@ sum(A_check) == p
 
 # Construct design matrix
 Xmat <- bdiag(Z)
-Xmat <- cbind(Matrix(0,nrow=nsamp,ncol=p-pL,sparse=T),Xmat)
+Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
 Xstar <- Xmat %*% A
 
 # dummy outcome
