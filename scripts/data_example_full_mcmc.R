@@ -58,7 +58,21 @@ sum(A_check) == p
 # Construct design matrix
 Xmat <- bdiag(Z)
 Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
-Xstar <- Xmat %*% A
+# Xstar <- Xmat %*% A
+# Do above matrix multiplication in chunks due to large matrix size
+Xstar <- Matrix(data=0,nrow=nrow(Xmat),ncol=ncol(A),sparse=T)
+n <- nrow(Xmat)
+nchunks <- 20
+chunk_size <- round(n/nchunks)
+for(i in 1:nchunks){
+  if(i < nchunks){
+    idx <- ((i-1)*chunk_size+1):(i*chunk_size)
+  } else {
+    idx <- ((i-1)*chunk_size+1):n
+  }
+  Xstar[idx,] <- Xmat[idx,] %*% A
+  print(i)
+}
 
 # dummy outcome
 Yvec <- rep(1,sum(Y))
