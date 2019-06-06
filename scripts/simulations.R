@@ -6,7 +6,6 @@
 direc <- "~/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/" # set to path of the moretrees repository
 setwd(direc)
 
-
 ##### Load functions ######
 source("scripts/VI_functions.R")
 require(igraph)
