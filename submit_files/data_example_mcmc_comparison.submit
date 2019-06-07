@@ -5,9 +5,9 @@ Universe = vanilla
 # The following arguments are _optional_. If included
 # they are used to specify the requirements for the
 # submission.
-request_cpus = 1
-request_disk = 4GB
-request_memory = 50GB
+request_cpus = 3
+request_disk = 16GB
+request_memory = 100GB
 
 # Enter the path to the program you wish to run.
 # The default runs the R program. To run another
@@ -19,7 +19,7 @@ Executable = /usr/local/bin/R
 # Specify the relative path to the input file (if any). If you
 # are using R this should be your R script. If you are using
 # Stata this should be your do file.
-input = ../moretrees/data_example_mcmc_comparison.R
+input = ../scripts/data_example_mcmc_comparison.R
 
 # Specify where to output any results printed by your program.
 output = ../Output/out_data_example_mcmc_comparison.$(Process)
@@ -34,6 +34,7 @@ Log = ../Output/log_data_example_mcmc_comparison.$(Process)
 # Specify any arguments you want to pass to the executable.
 # Arguments in order: fold nrestarts m.max tol m.print nchains niter nthreads ping
 # 
-Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-8 10 3 3000 1 10
+#Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-8 10 3 3000 1 10
+Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1E-8 1 3 10 1 1
 Queue 10
 

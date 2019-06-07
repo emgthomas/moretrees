@@ -19,7 +19,7 @@ Executable = /usr/local/bin/R
 # Specify the relative path to the input file (if any). If you
 # are using R this should be your R script. If you are using
 # Stata this should be your do file.
-input = ../moretrees/simulations.R
+input = ../scripts/simulations.R
 
 # Specify where to output any results printed by your program.
 output = ../Output/out_sims.$(Process)

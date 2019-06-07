@@ -19,7 +19,7 @@ Executable = /usr/local/bin/R
 # Specify the relative path to the input file (if any). If you
 # are using R this should be your R script. If you are using
 # Stata this should be your do file.
-input = ../moretrees/data_example_cv.R
+input = ../scripts/data_example_cv.R
 
 # Specify where to output any results printed by your program.
 output = ../Output/out_data_example_cv.$(Process)

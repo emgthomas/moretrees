@@ -56,6 +56,9 @@ adhoc_coeffs <- adhoc_collapsing(Z,Y,pL,groups)
 # Initial values for node coefficients
 nodes_init <- initial_node_coeffs(Z,Y,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
 
+# For parallelization
+registerDoParallel(cores=nrestarts)
+
 # Run VI algorithm using nrestarts random restarts
 restarts_vi <- foreach(j = 1:nrestarts) %dopar% {
   
