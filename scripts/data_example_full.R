@@ -59,14 +59,16 @@ restarts_ss <- foreach(j = 1:nrestarts) %dopar% {
   Rprof(file=prof,memory.profiling=TRUE)
   
   # run VI algorithm
-  VI_binary_ss(Z=Z,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
+  out_vi <- VI_binary_ss(Z=Z,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
                leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
                tol=tol,m.max=m.max,m.print=10,more=FALSE,update_hyper=TRUE,update_hyper_freq=10)
   
   Rprof(NULL) # close Rprof
-  summaryRprof(prof,lines="hide",memory="both") # summarize Rprof results
+  print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
   
   sink() # close sink
+  
+  out_vi
   
 }
 

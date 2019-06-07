@@ -22,23 +22,25 @@ load("./simulation_inputs/inputs.Rdata")
 
 ######### Algorithm parameters #########
 
-# datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-datArgs <- c(0,3,1E5,1E-8,3000,4,10) # Alternatively, enter arguments directly in R
+datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
+# datArgs <- c(0,3,1E5,1E-8,10,3,10,1,1) # Alternatively, enter arguments directly in R
 
 fold <- datArgs[1]+1 # which fold of data (integer from 1 to 10)
-m.max <- datArgs[2] # maximum number of time steps
-tol <- datArgs[3] # tolerance for convergence
-nchains <- datArgs[4] # how may parallel chains to run
-niter <- datArgs[5] # number of MCMC samples
-nthreads <- datArgs[6] # number of threads for data augmentation (see ?logit.spike)
-ping <- datArgs[7] # print progress report after ping samples
+nrestarts <- datArgs[2] # number of random restarts for VI algorithm
+m.max <- datArgs[3] # maximum number of time steps
+tol <- datArgs[4] # tolerance for convergence
+m.print <- datArgs[5]
+nchains <- datArgs[6] # how may parallel chains to run
+niter <- datArgs[7] # number of MCMC samples
+nthreads <- datArgs[8] # number of threads for data augmentation (see ?logit.spike)
+ping <- datArgs[9] # print progress report after ping samples
 
 ######################## Load data ########################
 
 # Load data
-load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/Case_crossover_data/moretrees_CC_data.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
 # Load folds
-load(file="data/cv_folds.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/cv_folds.Rdata")
 
 # Extract training data
 for(v in 1:pL){
@@ -54,23 +56,41 @@ adhoc_coeffs <- adhoc_collapsing(Z,Y,pL,groups)
 # Initial values for node coefficients
 nodes_init <- initial_node_coeffs(Z,Y,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
 
-# saving output to track number of time steps
-pr <- paste0("./data_example_results/comparison_VI_print",fold,".out")
-sink(file=pr)
+# Run VI algorithm using nrestarts random restarts
+restarts_vi <- foreach(j = 1:nrestarts) %dopar% {
+  
+  # saving output to track number of time steps
+  pr <- paste0("./data_example_results/comparison_VI_print",fold,"_restart",j,".out")
+  sink(file=pr)
+  
+  # profiling to test speed of VI vs. MCMC
+  prof <- paste0("./data_example_results/comparison_VI_prof",fold,"_restart",j,".out")
+  Rprof(file=prof,memory.profiling=TRUE)
+  
+  # run VI algorithm
+  out_vi <- VI_binary_ss(Z=Z,Y=Y,n=nsamp,p=p,pL=pL,ancestors=ancestors,
+                         leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
+                         tol=tol,m.max=m.max,m.print=m.print,more=FALSE,update_hyper=T,update_hyper_freq=10)
+  
+  Rprof(NULL) # close Rprof
+  print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
+  
+  sink() # close sink
+  
+  out_vi
+  
+}
 
-# profiling to test speed of VI vs. MCMC
-prof <- paste0("./data_example_results/comparison_VI_prof",fold,".out")
-Rprof(file=prof,memory.profiling=TRUE)
+# Choose final model with highest ELBO
+ELBOS <- numeric(nrestarts)
+for(j in 1:nrestarts){
+  ELBOS[j] <- restarts_vi[[j]]$ELBO
+}
+out_vi <- restarts_vi[[which.max(ELBOS)]]
 
-# Run ssMOReTreeS model to get intial values for MCMC
-out_vi <- VI_binary_ss(Z=Z,Y=Y,n=nsamp,p=p,pL=pL,ancestors=ancestors,
-                       leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
-                       tol=tol,m.max=m.max,m.print=10,more=FALSE,update_hyper=T,update_hyper_freq=10)
-
-Rprof(NULL) # close Rprof
-summaryRprof(prof,lines="hide",memory="both") # summarize Rprof results
-
-sink() # close sink
+# Save VI results
+res <- paste0("./data_example_results/comparison_vi_results",fold,".csv")
+save(out_vi,file=res)
 
 # intial values for gamma_v*s_v
 p_vi <- exp(loglogit(out_vi$VI_params$u_s))
@@ -112,8 +132,8 @@ Xstar <- Xmat %*% A
 Yvec <- rep(1,sum(Y))
 
 # hyperparameters
-rho <- final_ss$hyperparams[1]
-tau <- final_ss$hyperparams[2]
+rho <- out_vi$hyperparams[1]
+tau <- out_vi$hyperparams[2]
 
 # set up prior
 prior <- LogitZellnerPrior(predictors=diag(rep(sqrt(p/tau)*2,p)),
@@ -154,7 +174,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
                           ping=ping)
   
   Rprof(NULL) # close Rprof
-  summaryRprof(prof,lines="hide",memory="both") # summarize Rprof results
+  print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
   
   ######################## Save MCMC samples #######################
   sgamma_mcmc <- out_mcmc$beta
