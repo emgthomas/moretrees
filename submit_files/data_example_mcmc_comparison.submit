@@ -34,7 +34,7 @@ Log = ../Output/log_data_example_mcmc_comparison.$(Process)
 # Specify any arguments you want to pass to the executable.
 # Arguments in order: fold nrestarts m.max tol m.print nchains niter nthreads ping
 # 
-#Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-8 10 3 3000 1 10
-Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1E-8 1 3 10 1 1
+Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-8 10 3 3000 1 10
+#Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1E-8 1 3 10 1 1
 Queue 10
 

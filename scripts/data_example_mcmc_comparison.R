@@ -63,11 +63,11 @@ registerDoParallel(cores=nrestarts)
 restarts_vi <- foreach(j = 1:nrestarts) %dopar% {
   
   # saving output to track number of time steps
-  pr <- paste0("./data_example_results/comparison_VI_print",fold,"_restart",j,".out")
+  pr <- paste0("./data_example_results/comparison_vi_print",fold,"_restart",j,".txt")
   sink(file=pr)
   
   # profiling to test speed of VI vs. MCMC
-  prof <- paste0("./data_example_results/comparison_VI_prof",fold,"_restart",j,".out")
+  prof <- paste0("./data_example_results/comparison_vi_prof",fold,"_restart",j,".out")
   Rprof(file=prof,memory.profiling=TRUE)
   
   # run VI algorithm
@@ -92,7 +92,7 @@ for(j in 1:nrestarts){
 out_vi <- restarts_vi[[which.max(ELBOS)]]
 
 # Save VI results
-res <- paste0("./data_example_results/comparison_vi_results",fold,".csv")
+res <- paste0("./data_example_results/comparison_vi_results",fold,".Rdata")
 save(out_vi,file=res)
 
 # intial values for gamma_v*s_v
@@ -161,7 +161,7 @@ registerDoParallel(cores=nchains)
 samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   
   # saving output to track number of time steps
-  pr <- paste0("./data_example_results/comparison_mcmc_print",fold,"_chain",j,".out")
+  pr <- paste0("./data_example_results/comparison_mcmc_print",fold,"_chain",j,".txt")
   sink(file=pr)
   
   # profiling to test speed of VI vs. MCMC
