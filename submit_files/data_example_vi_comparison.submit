@@ -7,7 +7,7 @@ Universe = vanilla
 # submission.
 request_cpus = 3
 request_disk = 100KB
-request_memory = 160GB
+request_memory = 20GB
 
 # Enter the path to the program you wish to run.
 # The default runs the R program. To run another
@@ -19,14 +19,14 @@ Executable = /usr/local/bin/R
 # Specify the relative path to the input file (if any). If you
 # are using R this should be your R script. If you are using
 # Stata this should be your do file.
-input = ../scripts/data_example_mcmc_comparison.R
+input = ../scripts/data_example_vi_comparison.R
 
 # Specify where to output any results printed by your program.
-output = ../Output/out_data_example_mcmc_comparison.$(Process)
+output = ../Output/out_data_example_vi_comparison.$(Process)
 # Specify where to save any errors returned by your program.
-error = ../Output/error_data_example_mcmc_comparison.$(Process)
+error = ../Output/error_data_example_vi_comparison.$(Process)
 # Specify where to save the log file.
-Log = ../Output/log_data_example_mcmc_comparison.$(Process)
+Log = ../Output/log_data_example_vi_comparison.$(Process)
 # Enter the number of processes to request. This should 
 # always be the last part of your submit file.
 #Queue 4
@@ -34,6 +34,6 @@ Log = ../Output/log_data_example_mcmc_comparison.$(Process)
 # Specify any arguments you want to pass to the executable.
 # Arguments in order: fold nrestarts m.max tol m.print nchains niter nthreads ping
 # 
-Arguments = --no-save --no-restore --slave --args $(Process) 3 3000 1 10
+Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-16 10
 Queue 10
 
