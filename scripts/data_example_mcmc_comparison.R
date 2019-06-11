@@ -65,20 +65,20 @@ sum(A_check) == p
 Xmat <- bdiag(Z)
 Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
 Xstar <- Xmat %*% A
-# # Do above matrix multiplication in chunks due to large matrix size
-# Xstar <- Matrix(data=0,nrow=0,ncol=ncol(A),sparse=T)
-# n <- nrow(Xmat)
-# nchunks <- 20
-# chunk_size <- round(n/nchunks)
-# for(i in 1:nchunks){
-#   if(i < nchunks){
-#     idx <- ((i-1)*chunk_size+1):(i*chunk_size)
-#   } else {
-#     idx <- ((i-1)*chunk_size+1):n
-#   }
-#   Xstar <- rbind(Xstar,Xmat[idx,] %*% A)
-#   print(i)
-# }
+# Do above matrix multiplication in chunks due to large matrix size
+Xstar <- Matrix(data=0,nrow=0,ncol=ncol(A),sparse=T)
+n <- nrow(Xmat)
+nchunks <- 20
+chunk_size <- round(n/nchunks)
+for(i in 1:nchunks){
+  if(i < nchunks){
+    idx <- ((i-1)*chunk_size+1):(i*chunk_size)
+  } else {
+    idx <- ((i-1)*chunk_size+1):n
+  }
+  Xstar <- rbind(Xstar,Xmat[idx,] %*% A)
+  print(i)
+}
 
 # dummy outcome
 Yvec <- rep(1,sum(Y))
@@ -123,7 +123,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   Rprof(file=prof,memory.profiling=TRUE)
   
   # run MCMC
-  out_mcmc <- logit.spike(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
+  out_mcmc <- logit.spike(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar),format=Sparse),
                           niter=niter,
                           prior=prior,
                           initial.value=gamma_vi,
