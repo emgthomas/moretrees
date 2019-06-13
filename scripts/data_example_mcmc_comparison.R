@@ -125,7 +125,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   Rprof(file=prof,memory.profiling=TRUE)
   
   # run MCMC
-  out_mcmc <- logit.spike(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar),format=Sparse),
+  out_mcmc <- logit.spike(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
                           niter=niter,
                           prior=prior,
                           initial.value=gamma_vi,
