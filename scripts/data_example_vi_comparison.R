@@ -72,6 +72,7 @@ restarts_vi <- foreach(j = 1:nrestarts) %dopar% {
   
   Rprof(NULL) # close Rprof
   print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
+  file.remove(prof) # need to remove profile files as they are very large
   
   sink() # close sink
   

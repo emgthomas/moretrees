@@ -17,14 +17,6 @@ require(Matrix)
 require(BoomSpikeSlab)
 require(doParallel)
 
-### Load ICD9 tree ###
-load("./simulation_inputs/inputs.Rdata")
-
-### Load VI results ###
-
-VI_res <- paste0("./data_example_results/comparison_vi_results",fold,".Rdata")
-load(VI_res)
-
 ######### Algorithm parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
@@ -36,11 +28,21 @@ niter <- datArgs[3] # number of MCMC samples
 nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
 ping <- datArgs[5] # print progress report after ping samples
 
+
+
 ######################## Load data ########################
+
+# Load ICD9 tree
+load("./simulation_inputs/inputs.Rdata")
+
+# Load VI results
+VI_res <- paste0("./data_example_results/comparison_vi_results",fold,".Rdata")
+load(VI_res)
 
 # Load data
 load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
 # Load folds
+
 load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/cv_folds.Rdata")
 
 # Extract training data
@@ -65,20 +67,20 @@ sum(A_check) == p
 Xmat <- bdiag(Z)
 Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
 Xstar <- Xmat %*% A
-# Do above matrix multiplication in chunks due to large matrix size
-Xstar <- Matrix(data=0,nrow=0,ncol=ncol(A),sparse=T)
-n <- nrow(Xmat)
-nchunks <- 20
-chunk_size <- round(n/nchunks)
-for(i in 1:nchunks){
-  if(i < nchunks){
-    idx <- ((i-1)*chunk_size+1):(i*chunk_size)
-  } else {
-    idx <- ((i-1)*chunk_size+1):n
-  }
-  Xstar <- rbind(Xstar,Xmat[idx,] %*% A)
-  print(i)
-}
+# # Do above matrix multiplication in chunks due to large matrix size
+# Xstar <- Matrix(data=0,nrow=0,ncol=ncol(A),sparse=T)
+# n <- nrow(Xmat)
+# nchunks <- 20
+# chunk_size <- round(n/nchunks)
+# for(i in 1:nchunks){
+#   if(i < nchunks){
+#     idx <- ((i-1)*chunk_size+1):(i*chunk_size)
+#   } else {
+#     idx <- ((i-1)*chunk_size+1):n
+#   }
+#   Xstar <- rbind(Xstar,Xmat[idx,] %*% A)
+#   print(i)
+# }
 
 # dummy outcome
 Yvec <- rep(1,sum(Y))
@@ -132,6 +134,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   
   Rprof(NULL) # close Rprof
   print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
+  file.remove(prof) # need to remove profile files as they are very large
   
   ######################## Save MCMC samples #######################
   sgamma_mcmc <- out_mcmc$beta
