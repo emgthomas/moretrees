@@ -9,8 +9,6 @@ setwd(direc)
 
 ### Load functions and packages
 source("scripts/processing_functions.R")
-require(doParallel)
-registerDoParallel(cores=5)
 
 ### Load ICD9 tree
 load("./simulation_inputs/inputs.Rdata")
@@ -32,7 +30,7 @@ beta_indiv_est <- indiv.beta.ci.calc(final_ss$VI_params,ancestors,pL,p)
 beta_sim <- beta_indiv_est$beta_indiv*m
 
 ### Simulate ten datasets ###
-# foreach(i=1:10,.combine=rbind,.errorhandling="remove") %dopar% {
+set.seed(48549)
 for(i in 1:10){  
   
   # Simulate number of cases for each disease
@@ -54,5 +52,5 @@ for(i in 1:10){
   }
   
   # Save result
-  save(Z.sim,paste0("./simulation_inputs/simulate_data_comparison",i,".Rdata"))
+  save(Z.sim,file=paste0("./simulation_inputs/simulate_data_comparison",i,".Rdata"))
 }
