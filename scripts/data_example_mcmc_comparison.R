@@ -19,16 +19,14 @@ require(doParallel)
 
 ######### Algorithm parameters #########
 
-datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-# datArgs <- c(0,3,10,1,1) # Alternatively, enter arguments directly in R
+# datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
+datArgs <- c(0,3,10,1,1) # Alternatively, enter arguments directly in R
 
 fold <- datArgs[1]+1 # which fold of data (integer from 1 to 10)
 nchains <- datArgs[2] # how may parallel chains to run
 niter <- datArgs[3] # number of MCMC samples
 nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
 ping <- datArgs[5] # print progress report after ping samples
-
-
 
 ######################## Load data ########################
 
@@ -67,20 +65,6 @@ sum(A_check) == p
 Xmat <- bdiag(Z)
 Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
 Xstar <- Xmat %*% A
-# # Do above matrix multiplication in chunks due to large matrix size
-# Xstar <- Matrix(data=0,nrow=0,ncol=ncol(A),sparse=T)
-# n <- nrow(Xmat)
-# nchunks <- 20
-# chunk_size <- round(n/nchunks)
-# for(i in 1:nchunks){
-#   if(i < nchunks){
-#     idx <- ((i-1)*chunk_size+1):(i*chunk_size)
-#   } else {
-#     idx <- ((i-1)*chunk_size+1):n
-#   }
-#   Xstar <- rbind(Xstar,Xmat[idx,] %*% A)
-#   print(i)
-# }
 
 # dummy outcome
 Yvec <- rep(1,sum(Y))
