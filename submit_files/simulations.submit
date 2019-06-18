@@ -22,11 +22,11 @@ Executable = /usr/local/bin/R
 input = ../scripts/simulations.R
 
 # Specify where to output any results printed by your program.
-output = ../Output/out_sims.$(Process)
+output = ../output/out_sims.$(Process)
 # Specify where to save any errors returned by your program.
-error = ../Output/error_sims.$(Process)
+error = ../output/error_sims.$(Process)
 # Specify where to save the log file.
-Log = ../Output/log_sims.$(Process)
+Log = ../output/log_sims.$(Process)
 # Enter the number of processes to request. This should 
 # always be the last part of your submit file.
 #Queue 4
