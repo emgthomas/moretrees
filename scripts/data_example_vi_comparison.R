@@ -24,32 +24,24 @@ load("./simulation_inputs/inputs.Rdata")
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
 # datArgs <- c(0,3,1E5,1E-8,10) # Alternatively, enter arguments directly in R
 
-fold <- datArgs[1]+1 # which fold of data (integer from 1 to 10)
+sim <- datArgs[1]+1 # which simulated dataset (integer from 1 to 10)
 nrestarts <- datArgs[2] # number of random restarts for VI algorithm
 m.max <- datArgs[3] # maximum number of time steps
 tol <- datArgs[4] # tolerance for convergence
 m.print <- datArgs[5] # how often to print progress for VI algorithm
 
-######################## Load data ########################
+######################## Load simulated data ########################
 
-# Load data
-load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
-# Load folds
-load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/cv_folds.Rdata")
-
-# Extract training data
-for(v in 1:pL){
-  Y[v] <- sum(folds[[v]] == fold)
-  Z[[v]] <- Z[[v]][folds[[v]]==fold]
-}
+load(file=paste0("./simulation_inputs/simulate_data_comparison",sim,".Rdata"))
+Y.sim <- sapply(Z.sim,length)
 
 ######################## Variational inference ########################
 
 # Adhoc collapsing estimates
-adhoc_coeffs <- adhoc_collapsing(Z,Y,pL,groups)
+adhoc_coeffs <- adhoc_collapsing(Z.sim,Y.sim,pL,groups)
 
 # Initial values for node coefficients
-nodes_init <- initial_node_coeffs(Z,Y,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
+nodes_init <- initial_node_coeffs(Z.sim,Y.sim,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
 
 # For parallelization
 registerDoParallel(cores=nrestarts)
@@ -58,15 +50,15 @@ registerDoParallel(cores=nrestarts)
 restarts_vi <- foreach(j = 1:nrestarts) %dopar% {
   
   # saving output to track number of time steps
-  pr <- paste0("./data_example_results/comparison_vi_print",fold,"_restart",j,".txt")
+  pr <- paste0("./data_example_results/comparison_vi_print",sim,"_restart",j,".txt")
   sink(file=pr)
   
   # profiling to test speed of VI vs. MCMC
-  prof <- paste0("./data_example_results/comparison_vi_prof",fold,"_restart",j,".out")
+  prof <- paste0("./data_example_results/comparison_vi_prof",sim,"_restart",j,".out")
   Rprof(file=prof,memory.profiling=TRUE)
   
   # run VI algorithm
-  out_vi <- VI_binary_ss(Z=Z,Y=Y,n=nsamp,p=p,pL=pL,ancestors=ancestors,
+  out_vi <- VI_binary_ss(Z=Z.sim,Y=Y.sim,n=nsamp,p=p,pL=pL,ancestors=ancestors,
                          leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
                          tol=tol,m.max=m.max,m.print=m.print,more=FALSE,update_hyper=T,update_hyper_freq=10)
   
@@ -88,5 +80,5 @@ for(j in 1:nrestarts){
 out_vi <- restarts_vi[[which.max(ELBOS)]]
 
 # Save VI results
-res <- paste0("./data_example_results/comparison_vi_results",fold,".Rdata")
+res <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
 save(out_vi,file=res)

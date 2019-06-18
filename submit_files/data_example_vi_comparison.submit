@@ -32,7 +32,7 @@ Log = ../Output/log_data_example_vi_comparison.$(Process)
 #Queue 4
 
 # Specify any arguments you want to pass to the executable.
-# Arguments in order: fold nrestarts m.max tol m.print nchains niter nthreads ping
+# Arguments in order: sim nrestarts m.max tol m.print
 # 
 Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-16 10
 Queue 10

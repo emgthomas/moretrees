@@ -22,7 +22,7 @@ require(doParallel)
 # datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
 datArgs <- c(0,3,10,1,1) # Alternatively, enter arguments directly in R
 
-fold <- datArgs[1]+1 # which fold of data (integer from 1 to 10)
+sim <- datArgs[1]+1 # which simulated dataset (integer from 1 to 10)
 nchains <- datArgs[2] # how may parallel chains to run
 niter <- datArgs[3] # number of MCMC samples
 nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
@@ -34,20 +34,11 @@ ping <- datArgs[5] # print progress report after ping samples
 load("./simulation_inputs/inputs.Rdata")
 
 # Load VI results
-VI_res <- paste0("./data_example_results/comparison_vi_results",fold,".Rdata")
+VI_res <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
 load(VI_res)
 
-# Load data
-load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
-# Load folds
-
-load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/cv_folds.Rdata")
-
-# Extract training data
-for(v in 1:pL){
-  Y[v] <- sum(folds[[v]] == fold)
-  Z[[v]] <- Z[[v]][folds[[v]]==fold]
-}
+# Load simulated data
+load(file=paste0("./simulation_inputs/simulate_data_comparison",1,".Rdata"))
 
 ######################## Prepare data for MCMC ########################
 
@@ -62,12 +53,12 @@ for(v in 1:p) A_check[v] <- setequal(which(A[v,]>0),ancestors[[v]])
 sum(A_check) == p
 
 # Construct design matrix
-Xmat <- bdiag(Z)
+Xmat <- bdiag(Z.sim)
 Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
 Xstar <- Xmat %*% A
 
 # dummy outcome
-Yvec <- rep(1,sum(Y))
+Yvec <- rep(1,nrow(Xstar))
 
 # hyperparameters
 rho <- out_vi$hyperparams[1]
@@ -101,11 +92,11 @@ registerDoParallel(cores=nchains)
 samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   
   # saving output to track number of time steps
-  pr <- paste0("./data_example_results/comparison_mcmc_print",fold,"_chain",j,".txt")
+  pr <- paste0("./data_example_results/comparison_mcmc_print",sim,"_chain",j,".txt")
   sink(file=pr)
   
   # profiling to test speed of VI vs. MCMC
-  prof <- paste0("./data_example_results/comparison_mcmc_prof",fold,"_chain",j,".out")
+  prof <- paste0("./data_example_results/comparison_mcmc_prof",sim,"_chain",j,".out")
   Rprof(file=prof,memory.profiling=TRUE)
   
   # run MCMC
@@ -124,7 +115,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   sgamma_mcmc <- out_mcmc$beta
   colnames(sgamma_mcmc) <- colnames(Xstar)
   
-  res <- paste0("./data_example_results/comparison_mcmc_samples",fold,"_chain",j,".csv")
+  res <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",j,".csv")
   write.csv(sgamma_mcmc,file=res,row.names=F)
   
   sink() # close sink
