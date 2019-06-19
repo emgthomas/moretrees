@@ -20,7 +20,7 @@ require(doParallel)
 ######### Algorithm parameters #########
 
 # datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-datArgs <- c(0,3,10,1,1) # Alternatively, enter arguments directly in R
+datArgs <- c(1,3,10,1,1) # Alternatively, enter arguments directly in R
 
 sim <- datArgs[1]+1 # which simulated dataset (integer from 1 to 10)
 nchains <- datArgs[2] # how may parallel chains to run

@@ -7,7 +7,7 @@ Universe = vanilla
 # submission.
 request_cpus = 3
 request_disk = 100KB
-request_memory = 50GB
+request_memory = 20GB
 
 # Enter the path to the program you wish to run.
 # The default runs the R program. To run another
