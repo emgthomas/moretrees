@@ -4,7 +4,7 @@
 
 # direc <- "../moretrees/" # path of the moretrees repository
 # direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
-direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/moretrees"
+direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/moretrees/"
 setwd(direc)
 
 #### Create directory for saving results ###
@@ -86,21 +86,24 @@ rm(Y,Z)
 load(paste0("./data_example_results/data_example_cv_fold",fold,".Rdata"))
 
 # Values of the tuning parameter to test
-tp <- seq(0,1,0.01)
+tp <- seq(0,1,0.001)
 
 # Get ancestor matrix A
 A <- t(as_adj(tree,sparse = T))
 A <- expm(A)
-A[A>0] <- 1 
+A[A>0] <- 1
+A <- A[(p-pL+1):p,]
 
 # Extract relevant VI params
-mu_gamma <- mod$mu_gamma
+mu_gamma <- mod$VI_params$mu_gamma
 p_vi <- exp(loglogit(mod$VI_params$u_s))
 
 ll.tp <- numeric(length(tp))
-for(i in length(tp)){
-  beta.t <- A %*% (mu_gamma * (p_vi >= tp[i]))
+for(i in 1:length(tp)){
+  sgamma <- (mu_gamma * (p_vi >= tp[i]))
+  beta.t <- A %*% sgamma
   ll.tp[i] <- sum(sapply(1:pL,ll.fun,beta=beta.t,Z=Z.test))/sum(Y.test)
+  print(i)
 }
 
 ############### Save results ###############
