@@ -33,9 +33,9 @@ tol <- datArgs[3] # tolerance for convergence
 ############### Prepare data ###############
 
 # Load data
-load(file="data/moretrees_CC_data.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
 # Load cv folds
-load(file="data/cv_folds.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/cv_folds.Rdata")
 
 ############### Out-of-sample prediction via 10-fold CV ###############
 
