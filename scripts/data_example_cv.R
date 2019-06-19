@@ -29,35 +29,37 @@ fold <- datArgs[1]+1 # which fold for cv (integer from 1 to 10)
 m.max <- datArgs[2] # maximum number of time steps
 tol <- datArgs[3] # tolerance for convergence
 
+############### Prepare data ###############
+
+# Load data
+load(file="data/moretrees_CC_data.Rdata")
+# Load cv folds
+load(file="data/cv_folds.Rdata")
+
+############### Out-of-sample prediction via 10-fold CV ###############
+
+# Function for computing log-likelihood component for each outcome
+ll.fun <- function(v,beta,Z.test){
+  sum(loglogit(beta[v]*Z.test[[v]]))
+}
+
+# Extract training and test data
+Y.train <- numeric(length=pL)
+Z.train <- list()
+Y.test <- numeric(length=pL)
+Z.test <- list()
+for(v in 1:pL){
+  Y.test[v] <- sum(folds[[v]] == fold)
+  Y.train[v] <- Y[v] - Y.test[v]
+  Z.test[[v]] <- Z[[v]][folds[[v]]==fold]
+  Z.train[[v]] <- Z[[v]][folds[[v]]!=fold]
+}
+
+# Discard original data to save on memory
+rm(Y,Z)
+
 # UNCOMMENT THE BELOW BEFORE MERGE WITH MAIN BRANCH
 
-# ############### Prepare data ###############
-# 
-# # Load data
-# load(file="data/moretrees_CC_data.Rdata")
-# # Load cv folds
-# load(file="data/cv_folds.Rdata")
-# 
-# ############### Out-of-sample prediction via 10-fold CV ###############
-# 
-# # Function for computing log-likelihood component for each outcome
-# ll.fun <- function(v,beta,Z.test){ 
-#   sum(loglogit(beta[v]*Z.test[[v]]))
-# } 
-# 
-# # Extract training and test data
-# Y.train <- numeric(length=pL)
-# Z.train <- list()
-# Y.test <- numeric(length=pL)
-# Z.test <- list()
-# for(v in 1:pL){
-#   Y.test[v] <- sum(folds[[v]] == fold)
-#   Y.train[v] <- Y[v] - Y.test[v]
-#   Z.test[[v]] <- Z[[v]][folds[[v]]==fold]
-#   Z.train[[v]] <- Z[[v]][folds[[v]]!=fold]
-# }
-# # Discard original data to save on memory
-# rm(Y,Z)
 # # Adhoc collapsing estimates
 # adhoc_coeffs_fold <- adhoc_collapsing(Z.train,Y.train,pL,groups)
 # # Initial values for node coefficients
@@ -99,7 +101,6 @@ for(i in length(tp_vals)){
   beta.t <- beta <- A %*% (mu_gamma * (p_vi >= t[i]))
   ll.tp[i] <- sum(sapply(1:pL,ll.fun,beta=beta.t,Z=Z.test))/sum(Y.test)
 }
-
 
 ############### Save results ###############
 
