@@ -98,8 +98,8 @@ mu_gamma <- mod$mu_gamma
 p_vi <- exp(loglogit(mod$VI_params$u_s))
 
 ll.tp <- numeric(length(tp))
-for(i in length(tp_vals)){
-  beta.t <- A %*% (mu_gamma * (p_vi >= t[i]))
+for(i in length(tp)){
+  beta.t <- A %*% (mu_gamma * (p_vi >= tp[i]))
   ll.tp[i] <- sum(sapply(1:pL,ll.fun,beta=beta.t,Z=Z.test))/sum(Y.test)
 }
 
