@@ -37,15 +37,18 @@ load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/m
 # Load permutations
 load(file="./simulation_inputs/permutations.Rdata")
 
+# Load original results
+load(file="./data_example_results/data_example_full.Rdata")
+
 # Permute data
 permutation <- permutations[,perm]
-Y <- Y[permutations]
+Y <- Y[permutation]
 Z <- Z[permutation]
 
 ############### Run analysis on whole dataset ###############
 
 # Adhoc collapsing estimates
-adhoc_coeffs <- adhoc_collapsing(Z,Y,pL,groups)
+adhoc_coeffs <- adhoc_coeffs[permutation,]
 
 # Initial values for node coefficients
 nodes_init <- initial_node_coeffs(Z,Y,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
