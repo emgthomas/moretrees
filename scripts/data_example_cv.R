@@ -59,31 +59,27 @@ for(v in 1:pL){
 # Discard original data to save on memory
 rm(Y,Z)
 
-# UNCOMMENT THE BELOW BEFORE MERGE WITH MAIN BRANCH
-
-# # Adhoc collapsing estimates
-# adhoc_coeffs_fold <- adhoc_collapsing(Z.train,Y.train,pL,groups)
-# # Initial values for node coefficients
-# nodes_init_fold <- initial_node_coeffs(Z.train,Y.train,uncollapsed=adhoc_coeffs_fold[,1],p,pL,leaf.descendants,ancestors)
-# # Run ssMOReTreeS
-# mod <- VI_binary_ss(Z=Z.train,Y=Y.train,n=sum(Y.train),p=p,pL=pL,ancestors=ancestors,
-#                     leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init_fold,
-#                     tol=tol,m.max=m.max,m.print=10,more=FALSE,update_hyper=TRUE,update_hyper_freq=10)
-# # Get test set log likelihoods
-# ll.moretrees.group <- sum(sapply(1:pL,ll.fun,beta=mod$moretrees_est,Z=Z.test))/sum(Y.test)
-# beta.indiv <- indiv.beta.calc(VI_params=mod$VI_params,ancestors=ancestors,pL=pL,p=p)
-# ll.moretrees.indiv <- sum(sapply(1:pL,ll.fun,beta=beta.indiv,Z=Z.test))/sum(Y.test)
-# ll.adhoc <- numeric(ncol(adhoc_coeffs_fold))
-# for(i in 1:ncol(adhoc_coeffs_fold)){
-#   ll.adhoc[i] <- sum(sapply(1:pL,ll.fun,beta=adhoc_coeffs_fold[,i],Z=Z.test))/sum(Y.test)
-# }
-# # Result
-# ll.cv <- as.data.frame(matrix(c(fold,ll.moretrees.group,ll.moretrees.indiv,ll.adhoc),nrow=1))
-# names(ll.cv) <- c("fold","moretrees_groups","moretrees_indiv","uncollapsed","sim_groups","adhoc1","adhoc2","adhoc3","fully_collapsed")
+# Adhoc collapsing estimates
+adhoc_coeffs_fold <- adhoc_collapsing(Z.train,Y.train,pL,groups)
+# Initial values for node coefficients
+nodes_init_fold <- initial_node_coeffs(Z.train,Y.train,uncollapsed=adhoc_coeffs_fold[,1],p,pL,leaf.descendants,ancestors)
+# Run ssMOReTreeS
+mod <- VI_binary_ss(Z=Z.train,Y=Y.train,n=sum(Y.train),p=p,pL=pL,ancestors=ancestors,
+                    leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init_fold,
+                    tol=tol,m.max=m.max,m.print=10,more=FALSE,update_hyper=TRUE,update_hyper_freq=10)
+# Get test set log likelihoods
+ll.moretrees.group <- sum(sapply(1:pL,ll.fun,beta=mod$moretrees_est,Z=Z.test))/sum(Y.test)
+beta.indiv <- indiv.beta.calc(VI_params=mod$VI_params,ancestors=ancestors,pL=pL,p=p)
+ll.moretrees.indiv <- sum(sapply(1:pL,ll.fun,beta=beta.indiv,Z=Z.test))/sum(Y.test)
+ll.adhoc <- numeric(ncol(adhoc_coeffs_fold))
+for(i in 1:ncol(adhoc_coeffs_fold)){
+  ll.adhoc[i] <- sum(sapply(1:pL,ll.fun,beta=adhoc_coeffs_fold[,i],Z=Z.test))/sum(Y.test)
+}
+# Result
+ll.cv <- as.data.frame(matrix(c(fold,ll.moretrees.group,ll.moretrees.indiv,ll.adhoc),nrow=1))
+names(ll.cv) <- c("fold","moretrees_groups","moretrees_indiv","uncollapsed","sim_groups","adhoc1","adhoc2","adhoc3","fully_collapsed")
 
 ############### Testing values of tuning parameter ###############
-# loading results of VI algo- DELETE THIS LATER
-load(paste0("./data_example_results/data_example_cv_fold",fold,".Rdata"))
 
 # Values of the tuning parameter to test
 tp <- seq(0,1,0.001)
@@ -98,6 +94,7 @@ A <- A[(p-pL+1):p,]
 mu_gamma <- mod$VI_params$mu_gamma
 p_vi <- exp(loglogit(mod$VI_params$u_s))
 
+# Get test set log likelihood for each value of tp
 ll.tp <- numeric(length(tp))
 for(i in 1:length(tp)){
   sgamma <- (mu_gamma * (p_vi >= tp[i]))
