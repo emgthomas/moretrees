@@ -60,7 +60,7 @@ registerDoParallel(cores=nrestarts)
 # Run spike & slab model using nrestarts random restarts
 restarts_ss <- foreach(j = 1:nrestarts) %dopar% {
   
-  # out_ss <- 
+  #out_ss <- 
   VI_binary_ss(Z=Z,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
                leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
                tol=tol,m.max=m.max,m.print=10,more=FALSE,update_hyper=TRUE,update_hyper_freq=10)
@@ -82,4 +82,4 @@ groups <- as.numeric(as.factor(beta_est))
 ############### Save results ###############
 
 save(permutation,beta_est,groups,final_ss,ELBOS,
-     file = paste0("data_example_results/data_example_full_perm",perm,".Rdata"))
+     file = paste0("./data_example_results/data_example_full_perm",perm,".Rdata"))

@@ -34,6 +34,6 @@ Log = ../output/log_data_example_full_permute.$(Process)
 # Specify any arguments you want to pass to the executable.
 # Arguments in order: permutation restarts m.max tol
 # 
-Arguments = --no-save --no-restore --slave --args $(Process) 1E5 1E-16
+Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-16
 Queue 10
 
