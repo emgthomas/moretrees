@@ -127,7 +127,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   sgamma_mcmc <- out_mcmc$beta
   colnames(sgamma_mcmc) <- colnames(Xstar)
   
-  write.csv(sgamma_mcmc,file=res,row.names=F,append=TRUE)
+  write.table(sgamma_mcmc,file=res,sep=",",col.names=F,row.names=F,append=TRUE)
   
   sink() # close sink
 }
