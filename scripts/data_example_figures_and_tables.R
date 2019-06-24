@@ -35,7 +35,6 @@ for(i in 1:nfolds){
 
 # Get average LL over folds for each value of tuning parameter
 ll.tp <- rowMeans(ll.tp.folds)
-plot(tp,ll.tp,type="l")
 
 # Best value of tuning parameter
 ll.max <- max(ll.tp)
@@ -64,7 +63,7 @@ ngroups <- numeric(length(tp))
 for(i in 1:length(tp)){
   sgamma <- (mu_gamma * (p_vi >= tp[i]))
   beta.tp <- A %*% sgamma
-  ngroups[i] <- length(unique(as.numeric(beta.t0)))
+  ngroups[i] <- length(unique(as.numeric(beta.tp)))
 }
 
 
