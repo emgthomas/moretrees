@@ -30,7 +30,7 @@ ll.tp.folds <- as.data.frame(matrix(nrow=length(tp),ncol=nfolds))
 for(i in 1:nfolds){
   load(paste0("data_example_results/data_example_cv_fold",i,".Rdata"))
   ll.tp.folds[,i] <- ll.tp
-  plot(tp,ll.tp,type="l",main = i)
+  #plot(tp,ll.tp,type="l",main = i)
 }
 
 # Get average LL over folds for each value of tuning parameter
@@ -63,9 +63,20 @@ p_vi <- exp(loglogit(final_ss$VI_params$u_s))
 ngroups <- numeric(length(tp))
 for(i in 1:length(tp)){
   sgamma <- (mu_gamma * (p_vi >= tp[i]))
-  beta.t <- A %*% sgamma
-  ngroups[i] <- length(unique(as.numeric(beta.t)))
+  beta.tp <- A %*% sgamma
+  ngroups[i] <- length(unique(as.numeric(beta.t0)))
 }
+
+
+# Best beta
+sgamma <- (mu_gamma * (p_vi >= min(tp.max)))
+beta.tp.min <- A %*% sgamma
+sgamma <- (mu_gamma * (p_vi >= max(tp.max)))
+beta.tp.max <- A %*% sgamma
+
+# Is it same as beta_coll?
+all.equal(as.numeric(beta.tp.min),final_ss$moretrees_est)
+all.equal(as.numeric(beta.tp.max),final_ss$moretrees_est)
 
 # Best number of groups
 ngroups_max <- unique(ngroups[which(ll.tp==ll.max)])
@@ -141,11 +152,14 @@ require(data.table)
 cv.res$sim_groups <- NULL
 cv.df <- melt(cv.res,id.vars="fold",measure.vars=2:(nmods),variable.name="mod",value.name="ll")
 
-# Winner excluding MOReTreeS individual and MOReTreeS collapsed 2
+# Cross validated predictive accuracy
+sort(colMeans(cv.res[,2:ncol(cv.res)]),decreasing = T)
+
+# Winner excluding MOReTreeS individual and MOReTreeS collapsed delta max
 apply(cv.res[,-c(1,3,4)],1,which.max)
 # How often does MOReTreeS individual beat MOReTrees collapsed?
 sum(cv.res[,2] <= cv.res[,4])
-# How often does MOReTreeS collpsed2 beat MOReTrees collapsed?
+# How often does MOReTreeS collpsed delta max beat MOReTrees collapsed?
 sum(cv.res[,2] <= cv.res[,3])
 
 ############### Figure 4 ################
