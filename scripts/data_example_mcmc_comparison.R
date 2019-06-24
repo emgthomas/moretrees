@@ -12,6 +12,7 @@ if(!dir.exists("./data_example_results")) dir.create("./data_example_results")
 ### Load functions ###
 source("scripts/VI_functions.R")
 source("scripts/processing_functions.R")
+source("scripts/logit_spike_edit.R")
 require(igraph)
 require(Matrix)
 require(BoomSpikeSlab)
@@ -95,15 +96,26 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   pr <- paste0("./data_example_results/comparison_mcmc_print",sim,"_chain",j,".txt")
   sink(file=pr)
   
+  # checking if we already have some iterations to work with
+  res <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",j,".csv")
+  if(exists(res)){
+    nL <- countLines(res)
+    gamma0 <- as.numeric(read.csv(res, header=FALSE, skip=nL-1)) # Read only last line to restart from most recent iteration
+  } else {
+    # If not, use VI results as initial values
+    gamma0 <- gamma_vi
+  }
+  
   # profiling to test speed of VI vs. MCMC
   prof <- paste0("./data_example_results/comparison_mcmc_prof",sim,"_chain",j,".out")
-  Rprof(file=prof,memory.profiling=TRUE)
+  # Use append=TRUE in case we have already run some iterations
+  Rprof(file=prof,memory.profiling=TRUE,append=TRUE)
   
   # run MCMC
-  out_mcmc <- logit.spike(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
+  out_mcmc <- logit.spike.edit(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
                           niter=niter,
                           prior=prior,
-                          initial.value=gamma_vi,
+                          initial.value=gamma0,
                           nthreads=nthreads,
                           ping=ping)
   
@@ -115,10 +127,7 @@ samples_mcmc <- foreach(j = 1:nchains) %dopar% {
   sgamma_mcmc <- out_mcmc$beta
   colnames(sgamma_mcmc) <- colnames(Xstar)
   
-  res <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",j,".csv")
-  write.csv(sgamma_mcmc,file=res,row.names=F)
+  write.csv(sgamma_mcmc,file=res,row.names=F,append=TRUE)
   
   sink() # close sink
 }
-
-
