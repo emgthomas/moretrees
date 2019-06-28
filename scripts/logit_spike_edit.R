@@ -83,19 +83,21 @@ logit.spike.edit <- function (formula, niter, data, subset, prior = NULL, na.act
   ans$xlevels <- .getXlevels(mt, mf)
   ans$call <- cl
   ans$terms <- mt
-  fitted.logits <- design %*% t(ans$beta)
-  log.likelihood.contributions <- response * fitted.logits + 
-    ny * plogis(fitted.logits, log.p = TRUE, lower.tail = FALSE)
-  ans$log.likelihood <- colSums(log.likelihood.contributions)
-  sign <- rep(1, length(response))
-  sign[response/ny < 0.5] <- -1
-  ans$deviance.residuals <- sign * sqrt(rowMeans(-2 * log.likelihood.contributions))
-  p.hat <- sum(response)/sum(ny)
-  ans$null.log.likelihood <- sum(response * log(p.hat) + (ny - 
-                                                            response) * log(1 - p.hat))
-  fitted.probabilities <- plogis(fitted.logits)
-  ans$fitted.probabilities <- rowMeans(fitted.probabilities)
-  ans$fitted.logits <- rowMeans(fitted.logits)
+  #### Editing out computation of fitted logits because they cause a huge memory spike
+  #### (around three times the memory needed for the rest of the process)
+  # fitted.logits <- design %*% t(ans$beta)
+  # log.likelihood.contributions <- response * fitted.logits + 
+  #   ny * plogis(fitted.logits, log.p = TRUE, lower.tail = FALSE)
+  # ans$log.likelihood <- colSums(log.likelihood.contributions)
+  # sign <- rep(1, length(response))
+  # sign[response/ny < 0.5] <- -1
+  # ans$deviance.residuals <- sign * sqrt(rowMeans(-2 * log.likelihood.contributions))
+  # p.hat <- sum(response)/sum(ny)
+  # ans$null.log.likelihood <- sum(response * log(p.hat) + (ny - 
+  #                                                           response) * log(1 - p.hat))
+  # fitted.probabilities <- plogis(fitted.logits)
+  # ans$fitted.probabilities <- rowMeans(fitted.probabilities)
+  # ans$fitted.logits <- rowMeans(fitted.logits)
   if (!is.null(initial.value) && inherits(initial.value, "logit.spike")) {
     ans$beta <- rbind(initial.value$beta, ans$beta)
   }
@@ -105,8 +107,8 @@ logit.spike.edit <- function (formula, niter, data, subset, prior = NULL, na.act
   }
   colnames(ans$beta) <- colnames(design)
   
-  # Editing out the below as it causes code to return design matrix
-  # This is a problem for me because design matrix is huge, causing server to run out of memory
+  #### Editing out the below as it causes code to return design matrix 
+  #### This is a problem for me because design matrix is huge
   # if (has.data) {
   #   ans$training.data <- data
   # }

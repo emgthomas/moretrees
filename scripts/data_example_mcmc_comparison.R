@@ -21,10 +21,11 @@ require(doParallel)
 ######### Algorithm parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-# datArgs <- c(1,3,10,1,1) # Alternatively, enter arguments directly in R
+# datArgs <- c(3,3,10,1,1) # Alternatively, enter arguments directly in R
 
-sim <- datArgs[1]+1 # which simulated dataset (integer from 1 to 10)
 nchains <- datArgs[2] # how may parallel chains to run
+sim <- datArgs[1] %/% nchains + 1 # which simulated dataset (integer from 1 to 10)
+chain <- datArgs[1] %% nchains + 1 # which chain (integer from 1 to nchains)
 niter <- datArgs[3] # number of MCMC samples
 nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
 ping <- datArgs[5] # print progress report after ping samples
@@ -86,48 +87,41 @@ sum(prior$prior.inclusion.probabilities == rho) == p
 
 ####################### Run MCMC #######################
 
-# For parallelization
-registerDoParallel(cores=nchains)
+# saving output to track number of time steps
+pr <- paste0("./data_example_results/comparison_mcmc_print",sim,"_chain",chain,".txt")
+sink(file=pr)
 
-# Run spike & slab model using nchains chains
-samples_mcmc <- foreach(j = 1:nchains) %dopar% {
-  
-  # saving output to track number of time steps
-  pr <- paste0("./data_example_results/comparison_mcmc_print",sim,"_chain",j,".txt")
-  sink(file=pr)
-  
-  # checking if we already have some iterations to work with
-  res <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",j,".csv")
-  if(exists(res)){
-    nL <- countLines(res)
-    gamma0 <- as.numeric(read.csv(res, header=FALSE, skip=nL-1)) # Read only last line to restart from most recent iteration
-  } else {
-    # If not, use VI results as initial values
-    gamma0 <- gamma_vi
-  }
-  
-  # profiling to test speed of VI vs. MCMC
-  prof <- paste0("./data_example_results/comparison_mcmc_prof",sim,"_chain",j,".out")
-  # Use append=TRUE in case we have already run some iterations
-  Rprof(file=prof,memory.profiling=TRUE,append=TRUE)
-  
-  # run MCMC
-  out_mcmc <- logit.spike.edit(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
-                          niter=niter,
-                          prior=prior,
-                          initial.value=gamma0,
-                          nthreads=nthreads,
-                          ping=ping)
-  
-  Rprof(NULL) # close Rprof
-  print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
-  file.remove(prof) # need to remove profile files as they are very large
-  
-  ######################## Save MCMC samples #######################
-  sgamma_mcmc <- out_mcmc$beta
-  colnames(sgamma_mcmc) <- colnames(Xstar)
-  
-  write.table(sgamma_mcmc,file=res,sep=",",col.names=F,row.names=F,append=TRUE)
-  
-  sink() # close sink
+# checking if we already have some iterations to work with
+res <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",chain,".csv")
+if(exists(res)){
+  nL <- countLines(res)
+  gamma0 <- as.numeric(read.csv(res, header=FALSE, skip=nL-1)) # Read only last line to restart from most recent iteration
+} else {
+  # If not, use VI results as initial values
+  gamma0 <- gamma_vi
 }
+
+# profiling to test speed of VI vs. MCMC
+prof <- paste0("./data_example_results/comparison_mcmc_prof",sim,"_chain",chain,".out")
+# Use append=TRUE in case we have already run some iterations
+Rprof(file=prof,memory.profiling=TRUE,append=TRUE)
+
+# run MCMC
+out_mcmc <- logit.spike.edit(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
+                             niter=niter,
+                             prior=prior,
+                             initial.value=gamma0,
+                             nthreads=nthreads,
+                             ping=ping)
+
+Rprof(NULL) # close Rprof
+print(summaryRprof(prof,lines="hide",memory="both")) # summarize Rprof results
+file.remove(prof) # need to remove profile files as they are very large
+
+######################## Save MCMC samples #######################
+sgamma_mcmc <- out_mcmc$beta
+colnames(sgamma_mcmc) <- colnames(Xstar)
+
+write.table(sgamma_mcmc,file=res,sep=",",col.names=F,row.names=F,append=TRUE)
+
+sink() # close sink
