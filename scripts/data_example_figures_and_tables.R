@@ -2,17 +2,30 @@
 # ----------------------- Producing figures and tables for data example ----------------------- #
 # --------------------------------------------------------------------------------------------- #
 
-# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
-direc <- "../moretrees/" # path of the moretrees repository
+# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees/"
+# direc <- "../moretrees/" # path of the moretrees repository
+direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
 setwd(direc)
 
 #### Create directory for saving results ###
 if(!dir.exists("./figures_and_tables")) dir.create("./figures_and_tables")
 
-############################### Cross-validation results ###############################
-
+# Load functions
 require(igraph)
+require(mclust)
+require(ggplot2)
+require(gridExtra)
+require(data.table)
+require(reshape2)
+require(glue)
+require(RColorBrewer)
+require(collapsibleTree)
+require(circlize)
+require(plotly)
+require(xtable)
+source("scripts/processing_functions.R")
+
+############################### Cross-validation results ###############################
 
 # Load tree
 load("simulation_inputs/inputs.Rdata")
@@ -27,7 +40,6 @@ for(i in 1:nfolds){
   load(paste0("data_example_results/data_example_cv_fold",i,".Rdata"))
   cv.res[i,] <- as.numeric(ll.cv)
 }
-require(data.table)
 cv.res$sim_groups <- NULL
 cv.df <- melt(cv.res,id.vars="fold",measure.vars=2:(nmods),variable.name="mod",value.name="ll")
 
@@ -37,7 +49,6 @@ apply(cv.res[,-c(1,3)],1,which.max)
 sum(cv.res[,2] <= cv.res[,3])
 
 ############### Figure 4 ################
-require(ggplot2)
 cv.plot <- ggplot(cv.df,aes(x=mod,y=ll)) + 
   geom_boxplot() +
   theme_bw(base_size=19) + 
@@ -48,9 +59,143 @@ pdf("figures_and_tables/figure4.pdf",width=12,height=5)
 cv.plot
 dev.off()
 
+############################# Permutation results #############################
+load("data_example_results/data_example_full.Rdata")
+beta_est_true <- beta_est
+group_est_true <- as.integer(as.factor(beta_est_true))
+
+nperm <- 10
+perm.est <- matrix(nrow=pL,ncol=nperm)
+perm.group <- matrix(nrow=pL,ncol=nperm)
+perm.smc <- matrix(nrow=max(group_est_true),ncol=nperm)
+
+for(i in 1:(nperm)){
+  load(paste0("data_example_results/data_example_full_perm",i,".Rdata"))
+  perm.est[,i] <- beta_est
+  perm.group[,i] <- as.integer(as.factor(beta_est))
+  perm.smc[,i] <- smc(group_est_true,perm.group[,i])
+  #plot(beta_est,beta_est_true)
+}
+smc.mean <- rowMeans(perm.smc)
+
+dat <- as.data.frame(cbind(perm.est,perm.group))
+est.names <- sapply(1:10,function(i) paste0("est.",i))
+names(dat)[1:10] <- est.names
+group.names <- sapply(1:10,function(i) paste0("group.",i))
+names(dat)[11:20] <- group.names
+dat$est.orig <- beta_est_true
+dat$group.orig <- group_est_true
+dat$est.0 <- dat$est.orig
+dat$group.0 <- dat$group.orig
+dat$Y <- Y
+dat.df <- reshape(dat,direction="long",
+                  varying=list(c("est.0",est.names),
+                               c("group.0",group.names)))
+names(dat.df)[4:7] <- c("perm","est","group","v")
+dat.df$group.orig <- as.factor(dat.df$group.orig)
+dat.df$perm <- dat.df$perm-1
+dat.df$perm <- as.factor(dat.df$perm)
+dat.df$group <- as.factor(dat.df$group)
+change.group <- apply(X=cbind(as.character(dat.df$perm),
+                              as.character(dat.df$group.orig),
+                              as.character(dat.df$group)),
+                      MARGIN=1,FUN=collapse,sep="")
+dat.df$change.group <- change.group
+n.outcomes <- tapply(change.group,as.factor(change.group),length)
+n.cases <- tapply(dat.df$Y,as.factor(change.group),sum)
+n.df <- data.frame(change.group=names(n.outcomes),
+                   n.outcomes=n.outcomes,
+                   n.cases=n.cases)
+dat.df <- merge(dat.df,n.df,by="change.group",all.x=T,all.y=F)
+dat.df$est.group.orig <- exp(dat.df$est.orig*10)
+dat.df$est.group.orig <- as.factor(format(dat.df$est.group.orig,digits=3))
+dat.df$est.group <- exp(dat.df$est*10)
+dat.df$est.group <- format(dat.df$est.group,digits=3)
+perm.smc <- cbind(rep(1,nrow(perm.smc)),perm.smc)
+
+##### OR for original groups vs permuted groups, showing number of outcomes
+plot.list <- list()
+for(i in 0:10){
+  # groups plot
+  dat.i <- dat.df[dat.df$perm==i,]
+  dat.i$est.group2 <- as.factor(dat.i$est.group)
+  if(i > 0){
+    plot_title <- paste0("Permutation ",i)
+  } else {
+    plot_title <- "No permutation" 
+  }
+  plot.groups <- ggplot(dat.i,aes(x=as.factor(est.group),y=est.group.orig,
+                             color=group,label=n.outcomes)) + 
+    geom_point(color="white",size=6) +
+    geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+    theme_bw() +
+    theme(legend.position="none",
+          plot.margin = margin(t=10,r=0,b=10,l=10, unit = "pt"),
+          plot.title = element_text(hjust = 0.5),
+          axis.text=element_text(size=7)) +
+    #facet_wrap(.~perm,nrow=1) +
+    ggtitle(plot_title) +
+    xlab("Permuted OR") +
+    ylab("Original OR")
+
+  # simple matching coefficient plot
+  smc.df <- data.frame(OR=as.factor(unique(dat.df$est.group.orig)),smc=perm.smc[,i+1],perm="kappa")
+  smc.df$label <- format(smc.df$smc,digits=1)
+  if(i==0) smc.df$label <- rep("1.00",nrow(smc.df))
+  plot.smc <- ggplot(smc.df,aes(y=OR,x=1)) + 
+    geom_tile(aes(fill=smc),colour="black",size=0.1) +
+    geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+    theme_bw() +
+    theme(legend.position="none",
+          #axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          plot.margin = margin(t=11,r=0,b=7,l=-3, unit = "pt"),
+          plot.title = element_text(hjust = 0.5),
+          panel.border=element_blank()) +
+    ggtitle(bquote(kappa)) +
+    # facet_wrap(.~perm,nrow=1,
+    #            labeller=label_bquote(kappa)) +
+    xlab("") + 
+    scale_fill_gradientn(colours=brewer.pal(max(as.numeric(dat.df$group.orig)),
+                                              name="YlGnBu"),
+                         limits=c(0,1)) +
+    # scale_fill_gradient(limits=c(0,1),low="red",high="blue") +
+    scale_x_continuous(breaks=0.5,labels="")
+
+  # Save plots as pdf
+  pdf(file = paste0("./figures_and_tables/figureA4_",i,".pdf"),
+      width=3.2,height=3)
+  print(grid.arrange(plot.groups,plot.smc,ncol=2,widths=c(4,0.4)))
+  dev.off()
+}
+
+# ##### OR for original groups vs permuted groups, showing number of cases
+# for(i in 0:10){
+#   dat.i <- dat.df[dat.df$perm==i,]
+#   dat.i$est.group2 <- as.factor(dat.i$est.group)
+#   plot.i <- ggplot(dat.i,aes(x=as.factor(est.group),y=est.group.orig,
+#                              color=group,label=round(n.cases/10^3))) + 
+#     geom_point(color="white",size=6) +
+#     geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+#     theme_bw() +
+#     theme(legend.position="none") +
+#     facet_wrap(.~perm,nrow=1) +
+#     xlab("Permuted OR") +
+#     ylab("Original OR")
+#   # Save plot as pdf
+#   pdf(file = paste0("./figures_and_tables/figureA5_",i,".pdf"),
+#       width=4,height=3)
+#   print(plot.i)
+#   dev.off()
+# }
+
 ############################### Full data results ###############################
 load("data_example_results/data_example_full.Rdata")
-source("scripts/processing_functions.R")
 
 ### Compute grouped estimates and CIs ###
 beta_est <- final_ss$moretrees_est
@@ -74,7 +219,6 @@ l.big[,1] <- 4*l.big[,1]
 l.big[488:499,1] <- l.big[488:499,1] + 6
 l.big[149:151,1] <- l.big[149:151,1] + c(8,16,24)
 beta_out <- final_ss$moretrees_est
-require(RColorBrewer)
 cols <- rainbow(7, alpha = 1)
 col1 <- rep(NA,p[1])
 col1[V(tree)$leaf] <- groups
@@ -129,7 +273,6 @@ dev.off()
 
 mult <- 10 # show results in units of 10 micrograms per cubic metre
 digits <- 3 # number of digits to display
-require(glue)
 
 {
   # Step 1: collapse to parent node when all children have same beta value
@@ -195,8 +338,6 @@ while(length(leaves)>0){
   groupings <- groupings[groupings!=gr]
 }
 
-require(collapsibleTree)
-require(circlize)
 edgelist2 <- as.data.frame(get.edgelist(trPrune),stringsAsFactors=F)
 names(edgelist2) <- c("parent","child")
 edgelist2 <- rbind(c(NA,root.node),edgelist2)
@@ -233,7 +374,6 @@ edgelist2_child <- as.character(icd_short_to_decimal(edgelist2$child))
 edgelist2$child[!is.na(edgelist2_child)] <- edgelist2_child[!is.na(edgelist2_child)]
 
 # Plot
-require(plotly)
 pl <-   collapsibleTreeNetwork2(edgelist2,attribute="beta",aggFun=identity, fill="col",
                                tooltipHtml="tooltip",nodeSize="nodesize",nodeSizeAggFun=identity,
                                nodeSizeScaleFun=max,width=800,height=1000,fontSize=14)
@@ -326,7 +466,6 @@ for(g in 1:max(beta_groups)){
 write(paste("\\renewcommand\\arraystretch{0.6}\\begin{longtable}{p{\\textwidth}} \\hline",paste(latex_groups,sep="",collapse=" \n \\hline \n \n "),"\\end{longtable}",sep="\n \n"),file="./figures_and_tables/tableC_supplementary_material.tex")
 
 # write small table
-require(xtable)
 row.names(small_table) <- NULL
 small_xtable <- xtable(small_table,align=c("l","c","p{6cm}","c","c","c"),digits=3,
                        display=c("d","d","s","d","f","f"))
