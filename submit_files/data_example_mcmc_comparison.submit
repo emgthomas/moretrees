@@ -7,7 +7,7 @@ Universe = vanilla
 # submission.
 request_cpus = 1
 request_disk = 1GB
-request_memory = 80GB
+request_memory = 30GB
 
 # Enter the path to the program you wish to run.
 # The default runs the R program. To run another
@@ -34,7 +34,7 @@ Log = ../output/log_data_example_mcmc_comparison.$(Process)
 # Specify any arguments you want to pass to the executable.
 # Arguments in order: sim nchains niter nthreads ping
 # 
-#Arguments = --no-save --no-restore --slave --args $(Process) 3 1000 1 10
-Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1 10
+Arguments = --no-save --no-restore --slave --args $(Process) 3 1000 1 10
+#Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1 10
 Queue 30 # must be nchains*nsims 
 
