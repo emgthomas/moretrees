@@ -88,7 +88,11 @@ for(sim in 1:nsims){
   # load VI results
   res_VI <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
   load(res_VI)
-  out_vi$VI_params$sim <- 1
-  beta_sd <- sapply(1:p,FUN=indiv.beta.sd.calc,VIsims=out_vi$VI_params,ancestors=ancestors,pL=pL,p=p)
-  var_VI[sim,] <- 
+  VI_params <- out_vi$VI_params
+  var_VI[sim,] <- beta.var.calc(mu_gamma=VI_params$mu_gamma,
+                                sigma2_gamma=VI_params$sigma2_gamma,
+                                u_s=VI_params$u_s,
+                                ancestors=ancestors,
+                                pL=pL,p=p)
+  var_MCMC[sim,] <- apply(beta_mcmc[[sim]][,1:pL],2,FUN=var)
 }
