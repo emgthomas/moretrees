@@ -48,7 +48,7 @@ for(sim in 1:nsims){
     p_nonzero <- rbind(p_nonzero,cbind(iters!=0,rep(chain,nrow(iters))))
   }
   beta.df <- as.data.frame(as.matrix(beta))
-  names(beta.df)[1:pL] <- names(Z.conv)
+  names(beta.df)[1:pL] <- colnames(A)[(p-pL+1):p]
   names(beta.df)[pL+1] <- "Chain"
   beta_mcmc[[sim]] <- beta.df
   gamma.df <- as.data.frame(as.matrix(gamma))
@@ -64,7 +64,7 @@ for(sim in 1:nsims){
 
 ############################### Convergence diagnostics ###############################
 
-sim <- 9
+sim <- 4
 u <- c("44100","44101","44102","44103")
 mcmc_trace(beta_mcmc[[sim]],par=u)
 mcmc_pairs(beta_mcmc[[sim]],par=u)
