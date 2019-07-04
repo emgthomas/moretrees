@@ -16,7 +16,6 @@ source("scripts/logit_spike_edit.R")
 require(igraph)
 require(Matrix)
 require(BoomSpikeSlab)
-require(doParallel)
 
 ######### Algorithm parameters #########
 
