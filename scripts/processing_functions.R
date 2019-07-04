@@ -38,6 +38,20 @@ indiv.beta.sd.calc <- function(idx,VIsims,ancestors,pL,p){
   return(data.frame(beta_indiv=beta_est,sd_indiv=sd_est,sim=VIsims$sim[idx[1:pL]]))
 }
 
+beta.var.calc <- function(mu_gamma,sigma2_gamma,u_s,ancestors,pL,p){
+  pi_s <- 1/(1+exp(u_s))
+  # beta_est <- numeric(length=pL)
+  var_est <- numeric(length=pL)
+  for(v in 1:pL){
+    u <- ancestors[[v+p-pL]]
+    sigma2_gamma_u <- sigma2_gamma[u]
+    mu_gamma_u <- mu_gamma[u]
+    pi_s_u <- pi_s[u]
+    var_est[v] <- sum(pi_s_u*(sigma2_gamma_u + (1-pi_s_u)*mu_gamma_u^2))
+  }
+  return(var_est)
+}
+
 gamma.sim.fun <- function(u,mu_gamma,sigma2_gamma,n.sim) rnorm(n.sim,mu_gamma[u],sigma2_gamma[u])
 
 indiv.beta.ci.calc <- function(VI_params,ancestors,pL,p,n.sim=1000){
