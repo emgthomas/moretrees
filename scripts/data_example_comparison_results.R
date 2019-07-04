@@ -111,7 +111,7 @@ nonzero_var <- function(x){
 } 
 var_VI <- matrix(nrow=pL,ncol=nsims)
 var_MCMC <- matrix(nrow=pL,ncol=nsims)
-var_plots_dat <- matrix(nrow=0,ncol=4)
+var_nonzero_mat <- matrix(nrow=0,ncol=4)
 for(sim in 1:nsims){
   # load VI results
   res_VI <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
@@ -128,27 +128,48 @@ for(sim in 1:nsims){
   which_nonzero <- which(p_s[,sim]>=cutoff)
   var_VI_nonzero <- VI_params$sigma2_gamma[which_nonzero]
   var_MCMC_nonzero <- apply(gamma_mcmc[[sim]][,1:p],2,FUN=nonzero_var)[which_nonzero]
-  var_plots_dat <- rbind(var_plots_dat,
+  var_nonzero_mat <- rbind(var_nonzero_mat,
                          cbind(var_VI_nonzero,
                                var_MCMC_nonzero,
                                which_nonzero,
                                rep(sim,length(var_VI_nonzero))))
-  row.names(var_plots_dat) <- NULL
+  row.names(var_nonzero_mat) <- NULL
 }
 
-### Plot variance for non-zero components
-var_plots_dat <- as.data.frame(var_plots_dat)
-names(var_plots_dat) <- c("VI","MCMC","nodes","sim")
-var_plots_dat$VI_smaller <- var_plots_dat$VI <= var_plots_dat$MCMC
+### Plot variance for all components
+var_dat <- data.frame(MCMC=var_MCMC,VI=var_VI,node=1:pL)
+var_dat <- reshape(var_dat,varying=list(1:10,11:20),direction="long")
+var_dat$id <- NULL
+var_dat$SmallerVariance <- "MCMC"
+var_dat$SmallerVariance[var_dat$VI <= var_dat$MCMC] <- "VI"
+names(var_dat) <- c("node","sim","MCMC","VI","SmallerVariance")
 
-axis.min <- 0
-axis.max <- max(as.matrix(var_plots_dat[,c("VI","MCMC")]))
+axis.min <- min(as.matrix(var_dat[,c("VI","MCMC")]))
+axis.max <- max(as.matrix(var_dat[,c("VI","MCMC")]))
 line.x <- c(axis.min,axis.max)
-var_plot <- ggplot(var_plots_dat,aes(x=VI,y=MCMC,col=VI_smaller)) + 
+var_plot <- ggplot(var_dat,aes(x=VI,y=MCMC,col=SmallerVariance)) + 
   geom_abline(intercept=0,slope=1) +
-  geom_point() +
+  geom_point(alpha=0.8) +
   facet_wrap(.~sim,ncol=5) +
-  scale_x_continuous(lim=c(axis.min,axis.max)) +
-  scale_y_continuous(lim=c(axis.min,axis.max))
+  scale_x_log10(lim=c(axis.min,axis.max)) + 
+  scale_y_log10(lim=c(axis.min,axis.max)) +
+  theme_bw()
+
+### Plot variance for non-zero components
+var_nonzero_dat <- as.data.frame(var_nonzero_mat)
+names(var_nonzero_dat) <- c("VI","MCMC","nodes","sim")
+var_nonzero_dat$SmallerVariance <- "MCMC"
+var_nonzero_dat$SmallerVariance[var_nonzero_dat$VI <= var_nonzero_dat$MCMC] <- "VI"
+
+axis.min <- min(as.matrix(var_nonzero_dat[,c("VI","MCMC")]))
+axis.max <- max(as.matrix(var_nonzero_dat[,c("VI","MCMC")]))
+line.x <- c(axis.min,axis.max)
+var_nonzero_plot <- ggplot(var_nonzero_dat,aes(x=VI,y=MCMC,col=SmallerVariance)) + 
+  geom_abline(intercept=0,slope=1) +
+  geom_point(alpha=0.8) +
+  facet_wrap(.~sim,ncol=5) +
+  scale_x_log10(lim=c(axis.min,axis.max)) + 
+  scale_y_log10(lim=c(axis.min,axis.max)) +
+  theme_bw()
 
 
