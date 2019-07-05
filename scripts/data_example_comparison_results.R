@@ -163,6 +163,9 @@ dat.df$est_mcmc_lab <- format(dat.df$est_mcmc,digits=4)
 dat.df$est_true_lab <- format(dat.df$est_true,digits=4)
 
 ##### Plotting ORs estimated by MCMC vs those estimated by VI
+top.pts <- 20
+left.pts <- 20
+plot.list <- list()
 for(sim in 1:10){
   # groups plot
   dat.sim <- dat.df[dat.df$sim==sim,]
@@ -176,7 +179,7 @@ for(sim in 1:10){
     geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
     theme_bw() +
     theme(legend.position="none",
-          plot.margin = margin(t=-15,r=0,b=0,l=0, unit = "pt"),
+          plot.margin = margin(t=-15,r=0,b=0,l=left.pts, unit = "pt"),
           # plot.margin = margin(t=0,r=0,b=10,l=10, unit = "pt"),
           plot.title = element_blank(),
           axis.text=element_text(size=7)) +
@@ -229,7 +232,7 @@ for(sim in 1:10){
           panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
           # plot.margin = margin(t=0,r=-4,b=-16,l=52, unit = "pt"),
-          plot.margin = margin(t=0,r=0,b=0,l=0, unit = "pt"),
+          plot.margin = margin(t=top.pts,r=0,b=0,l=left.pts, unit = "pt"),
           panel.border=element_blank(),
           plot.title = element_text(hjust = 0.5)) +
     xlab("") + 
@@ -253,21 +256,25 @@ for(sim in 1:10){
           axis.ticks.y=element_blank(),
           panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
-          plot.margin = margin(t=0,r=0,b=0,l=0, unit = "pt"),
+          plot.margin = margin(t=top.pts,r=0,b=0,l=0, unit = "pt"),
           panel.border=element_blank())
   
-  # Save plots as pdf
-  pdf(file = paste0("./figures_and_tables/figureA5_",sim,".pdf"),
-  width=4,height=4)
-  print(plot.mcmc.smc + 
+  # # Save plots as pdf
+  # pdf(file = paste0("./figures_and_tables/figureA5_",sim,".pdf"),
+  # width=4,height=4)
+  plot.list[[sim]] <- plot.mcmc.smc + 
     plot.filler + 
     plot.groups + 
     plot.vi.smc +
-    plot_layout(ncol=2,widths=c(7,1),heights=c(1,7)))
-  dev.off()
+    plot_layout(ncol=2,widths=c(7,1),heights=c(1,7))
+  # dev.off()
   
   print(sim)
 }
+
+pdf(file = paste0("./figures_and_tables/figureA5.pdf"),width=20,height=8)
+wrap_plots(plot.list,ncol=5,widths=rep(1,5),heights=rep(1,2))
+dev.off()
 
 ### compute variance estimates ###
 nonzero_var <- function(x){

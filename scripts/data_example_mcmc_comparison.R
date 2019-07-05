@@ -21,8 +21,6 @@ require(BoomSpikeSlab)
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
 # datArgs <- c(1,3,10,1,1) # Alternatively, enter arguments directly in R
-runagain <- c(1,9) # Delete later; rerunning some chains that didn't work
-datArgs[1] <- runagain[datArgs[1]+1]
 
 nchains <- datArgs[2] # how may parallel chains to run
 sim <- datArgs[1] %/% nchains + 1 # which simulated dataset (integer from 1 to 10)

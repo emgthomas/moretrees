@@ -14,9 +14,10 @@ if(!dir.exists("./figures_and_tables")) dir.create("./figures_and_tables")
 require(igraph)
 require(mclust)
 require(ggplot2)
-require(gridExtra)
+require(patchwork)
 require(data.table)
 require(reshape2)
+require(Matrix)
 require(glue)
 require(RColorBrewer)
 require(collapsibleTree)
@@ -115,6 +116,8 @@ perm.smc <- cbind(rep(1,nrow(perm.smc)),perm.smc)
 
 ##### OR for original groups vs permuted groups, showing number of outcomes
 plot.list <- list()
+top.pts <- 10
+left.pts <- 10
 for(i in 0:10){
   # groups plot
   dat.i <- dat.df[dat.df$perm==i,]
@@ -130,10 +133,9 @@ for(i in 0:10){
     geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
     theme_bw() +
     theme(legend.position="none",
-          plot.margin = margin(t=10,r=0,b=10,l=10, unit = "pt"),
+          plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
           plot.title = element_text(hjust = 0.5),
           axis.text=element_text(size=7)) +
-    #facet_wrap(.~perm,nrow=1) +
     ggtitle(plot_title) +
     xlab("Permuted OR") +
     ylab("Original OR")
@@ -154,25 +156,32 @@ for(i in 0:10){
           axis.ticks.y=element_blank(),
           panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
-          plot.margin = margin(t=11,r=0,b=7,l=-3, unit = "pt"),
+          plot.margin = margin(t=top.pts,r=0,b=0, unit = "pt"),
           plot.title = element_text(hjust = 0.5),
           panel.border=element_blank()) +
     ggtitle(bquote(kappa)) +
-    # facet_wrap(.~perm,nrow=1,
-    #            labeller=label_bquote(kappa)) +
     xlab("") + 
     scale_fill_gradientn(colours=brewer.pal(max(as.numeric(dat.df$group.orig)),
                                               name="YlGnBu"),
                          limits=c(0,1)) +
-    # scale_fill_gradient(limits=c(0,1),low="red",high="blue") +
     scale_x_continuous(breaks=0.5,labels="")
 
   # Save plots as pdf
-  pdf(file = paste0("./figures_and_tables/figureA4_",i,".pdf"),
-      width=3.2,height=3)
-  print(grid.arrange(plot.groups,plot.smc,ncol=2,widths=c(4,0.4)))
-  dev.off()
+  if(i > 0){
+    plot.list[[i]] <- plot.groups + plot.smc +
+      plot_layout(ncol=2,widths=c(7,1))
+  } else {
+    pdf(file = paste0("./figures_and_tables/figureA4_",i,".pdf"),
+        width=4,height=3.5)
+    print(plot.groups + plot.smc +
+            plot_layout(ncol=2,widths=c(7,1)))
+    dev.off()
+  }
 }
+
+pdf(file = paste0("./figures_and_tables/figureA4.pdf"),width=18,height=7)
+wrap_plots(plot.list,ncol=5,widths=rep(1,5),heights=rep(1,2))
+dev.off()
 
 # ##### OR for original groups vs permuted groups, showing number of cases
 # for(i in 0:10){
