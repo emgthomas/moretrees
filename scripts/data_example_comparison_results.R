@@ -17,6 +17,12 @@ require(Matrix)
 require(BoomSpikeSlab)
 require(reshape2)
 require(ggplot2)
+require(glue)
+require(RColorBrewer)
+require(patchwork)
+# # To install the patchwork package:
+# library(devtools)
+# install_github("thomasp85/patchwork")
 source("scripts/processing_functions.R")
 
 ### Load ICD9 tree
@@ -83,9 +89,13 @@ v <- 1
 
 ### compute beta estimates ###
 beta_est_mcmc <- data.frame(matrix(nrow=pL,ncol=nsims))
-names(beta_est_mcmc) <- names(A.conv)
+names(beta_est_mcmc) <- names(A)[(p-pL+1):p]
+group_est_mcmc <- data.frame(matrix(nrow=pL,ncol=nsims))
+names(group_est_mcmc) <- names(A)[(p-pL+1):p]
 beta_est_vi <- data.frame(beta=matrix(nrow=pL,ncol=nsims))
-names(beta_est_vi) <- names(A.conv)
+names(beta_est_vi) <- names(A)[(p-pL+1):p]
+group_est_vi <- data.frame(beta=matrix(nrow=pL,ncol=nsims))
+names(group_est_vi) <- names(A)[(p-pL+1):p]
 cutoff <- 0.5
 p_s <- matrix(nrow=p,ncol=nsims)
 for(sim in 1:nsims){
@@ -96,12 +106,167 @@ for(sim in 1:nsims){
   sgamma[!nonzero] <- 0
   beta_est <- as.numeric(sgamma %*% t(A.conv))
   beta_est_mcmc[,sim] <- beta_est
-  
+  group_est_mcmc[,sim] <- as.integer(factor(beta_est,
+                                          levels=sort(unique(beta_est))))
   ## VI MOReTreeS estimate
   res_VI <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
   load(res_VI)
   beta_est_vi[,sim] <- out_vi$moretrees_est
+  group_est_vi[,sim] <- as.integer(factor(out_vi$moretrees_est,
+                                          levels=sort(unique(out_vi$moretrees_est))))
   p_s_vi <- 1/(1+exp(-out_vi$VI_params$u_s))
+}
+
+########## Compare VI and MCMC estimates of beta ##############
+
+### Load data example results
+load("./data_example_results/data_example_full.Rdata")
+
+### Sample size
+n <- 1E6 # Size of simulated dataset
+n_data <- sum(Y) # Size of original dataset
+m <- sqrt(n_data/n) # Scaling factor for coefficients
+
+### Beta estimates used for simultaions
+beta_indiv_est <- indiv.beta.ci.calc(final_ss$VI_params,ancestors,pL,p)
+# Scale up the beta estimates to account for smaller sample size
+beta_sim <- beta_indiv_est$beta_indiv*m
+
+####### Prepare data for plotting ########
+vi.mcmc.smc <- matrix(nrow=0,ncol=3)
+mcmc.vi.smc <- matrix(nrow=0,ncol=3)
+
+vi.dat <- data.frame(est=beta_est_vi,group=group_est_vi,method="VI")
+mcmc.dat <- data.frame(est=beta_est_mcmc,group=group_est_mcmc,method="MCMC")
+dat <- rbind(vi.dat,mcmc.dat)
+dat <- data.frame(est_vi=beta_est_vi,est_mcmc=beta_est_mcmc,
+                  group_vi=group_est_vi,group_mcmc=group_est_mcmc)
+dat.df <- reshape(dat,direction="long",
+                  varying=list(1:10,11:20,21:30,31:40))
+names(dat.df)[1:6] <- c("sim","est_vi","est_mcmc","group_vi","group_mcmc","node")
+dat.df$est_true <- beta_sim
+change.group <- apply(X=cbind(as.character(dat.df$sim-1),
+                              as.character(dat.df$group_vi),
+                              as.character(dat.df$group_mcmc)),
+                      MARGIN=1,FUN=glue_collapse,sep="")
+dat.df$change.group <- change.group
+n.outcomes <- tapply(change.group,as.factor(change.group),length)
+# n.cases <- tapply(dat.df$Y,as.factor(change.group),sum)
+n.df <- data.frame(change.group=names(n.outcomes),
+                   n.outcomes=n.outcomes)
+                   #, n.cases=n.cases)
+dat.df <- merge(dat.df,n.df,by="change.group",all.x=T,all.y=F)
+dat.df$est_vi <- exp(dat.df$est_vi)
+dat.df$est_mcmc <- exp(dat.df$est_mcmc)
+dat.df$est_vi_lab <- format(dat.df$est_vi,digits=4)
+dat.df$est_mcmc_lab <- format(dat.df$est_mcmc,digits=4)
+dat.df$est_true_lab <- format(dat.df$est_true,digits=4)
+
+##### Plotting ORs estimated by MCMC vs those estimated by VI
+for(sim in 1:10){
+  # groups plot
+  dat.sim <- dat.df[dat.df$sim==sim,]
+  dat.sim$est_vi_lab <- factor(dat.sim$est_vi_lab,
+                           levels=sort(unique(dat.sim$est_vi_lab),decreasing = F))
+  dat.sim$est_mcmc_lab <- factor(dat.sim$est_mcmc_lab,
+                           levels=sort(unique(dat.sim$est_mcmc_lab),decreasing = F))
+  plot.groups <- ggplot(dat.sim,
+                        aes(x=est_mcmc_lab,y=est_vi_lab,label=n.outcomes)) + 
+    geom_point(color="white",size=6) +
+    geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+    theme_bw() +
+    theme(legend.position="none",
+          plot.margin = margin(t=-15,r=0,b=0,l=0, unit = "pt"),
+          # plot.margin = margin(t=0,r=0,b=10,l=10, unit = "pt"),
+          plot.title = element_blank(),
+          axis.text=element_text(size=7)) +
+    xlab("MCMC Estimates") +
+    ylab("VI Estimates")
+  
+  # simple matching coefficient plot
+  ### VI
+  smc.vi.df <- data.frame(OR=sort(unique(dat.sim$est_vi_lab)),
+                          smc=smc(dat.sim$group_vi,dat.sim$group_mcmc))
+  smc.vi.df$label <- format(smc.vi.df$smc,digits=1)
+  smc.vi.df$label[smc.vi.df$label=="1"] <- rep("1.00",nrow(smc.vi.df))
+  plot.vi.smc <- ggplot(smc.vi.df,aes(y=OR,x=1)) + 
+    geom_tile(aes(fill=smc),colour="black",size=0.1) +
+    geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+    theme_bw() +
+    theme(legend.position="none",
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          plot.margin = margin(t=-15,r=0,b=0,l=0, unit = "pt"),
+          # plot.margin = margin(t=-3,r=0,b=5,l=-3, unit = "pt"),
+          plot.title = element_blank(),
+          panel.border=element_blank()) +
+    xlab("") + 
+    scale_fill_gradientn(colours=brewer.pal(7,name="YlGnBu"),
+                         limits=c(0,1)) +
+    scale_x_continuous(breaks=0.5,labels="")
+  
+  ### mcmc
+  smc.mcmc.df <- data.frame(OR=sort(unique(dat.sim$est_mcmc_lab)),
+                          smc=smc(dat.sim$group_mcmc,dat.sim$group_vi))
+  smc.mcmc.df$label <- format(smc.mcmc.df$smc,digits=1)
+  smc.mcmc.df$label[smc.mcmc.df$label=="1"] <- rep("1.00",nrow(smc.mcmc.df))
+  plot.mcmc.smc <- ggplot(smc.mcmc.df,aes(y=1,x=OR)) + 
+    geom_tile(aes(fill=smc),colour="black",size=0.1) +
+    geom_label(aes(y=1,x=OR,label=label),
+               size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+    theme_bw() +
+    theme(legend.position="none",
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          # plot.margin = margin(t=0,r=-4,b=-16,l=52, unit = "pt"),
+          plot.margin = margin(t=0,r=0,b=0,l=0, unit = "pt"),
+          panel.border=element_blank(),
+          plot.title = element_text(hjust = 0.5)) +
+    xlab("") + 
+    ylab("") +
+    scale_fill_gradientn(colours=brewer.pal(7,
+                                            name="YlGnBu"),
+                         limits=c(0,1)) +
+    ggtitle(paste0("Simulation ",sim))
+  
+  # filler plot for corner
+  dat.fill <- data.frame(x=1,y=1,label="kappa")
+  plot.filler <- ggplot(dat.fill,aes(x=x,y=y,label=label)) +
+    theme_bw() +
+    geom_text(parse = TRUE,size=6)+
+    theme(legend.position="none",
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+          axis.title.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          plot.margin = margin(t=0,r=0,b=0,l=0, unit = "pt"),
+          panel.border=element_blank())
+  
+  # Save plots as pdf
+  pdf(file = paste0("./figures_and_tables/figureA5_",sim,".pdf"),
+  width=4,height=4)
+  print(plot.mcmc.smc + 
+    plot.filler + 
+    plot.groups + 
+    plot.vi.smc +
+    plot_layout(ncol=2,widths=c(7,1),heights=c(1,7)))
+  dev.off()
+  
+  print(sim)
 }
 
 ### compute variance estimates ###

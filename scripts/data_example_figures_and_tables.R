@@ -99,7 +99,7 @@ dat.df$group <- as.factor(dat.df$group)
 change.group <- apply(X=cbind(as.character(dat.df$perm),
                               as.character(dat.df$group.orig),
                               as.character(dat.df$group)),
-                      MARGIN=1,FUN=collapse,sep="")
+                      MARGIN=1,FUN=glue_collapse,sep="")
 dat.df$change.group <- change.group
 n.outcomes <- tapply(change.group,as.factor(change.group),length)
 n.cases <- tapply(dat.df$Y,as.factor(change.group),sum)
@@ -319,7 +319,7 @@ digits <- 3 # number of digits to display
   sibs.leaves <- vertex.attributes(trPrune,leaves)$parent
   beta.leaves <- vertex.attributes(trPrune,leaves)$beta_grouped
   sibscols <- cbind(as.character(sibs.leaves),as.character(beta.leaves))
-  groupings <- as.numeric(as.factor(apply(sibscols,1,collapse,sep=",")))
+  groupings <- as.numeric(as.factor(apply(sibscols,1,glue_collapse,sep=",")))
 }
 # groupings is a vector that uniquely identifies groups of leaf siblings with the same beta value.
 # These need to be merged.
