@@ -21,7 +21,3 @@ The following object is masked from ‘package:stats’:
 
     rWishart
 
-Loading required package: doParallel
-Loading required package: foreach
-Loading required package: iterators
-Loading required package: parallel

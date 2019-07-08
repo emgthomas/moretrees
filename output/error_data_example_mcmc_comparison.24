@@ -21,7 +21,7 @@ The following object is masked from ‘package:stats’:
 
     rWishart
 
-Loading required package: doParallel
-Loading required package: foreach
-Loading required package: iterators
-Loading required package: parallel
+Error in apply(sapply(strsplit(memstuff, ":"), as.numeric), 1, diff) : 
+  dim(X) must have a positive length
+Calls: print -> summaryRprof -> pmax -> apply
+Execution halted
