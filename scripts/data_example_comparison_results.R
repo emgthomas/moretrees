@@ -20,6 +20,7 @@ require(ggplot2)
 require(glue)
 require(RColorBrewer)
 require(patchwork)
+require(icd)
 # # To install the patchwork package:
 # library(devtools)
 # install_github("thomasp85/patchwork")
@@ -70,20 +71,34 @@ for(sim in 1:nsims){
 
 ############################### Convergence diagnostics ###############################
 
-sim <- 4
-u <- c("44100","44101","44102","44103")
-mcmc_trace(beta_mcmc[[sim]],par=u)
-mcmc_pairs(beta_mcmc[[sim]],par=u)
-# u <- c(200,201)
-# mcmc_trace(beta_mcmc[[sim]],par=names(beta_mcmc[[sim]])[u])
-# mcmc_pairs(beta_mcmc[[sim]],par=names(beta_mcmc[[sim]])[u])
-
-v <- c("44100","44101","44102","44103")
-mcmc_trace(gamma_mcmc[[sim]],par=v) 
-mcmc_pairs(gamma_mcmc[[sim]],par=v)
-v <- 1
-# mcmc_trace(gamma_mcmc[[sim]],par=names(gamma_mcmc[[sim]])[v]) 
-# mcmc_pairs(gamma_mcmc[[sim]],par=names(gamma_mcmc[[sim]])[v])
+#### Trace plots
+for(sim in 2:nsims){
+  plots.list <- list()
+  codes <- names(beta_mcmc[[sim]])[1:pL]
+  for(u in 1:pL){
+    outcome <- codes[u]
+    plots.list[[u]] <- mcmc_trace(beta_mcmc[[sim]],
+                                  par=outcome,
+                                  size=0.2) + 
+      theme_minimal() +
+      theme(legend.position="none",
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            panel.grid = element_blank(),
+            plot.title=element_text(hjust=0.5,size=10)) +
+      ggtitle(as.character(icd_short_to_decimal(outcome)))
+  }
+  # reordering
+  plots.list <- plots.list[order(codes)]
+  # pdf(file=paste0("./figures_and_tables/figureA6_",sim,".pdf"),width=16,height=27)
+  png(file=paste0("./figures_and_tables/figureA6_",sim,".png"),width=16,height=27,units="in",
+      res=500)
+  print(wrap_plots(plots.list,ncol=16))
+  dev.off()
+}
 
 ############################### Mean and variance comparison ###############################
 
@@ -259,16 +274,13 @@ for(sim in 1:10){
           plot.margin = margin(t=top.pts,r=0,b=0,l=0, unit = "pt"),
           panel.border=element_blank())
   
-  # # Save plots as pdf
-  # pdf(file = paste0("./figures_and_tables/figureA5_",sim,".pdf"),
-  # width=4,height=4)
+  # Save plots as pdf
   plot.list[[sim]] <- plot.mcmc.smc + 
     plot.filler + 
     plot.groups + 
     plot.vi.smc +
     plot_layout(ncol=2,widths=c(7,1),heights=c(1,7))
-  # dev.off()
-  
+
   print(sim)
 }
 
@@ -321,11 +333,15 @@ axis.max <- max(as.matrix(var_dat[,c("VI","MCMC")]))
 line.x <- c(axis.min,axis.max)
 var_plot <- ggplot(var_dat,aes(x=VI,y=MCMC,col=SmallerVariance)) + 
   geom_abline(intercept=0,slope=1) +
-  geom_point(alpha=0.8) +
+  geom_point(alpha=0.8,shape=1) +
   facet_wrap(.~sim,ncol=5) +
-  scale_x_log10(lim=c(axis.min,axis.max)) + 
-  scale_y_log10(lim=c(axis.min,axis.max)) +
-  theme_bw()
+  scale_x_log10(lim=c(axis.min,axis.max),breaks=c(1E-6,1)) +
+  scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-6,1)) +
+  theme_minimal()
+
+pdf(file="./figures_and_tables/figureA7.pdf",width=10,height=4)
+var_plot
+dev.off()
 
 ### Plot variance for non-zero components
 var_nonzero_dat <- as.data.frame(var_nonzero_mat)
@@ -338,10 +354,23 @@ axis.max <- max(as.matrix(var_nonzero_dat[,c("VI","MCMC")]))
 line.x <- c(axis.min,axis.max)
 var_nonzero_plot <- ggplot(var_nonzero_dat,aes(x=VI,y=MCMC,col=SmallerVariance)) + 
   geom_abline(intercept=0,slope=1) +
-  geom_point(alpha=0.8) +
+  geom_point(alpha=1,shape=1,size=3) +
   facet_wrap(.~sim,ncol=5) +
-  scale_x_log10(lim=c(axis.min,axis.max)) + 
-  scale_y_log10(lim=c(axis.min,axis.max)) +
-  theme_bw()
+  scale_x_log10(lim=c(axis.min,axis.max),breaks=c(1E-7,1E-5)) + 
+  scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-7,1E-5)) +
+  theme_minimal()
+
+pdf(file="./figures_and_tables/figureA8.pdf",width=10,height=4)
+var_nonzero_plot
+dev.off()
+
+### Average variance ratio VI:MCMC across sims for nonzero components
+var_nonzero_dat$ratio <- var_nonzero_dat$VI/var_nonzero_dat$MCMC
+ratio_sims <- tapply(var_nonzero_dat$ratio,
+                     var_nonzero_dat$sim,
+                     mean)
+cat(paste0("\n\nOn average, VI estimate of variance for nonzero gammas was ",
+           format(100*(1-mean(ratio_sims)),digits=3),
+           "% lower than MCMC estimate"))
 
 
