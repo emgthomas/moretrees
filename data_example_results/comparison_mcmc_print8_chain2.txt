@@ -1,190 +1,190 @@
-=-=-=-=-= Iteration 0 Mon Jul  1 19:17:32 2019 =-=-=-=-=
-=-=-=-=-= Iteration 10 Mon Jul  1 19:20:49 2019 =-=-=-=-=
-=-=-=-=-= Iteration 20 Mon Jul  1 19:28:14 2019 =-=-=-=-=
-=-=-=-=-= Iteration 30 Mon Jul  1 19:33:56 2019 =-=-=-=-=
-=-=-=-=-= Iteration 40 Mon Jul  1 19:41:38 2019 =-=-=-=-=
-=-=-=-=-= Iteration 50 Mon Jul  1 19:51:51 2019 =-=-=-=-=
-=-=-=-=-= Iteration 60 Mon Jul  1 19:55:57 2019 =-=-=-=-=
-=-=-=-=-= Iteration 70 Mon Jul  1 20:04:10 2019 =-=-=-=-=
-=-=-=-=-= Iteration 80 Mon Jul  1 20:09:48 2019 =-=-=-=-=
-=-=-=-=-= Iteration 90 Mon Jul  1 20:15:05 2019 =-=-=-=-=
-=-=-=-=-= Iteration 100 Mon Jul  1 20:23:41 2019 =-=-=-=-=
-=-=-=-=-= Iteration 110 Mon Jul  1 20:29:06 2019 =-=-=-=-=
-=-=-=-=-= Iteration 120 Mon Jul  1 20:37:42 2019 =-=-=-=-=
-=-=-=-=-= Iteration 130 Mon Jul  1 20:41:04 2019 =-=-=-=-=
-=-=-=-=-= Iteration 140 Mon Jul  1 20:47:01 2019 =-=-=-=-=
-=-=-=-=-= Iteration 150 Mon Jul  1 20:52:49 2019 =-=-=-=-=
-=-=-=-=-= Iteration 160 Mon Jul  1 20:57:12 2019 =-=-=-=-=
-=-=-=-=-= Iteration 170 Mon Jul  1 21:02:54 2019 =-=-=-=-=
-=-=-=-=-= Iteration 180 Mon Jul  1 21:07:15 2019 =-=-=-=-=
-=-=-=-=-= Iteration 190 Mon Jul  1 21:15:37 2019 =-=-=-=-=
-=-=-=-=-= Iteration 200 Mon Jul  1 21:22:41 2019 =-=-=-=-=
-=-=-=-=-= Iteration 210 Mon Jul  1 21:27:18 2019 =-=-=-=-=
-=-=-=-=-= Iteration 220 Mon Jul  1 21:32:00 2019 =-=-=-=-=
-=-=-=-=-= Iteration 230 Mon Jul  1 21:38:11 2019 =-=-=-=-=
-=-=-=-=-= Iteration 240 Mon Jul  1 21:45:25 2019 =-=-=-=-=
-=-=-=-=-= Iteration 250 Mon Jul  1 21:52:56 2019 =-=-=-=-=
-=-=-=-=-= Iteration 260 Mon Jul  1 21:58:48 2019 =-=-=-=-=
-=-=-=-=-= Iteration 270 Mon Jul  1 22:02:03 2019 =-=-=-=-=
-=-=-=-=-= Iteration 280 Mon Jul  1 22:07:45 2019 =-=-=-=-=
-=-=-=-=-= Iteration 290 Mon Jul  1 22:10:16 2019 =-=-=-=-=
-=-=-=-=-= Iteration 300 Mon Jul  1 22:20:16 2019 =-=-=-=-=
-=-=-=-=-= Iteration 310 Mon Jul  1 22:27:11 2019 =-=-=-=-=
-=-=-=-=-= Iteration 320 Mon Jul  1 22:30:19 2019 =-=-=-=-=
-=-=-=-=-= Iteration 330 Mon Jul  1 22:35:55 2019 =-=-=-=-=
-=-=-=-=-= Iteration 340 Mon Jul  1 22:41:26 2019 =-=-=-=-=
-=-=-=-=-= Iteration 350 Mon Jul  1 22:48:17 2019 =-=-=-=-=
-=-=-=-=-= Iteration 360 Mon Jul  1 22:54:04 2019 =-=-=-=-=
-=-=-=-=-= Iteration 370 Mon Jul  1 22:57:21 2019 =-=-=-=-=
-=-=-=-=-= Iteration 380 Mon Jul  1 23:01:46 2019 =-=-=-=-=
-=-=-=-=-= Iteration 390 Mon Jul  1 23:07:13 2019 =-=-=-=-=
-=-=-=-=-= Iteration 400 Mon Jul  1 23:14:48 2019 =-=-=-=-=
-=-=-=-=-= Iteration 410 Mon Jul  1 23:20:39 2019 =-=-=-=-=
-=-=-=-=-= Iteration 420 Mon Jul  1 23:30:34 2019 =-=-=-=-=
-=-=-=-=-= Iteration 430 Mon Jul  1 23:37:38 2019 =-=-=-=-=
-=-=-=-=-= Iteration 440 Mon Jul  1 23:41:28 2019 =-=-=-=-=
-=-=-=-=-= Iteration 450 Mon Jul  1 23:49:44 2019 =-=-=-=-=
-=-=-=-=-= Iteration 460 Mon Jul  1 23:56:49 2019 =-=-=-=-=
-=-=-=-=-= Iteration 470 Tue Jul  2 00:04:25 2019 =-=-=-=-=
-=-=-=-=-= Iteration 480 Tue Jul  2 00:14:22 2019 =-=-=-=-=
-=-=-=-=-= Iteration 490 Tue Jul  2 00:17:12 2019 =-=-=-=-=
-=-=-=-=-= Iteration 500 Tue Jul  2 00:26:06 2019 =-=-=-=-=
-=-=-=-=-= Iteration 510 Tue Jul  2 00:29:50 2019 =-=-=-=-=
-=-=-=-=-= Iteration 520 Tue Jul  2 00:37:28 2019 =-=-=-=-=
-=-=-=-=-= Iteration 530 Tue Jul  2 00:43:31 2019 =-=-=-=-=
-=-=-=-=-= Iteration 540 Tue Jul  2 00:51:00 2019 =-=-=-=-=
-=-=-=-=-= Iteration 550 Tue Jul  2 00:59:25 2019 =-=-=-=-=
-=-=-=-=-= Iteration 560 Tue Jul  2 01:03:23 2019 =-=-=-=-=
-=-=-=-=-= Iteration 570 Tue Jul  2 01:09:06 2019 =-=-=-=-=
-=-=-=-=-= Iteration 580 Tue Jul  2 01:16:13 2019 =-=-=-=-=
-=-=-=-=-= Iteration 590 Tue Jul  2 01:27:33 2019 =-=-=-=-=
-=-=-=-=-= Iteration 600 Tue Jul  2 01:35:57 2019 =-=-=-=-=
-=-=-=-=-= Iteration 610 Tue Jul  2 01:40:18 2019 =-=-=-=-=
-=-=-=-=-= Iteration 620 Tue Jul  2 01:47:29 2019 =-=-=-=-=
-=-=-=-=-= Iteration 630 Tue Jul  2 01:56:13 2019 =-=-=-=-=
-=-=-=-=-= Iteration 640 Tue Jul  2 02:02:21 2019 =-=-=-=-=
-=-=-=-=-= Iteration 650 Tue Jul  2 02:08:32 2019 =-=-=-=-=
-=-=-=-=-= Iteration 660 Tue Jul  2 02:14:59 2019 =-=-=-=-=
-=-=-=-=-= Iteration 670 Tue Jul  2 02:22:49 2019 =-=-=-=-=
-=-=-=-=-= Iteration 680 Tue Jul  2 02:28:51 2019 =-=-=-=-=
-=-=-=-=-= Iteration 690 Tue Jul  2 02:36:23 2019 =-=-=-=-=
-=-=-=-=-= Iteration 700 Tue Jul  2 02:40:34 2019 =-=-=-=-=
-=-=-=-=-= Iteration 710 Tue Jul  2 02:48:52 2019 =-=-=-=-=
-=-=-=-=-= Iteration 720 Tue Jul  2 02:53:04 2019 =-=-=-=-=
-=-=-=-=-= Iteration 730 Tue Jul  2 03:00:59 2019 =-=-=-=-=
-=-=-=-=-= Iteration 740 Tue Jul  2 03:01:56 2019 =-=-=-=-=
-=-=-=-=-= Iteration 750 Tue Jul  2 03:07:30 2019 =-=-=-=-=
-=-=-=-=-= Iteration 760 Tue Jul  2 03:18:36 2019 =-=-=-=-=
-=-=-=-=-= Iteration 770 Tue Jul  2 03:25:26 2019 =-=-=-=-=
-=-=-=-=-= Iteration 780 Tue Jul  2 03:32:20 2019 =-=-=-=-=
-=-=-=-=-= Iteration 790 Tue Jul  2 03:37:57 2019 =-=-=-=-=
-=-=-=-=-= Iteration 800 Tue Jul  2 03:47:42 2019 =-=-=-=-=
-=-=-=-=-= Iteration 810 Tue Jul  2 03:54:24 2019 =-=-=-=-=
-=-=-=-=-= Iteration 820 Tue Jul  2 04:00:06 2019 =-=-=-=-=
-=-=-=-=-= Iteration 830 Tue Jul  2 04:09:35 2019 =-=-=-=-=
-=-=-=-=-= Iteration 840 Tue Jul  2 04:14:56 2019 =-=-=-=-=
-=-=-=-=-= Iteration 850 Tue Jul  2 04:24:08 2019 =-=-=-=-=
-=-=-=-=-= Iteration 860 Tue Jul  2 04:26:36 2019 =-=-=-=-=
-=-=-=-=-= Iteration 870 Tue Jul  2 04:30:24 2019 =-=-=-=-=
-=-=-=-=-= Iteration 880 Tue Jul  2 04:35:57 2019 =-=-=-=-=
-=-=-=-=-= Iteration 890 Tue Jul  2 04:41:20 2019 =-=-=-=-=
-=-=-=-=-= Iteration 900 Tue Jul  2 04:48:03 2019 =-=-=-=-=
-=-=-=-=-= Iteration 910 Tue Jul  2 04:55:01 2019 =-=-=-=-=
-=-=-=-=-= Iteration 920 Tue Jul  2 05:05:39 2019 =-=-=-=-=
-=-=-=-=-= Iteration 930 Tue Jul  2 05:12:31 2019 =-=-=-=-=
-=-=-=-=-= Iteration 940 Tue Jul  2 05:15:37 2019 =-=-=-=-=
-=-=-=-=-= Iteration 950 Tue Jul  2 05:22:33 2019 =-=-=-=-=
-=-=-=-=-= Iteration 960 Tue Jul  2 05:29:19 2019 =-=-=-=-=
-=-=-=-=-= Iteration 970 Tue Jul  2 05:33:18 2019 =-=-=-=-=
-=-=-=-=-= Iteration 980 Tue Jul  2 05:38:52 2019 =-=-=-=-=
-=-=-=-=-= Iteration 990 Tue Jul  2 05:44:30 2019 =-=-=-=-=
+=-=-=-=-= Iteration 0 Sun Jul  7 05:06:43 2019 =-=-=-=-=
+=-=-=-=-= Iteration 10 Sun Jul  7 05:10:54 2019 =-=-=-=-=
+=-=-=-=-= Iteration 20 Sun Jul  7 05:13:50 2019 =-=-=-=-=
+=-=-=-=-= Iteration 30 Sun Jul  7 05:19:24 2019 =-=-=-=-=
+=-=-=-=-= Iteration 40 Sun Jul  7 05:27:22 2019 =-=-=-=-=
+=-=-=-=-= Iteration 50 Sun Jul  7 05:34:42 2019 =-=-=-=-=
+=-=-=-=-= Iteration 60 Sun Jul  7 05:39:04 2019 =-=-=-=-=
+=-=-=-=-= Iteration 70 Sun Jul  7 05:46:00 2019 =-=-=-=-=
+=-=-=-=-= Iteration 80 Sun Jul  7 05:55:39 2019 =-=-=-=-=
+=-=-=-=-= Iteration 90 Sun Jul  7 05:59:54 2019 =-=-=-=-=
+=-=-=-=-= Iteration 100 Sun Jul  7 06:05:45 2019 =-=-=-=-=
+=-=-=-=-= Iteration 110 Sun Jul  7 06:15:35 2019 =-=-=-=-=
+=-=-=-=-= Iteration 120 Sun Jul  7 06:23:47 2019 =-=-=-=-=
+=-=-=-=-= Iteration 130 Sun Jul  7 06:32:04 2019 =-=-=-=-=
+=-=-=-=-= Iteration 140 Sun Jul  7 06:37:58 2019 =-=-=-=-=
+=-=-=-=-= Iteration 150 Sun Jul  7 06:43:51 2019 =-=-=-=-=
+=-=-=-=-= Iteration 160 Sun Jul  7 06:49:30 2019 =-=-=-=-=
+=-=-=-=-= Iteration 170 Sun Jul  7 06:56:58 2019 =-=-=-=-=
+=-=-=-=-= Iteration 180 Sun Jul  7 07:01:13 2019 =-=-=-=-=
+=-=-=-=-= Iteration 190 Sun Jul  7 07:06:59 2019 =-=-=-=-=
+=-=-=-=-= Iteration 200 Sun Jul  7 07:09:53 2019 =-=-=-=-=
+=-=-=-=-= Iteration 210 Sun Jul  7 07:14:06 2019 =-=-=-=-=
+=-=-=-=-= Iteration 220 Sun Jul  7 07:16:35 2019 =-=-=-=-=
+=-=-=-=-= Iteration 230 Sun Jul  7 07:22:27 2019 =-=-=-=-=
+=-=-=-=-= Iteration 240 Sun Jul  7 07:30:49 2019 =-=-=-=-=
+=-=-=-=-= Iteration 250 Sun Jul  7 07:35:47 2019 =-=-=-=-=
+=-=-=-=-= Iteration 260 Sun Jul  7 07:38:48 2019 =-=-=-=-=
+=-=-=-=-= Iteration 270 Sun Jul  7 07:44:27 2019 =-=-=-=-=
+=-=-=-=-= Iteration 280 Sun Jul  7 07:47:36 2019 =-=-=-=-=
+=-=-=-=-= Iteration 290 Sun Jul  7 07:53:33 2019 =-=-=-=-=
+=-=-=-=-= Iteration 300 Sun Jul  7 07:56:51 2019 =-=-=-=-=
+=-=-=-=-= Iteration 310 Sun Jul  7 08:02:50 2019 =-=-=-=-=
+=-=-=-=-= Iteration 320 Sun Jul  7 08:08:22 2019 =-=-=-=-=
+=-=-=-=-= Iteration 330 Sun Jul  7 08:13:54 2019 =-=-=-=-=
+=-=-=-=-= Iteration 340 Sun Jul  7 08:19:47 2019 =-=-=-=-=
+=-=-=-=-= Iteration 350 Sun Jul  7 08:28:19 2019 =-=-=-=-=
+=-=-=-=-= Iteration 360 Sun Jul  7 08:34:09 2019 =-=-=-=-=
+=-=-=-=-= Iteration 370 Sun Jul  7 08:39:47 2019 =-=-=-=-=
+=-=-=-=-= Iteration 380 Sun Jul  7 08:45:18 2019 =-=-=-=-=
+=-=-=-=-= Iteration 390 Sun Jul  7 08:50:51 2019 =-=-=-=-=
+=-=-=-=-= Iteration 400 Sun Jul  7 08:55:35 2019 =-=-=-=-=
+=-=-=-=-= Iteration 410 Sun Jul  7 09:01:09 2019 =-=-=-=-=
+=-=-=-=-= Iteration 420 Sun Jul  7 09:06:02 2019 =-=-=-=-=
+=-=-=-=-= Iteration 430 Sun Jul  7 09:12:40 2019 =-=-=-=-=
+=-=-=-=-= Iteration 440 Sun Jul  7 09:15:19 2019 =-=-=-=-=
+=-=-=-=-= Iteration 450 Sun Jul  7 09:21:06 2019 =-=-=-=-=
+=-=-=-=-= Iteration 460 Sun Jul  7 09:28:22 2019 =-=-=-=-=
+=-=-=-=-= Iteration 470 Sun Jul  7 09:32:42 2019 =-=-=-=-=
+=-=-=-=-= Iteration 480 Sun Jul  7 09:40:05 2019 =-=-=-=-=
+=-=-=-=-= Iteration 490 Sun Jul  7 09:47:02 2019 =-=-=-=-=
+=-=-=-=-= Iteration 500 Sun Jul  7 09:55:25 2019 =-=-=-=-=
+=-=-=-=-= Iteration 510 Sun Jul  7 10:02:29 2019 =-=-=-=-=
+=-=-=-=-= Iteration 520 Sun Jul  7 10:09:20 2019 =-=-=-=-=
+=-=-=-=-= Iteration 530 Sun Jul  7 10:16:25 2019 =-=-=-=-=
+=-=-=-=-= Iteration 540 Sun Jul  7 10:20:35 2019 =-=-=-=-=
+=-=-=-=-= Iteration 550 Sun Jul  7 10:28:59 2019 =-=-=-=-=
+=-=-=-=-= Iteration 560 Sun Jul  7 10:33:44 2019 =-=-=-=-=
+=-=-=-=-= Iteration 570 Sun Jul  7 10:38:26 2019 =-=-=-=-=
+=-=-=-=-= Iteration 580 Sun Jul  7 10:39:46 2019 =-=-=-=-=
+=-=-=-=-= Iteration 590 Sun Jul  7 10:46:42 2019 =-=-=-=-=
+=-=-=-=-= Iteration 600 Sun Jul  7 10:53:58 2019 =-=-=-=-=
+=-=-=-=-= Iteration 610 Sun Jul  7 10:59:49 2019 =-=-=-=-=
+=-=-=-=-= Iteration 620 Sun Jul  7 11:08:25 2019 =-=-=-=-=
+=-=-=-=-= Iteration 630 Sun Jul  7 11:12:57 2019 =-=-=-=-=
+=-=-=-=-= Iteration 640 Sun Jul  7 11:19:57 2019 =-=-=-=-=
+=-=-=-=-= Iteration 650 Sun Jul  7 11:30:15 2019 =-=-=-=-=
+=-=-=-=-= Iteration 660 Sun Jul  7 11:36:04 2019 =-=-=-=-=
+=-=-=-=-= Iteration 670 Sun Jul  7 11:42:07 2019 =-=-=-=-=
+=-=-=-=-= Iteration 680 Sun Jul  7 11:46:01 2019 =-=-=-=-=
+=-=-=-=-= Iteration 690 Sun Jul  7 11:51:51 2019 =-=-=-=-=
+=-=-=-=-= Iteration 700 Sun Jul  7 11:59:06 2019 =-=-=-=-=
+=-=-=-=-= Iteration 710 Sun Jul  7 12:05:51 2019 =-=-=-=-=
+=-=-=-=-= Iteration 720 Sun Jul  7 12:12:53 2019 =-=-=-=-=
+=-=-=-=-= Iteration 730 Sun Jul  7 12:19:51 2019 =-=-=-=-=
+=-=-=-=-= Iteration 740 Sun Jul  7 12:23:10 2019 =-=-=-=-=
+=-=-=-=-= Iteration 750 Sun Jul  7 12:27:44 2019 =-=-=-=-=
+=-=-=-=-= Iteration 760 Sun Jul  7 12:36:27 2019 =-=-=-=-=
+=-=-=-=-= Iteration 770 Sun Jul  7 12:44:06 2019 =-=-=-=-=
+=-=-=-=-= Iteration 780 Sun Jul  7 12:46:10 2019 =-=-=-=-=
+=-=-=-=-= Iteration 790 Sun Jul  7 12:53:21 2019 =-=-=-=-=
+=-=-=-=-= Iteration 800 Sun Jul  7 12:58:15 2019 =-=-=-=-=
+=-=-=-=-= Iteration 810 Sun Jul  7 13:05:11 2019 =-=-=-=-=
+=-=-=-=-= Iteration 820 Sun Jul  7 13:12:30 2019 =-=-=-=-=
+=-=-=-=-= Iteration 830 Sun Jul  7 13:15:58 2019 =-=-=-=-=
+=-=-=-=-= Iteration 840 Sun Jul  7 13:23:25 2019 =-=-=-=-=
+=-=-=-=-= Iteration 850 Sun Jul  7 13:28:56 2019 =-=-=-=-=
+=-=-=-=-= Iteration 860 Sun Jul  7 13:37:02 2019 =-=-=-=-=
+=-=-=-=-= Iteration 870 Sun Jul  7 13:43:58 2019 =-=-=-=-=
+=-=-=-=-= Iteration 880 Sun Jul  7 13:50:59 2019 =-=-=-=-=
+=-=-=-=-= Iteration 890 Sun Jul  7 13:57:43 2019 =-=-=-=-=
+=-=-=-=-= Iteration 900 Sun Jul  7 14:04:36 2019 =-=-=-=-=
+=-=-=-=-= Iteration 910 Sun Jul  7 14:12:52 2019 =-=-=-=-=
+=-=-=-=-= Iteration 920 Sun Jul  7 14:17:13 2019 =-=-=-=-=
+=-=-=-=-= Iteration 930 Sun Jul  7 14:21:35 2019 =-=-=-=-=
+=-=-=-=-= Iteration 940 Sun Jul  7 14:30:00 2019 =-=-=-=-=
+=-=-=-=-= Iteration 950 Sun Jul  7 14:37:10 2019 =-=-=-=-=
+=-=-=-=-= Iteration 960 Sun Jul  7 14:41:26 2019 =-=-=-=-=
+=-=-=-=-= Iteration 970 Sun Jul  7 14:52:25 2019 =-=-=-=-=
+=-=-=-=-= Iteration 980 Sun Jul  7 15:00:55 2019 =-=-=-=-=
+=-=-=-=-= Iteration 990 Sun Jul  7 15:10:31 2019 =-=-=-=-=
 $by.self
                         self.time self.pct total.time total.pct mem.total
-"logit.spike.edit"       38105.52    99.96   38119.50     1e+02   32478.3
-"as.vector"                  3.10     0.01       3.10     1e-02    6359.8
-"is.na"                      2.32     0.01       2.32     1e-02    2655.5
-"[.data.frame"               2.28     0.01       2.30     1e-02    8590.0
-"na.omit"                    2.14     0.01       8.32     2e-02   17289.6
-"na.omit.data.frame"         1.56     0.00       6.18     2e-02   12974.5
-"array"                      1.48     0.00       1.48     0e+00    4362.7
-".External2"                 0.92     0.00       9.24     2e-02   21654.0
-"lazyLoadDBfetch"            0.04     0.00       0.04     0e+00       8.1
-"...elt"                     0.02     0.00       0.02     0e+00       7.7
-".External"                  0.02     0.00       0.02     0e+00      24.7
-"any"                        0.02     0.00       0.02     0e+00       8.0
-"anyDuplicated.default"      0.02     0.00       0.02     0e+00      15.6
-"exists"                     0.02     0.00       0.02     0e+00       7.6
-"makepredictcall"            0.02     0.00       0.02     0e+00       7.3
-"sys.call"                   0.02     0.00       0.02     0e+00       4.0
+"logit.spike.edit"       36728.98    99.96   36743.34     1e+02   28154.4
+"as.vector"                  3.02     0.01       3.02     1e-02    6356.0
+"is.na"                      2.36     0.01       2.36     1e-02    2739.5
+"na.omit"                    2.22     0.01       8.30     2e-02   17364.1
+"[.data.frame"               2.22     0.01       2.26     1e-02    8658.7
+"array"                      1.86     0.01       1.86     1e-02    4356.4
+"na.omit.data.frame"         1.46     0.00       6.08     2e-02   13027.9
+".External2"                 1.04     0.00       9.34     3e-02   17364.1
+"findCenvVar"                0.04     0.00       0.04     0e+00       8.3
+"[["                         0.02     0.00       0.04     0e+00      96.5
+"[[.data.frame"              0.02     0.00       0.02     0e+00       4.9
+"%in%"                       0.02     0.00       0.02     0e+00      22.4
+"all"                        0.02     0.00       0.02     0e+00       7.7
+"anyDuplicated.default"      0.02     0.00       0.02     0e+00      50.0
+"pmatch"                     0.02     0.00       0.02     0e+00      14.7
+"simpleFormals"              0.02     0.00       0.02     0e+00       7.8
 
 $by.total
                            total.time total.pct mem.total self.time self.pct
-"logit.spike.edit"           38119.50     1e+02   32478.3  38105.52    99.96
-"eval"                          12.96     3e-02   28047.9      0.00     0.00
-"model.frame.default"           12.96     3e-02   28047.9      0.00     0.00
-"model.frame"                   12.96     3e-02   28047.9      0.00     0.00
-".External2"                     9.24     2e-02   21654.0      0.92     0.00
-"na.omit"                        8.32     2e-02   17289.6      2.14     0.01
-"na.omit.data.frame"             6.18     2e-02   12974.5      1.56     0.00
-"data.frame"                     4.58     1e-02   10722.4      0.00     0.00
-"is.data.frame"                  4.58     1e-02   10722.4      0.00     0.00
-"as.vector"                      3.10     1e-02    6359.8      3.10     0.01
-"as.data.frame.matrix"           3.10     1e-02    6359.8      0.00     0.00
-"as.data.frame"                  3.10     1e-02    6359.8      0.00     0.00
-"is.na"                          2.32     1e-02    2655.5      2.32     0.01
-"[.data.frame"                   2.30     1e-02    8590.0      2.28     0.01
-"["                              2.30     1e-02    8590.0      0.00     0.00
-"array"                          1.48     0e+00    4362.7      1.48     0.00
-".local"                         1.48     0e+00    4362.7      0.00     0.00
-"as.matrix.Matrix"               1.48     0e+00    4362.7      0.00     0.00
-"as.matrix"                      1.48     0e+00    4362.7      0.00     0.00
-"as"                             1.48     0e+00    4362.7      0.00     0.00
-"asMethod"                       1.48     0e+00    4362.7      0.00     0.00
-"standardGeneric"                1.48     0e+00    4362.7      0.00     0.00
-"model.matrix.default"           0.92     0e+00    4364.4      0.00     0.00
-"model.matrix"                   0.92     0e+00    4364.4      0.00     0.00
-"doTryCatch"                     0.08     0e+00      23.5      0.00     0.00
-"tryCatch"                       0.08     0e+00      23.5      0.00     0.00
-"tryCatchList"                   0.08     0e+00      23.5      0.00     0.00
-"tryCatchOne"                    0.08     0e+00      23.5      0.00     0.00
-"cmp"                            0.06     0e+00      15.8      0.00     0.00
-"cmpCall"                        0.06     0e+00      15.8      0.00     0.00
-"cmpfun"                         0.06     0e+00      15.8      0.00     0.00
-"compiler:::tryCmpfun"           0.06     0e+00      15.8      0.00     0.00
-"genCode"                        0.06     0e+00      15.8      0.00     0.00
-"h"                              0.06     0e+00      15.8      0.00     0.00
-"tryInline"                      0.06     0e+00      15.8      0.00     0.00
-"lazyLoadDBfetch"                0.04     0e+00       8.1      0.04     0.00
-"cmpSymbolAssign"                0.04     0e+00       7.6      0.00     0.00
-"...elt"                         0.02     0e+00       7.7      0.02     0.00
-".External"                      0.02     0e+00      24.7      0.02     0.00
-"any"                            0.02     0e+00       8.0      0.02     0.00
-"anyDuplicated.default"          0.02     0e+00      15.6      0.02     0.00
-"exists"                         0.02     0e+00       7.6      0.02     0.00
-"makepredictcall"                0.02     0e+00       7.3      0.02     0.00
-"sys.call"                       0.02     0e+00       4.0      0.02     0.00
-"[[.data.frame"                  0.02     0e+00       4.0      0.00     0.00
-"[["                             0.02     0e+00       4.0      0.00     0.00
-"%in%"                           0.02     0e+00       4.0      0.00     0.00
-"anyDuplicated"                  0.02     0e+00      15.6      0.00     0.00
-"cb$putcode"                     0.02     0e+00       8.1      0.00     0.00
-"cb$putconst"                    0.02     0e+00       8.1      0.00     0.00
-"cmpCallArgs"                    0.02     0e+00       8.1      0.00     0.00
-"cmpCallSymFun"                  0.02     0e+00       8.1      0.00     0.00
-"cmpPrim2"                       0.02     0e+00       8.1      0.00     0.00
-"findCenvVar"                    0.02     0e+00       7.6      0.00     0.00
-"getInlineInfo"                  0.02     0e+00       7.6      0.00     0.00
-"inlineSimpleInternalCall"       0.02     0e+00       0.0      0.00     0.00
-"is.simpleInternal"              0.02     0e+00       0.0      0.00     0.00
+"logit.spike.edit"           36743.34     1e+02   28154.4  36728.98    99.96
+"eval"                          13.22     4e-02   28096.1      0.00     0.00
+"model.frame.default"           13.22     4e-02   28096.1      0.00     0.00
+"model.frame"                   13.22     4e-02   28096.1      0.00     0.00
+".External2"                     9.34     3e-02   17364.1      1.04     0.00
+"na.omit"                        8.30     2e-02   17364.1      2.22     0.01
+"na.omit.data.frame"             6.08     2e-02   13027.9      1.46     0.00
+"data.frame"                     4.88     1e-02   10712.4      0.00     0.00
+"is.data.frame"                  4.88     1e-02   10712.4      0.00     0.00
+"as.vector"                      3.02     1e-02    6356.0      3.02     0.01
+"as.data.frame.matrix"           3.02     1e-02    6356.0      0.00     0.00
+"as.data.frame"                  3.02     1e-02    6356.0      0.00     0.00
+"is.na"                          2.36     1e-02    2739.5      2.36     0.01
+"[.data.frame"                   2.26     1e-02    8658.7      2.22     0.01
+"["                              2.26     1e-02    8658.7      0.00     0.00
+"array"                          1.86     1e-02    4356.4      1.86     0.01
+".local"                         1.86     1e-02    4356.4      0.00     0.00
+"as.matrix.Matrix"               1.86     1e-02    4356.4      0.00     0.00
+"as.matrix"                      1.86     1e-02    4356.4      0.00     0.00
+"as"                             1.86     1e-02    4356.4      0.00     0.00
+"asMethod"                       1.86     1e-02    4356.4      0.00     0.00
+"standardGeneric"                1.86     1e-02    4356.4      0.00     0.00
+"model.matrix.default"           1.06     0e+00      22.4      0.00     0.00
+"model.matrix"                   1.06     0e+00      22.4      0.00     0.00
+"doTryCatch"                     0.08     0e+00      23.8      0.00     0.00
+"tryCatch"                       0.08     0e+00      23.8      0.00     0.00
+"tryCatchList"                   0.08     0e+00      23.8      0.00     0.00
+"tryCatchOne"                    0.08     0e+00      23.8      0.00     0.00
+"cmp"                            0.06     0e+00      16.1      0.00     0.00
+"cmpCall"                        0.06     0e+00      16.1      0.00     0.00
+"cmpfun"                         0.06     0e+00      16.1      0.00     0.00
+"compiler:::tryCmpfun"           0.06     0e+00      16.1      0.00     0.00
+"genCode"                        0.06     0e+00      16.1      0.00     0.00
+"h"                              0.06     0e+00      16.1      0.00     0.00
+"tryInline"                      0.06     0e+00      16.1      0.00     0.00
+"findCenvVar"                    0.04     0e+00       8.3      0.04     0.00
+"[["                             0.04     0e+00      96.5      0.02     0.00
+".deparseOpts"                   0.04     0e+00      37.1      0.00     0.00
+"deparse"                        0.04     0e+00      37.1      0.00     0.00
+"FUN"                            0.04     0e+00      37.1      0.00     0.00
+"paste"                          0.04     0e+00      37.1      0.00     0.00
+"vapply"                         0.04     0e+00      37.1      0.00     0.00
+"[[.data.frame"                  0.02     0e+00       4.9      0.02     0.00
+"%in%"                           0.02     0e+00      22.4      0.02     0.00
+"all"                            0.02     0e+00       7.7      0.02     0.00
+"anyDuplicated.default"          0.02     0e+00      50.0      0.02     0.00
+"pmatch"                         0.02     0e+00      14.7      0.02     0.00
+"simpleFormals"                  0.02     0e+00       7.8      0.02     0.00
+"...elt"                         0.02     0e+00       7.7      0.00     0.00
+"anyDuplicated"                  0.02     0e+00      50.0      0.00     0.00
+"cb$putconst"                    0.02     0e+00       8.3      0.00     0.00
+"cmpCallArgs"                    0.02     0e+00       8.3      0.00     0.00
+"cmpCallSymFun"                  0.02     0e+00       8.3      0.00     0.00
+"cmpSym"                         0.02     0e+00       8.3      0.00     0.00
+"cmpSymbolAssign"                0.02     0e+00       8.3      0.00     0.00
+"findVar"                        0.02     0e+00       8.3      0.00     0.00
+"getInlineInfo"                  0.02     0e+00       0.0      0.00     0.00
+"inlineSimpleInternalCall"       0.02     0e+00       7.8      0.00     0.00
+"is.simpleInternal"              0.02     0e+00       7.8      0.00     0.00
 "stopifnot"                      0.02     0e+00       7.7      0.00     0.00
-"terms.formula"                  0.02     0e+00      24.7      0.00     0.00
-"terms"                          0.02     0e+00      24.7      0.00     0.00
 "withCallingHandlers"            0.02     0e+00       7.7      0.00     0.00
 
 $sample.interval
 [1] 0.02
 
 $sampling.time
-[1] 38119.5
+[1] 36743.34
 
 [1] TRUE
