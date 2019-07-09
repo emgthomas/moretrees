@@ -173,9 +173,9 @@ n.df <- data.frame(change.group=names(n.outcomes),
 dat.df <- merge(dat.df,n.df,by="change.group",all.x=T,all.y=F)
 dat.df$est_vi <- exp(dat.df$est_vi)
 dat.df$est_mcmc <- exp(dat.df$est_mcmc)
-dat.df$est_vi_lab <- format(dat.df$est_vi,digits=4)
-dat.df$est_mcmc_lab <- format(dat.df$est_mcmc,digits=4)
-dat.df$est_true_lab <- format(dat.df$est_true,digits=4)
+dat.df$est_vi_lab <- sprintf("%.4f",dat.df$est_vi)
+dat.df$est_mcmc_lab <- sprintf("%.4f",dat.df$est_mcmc)
+dat.df$est_true_lab <- sprintf("%.4f",dat.df$est_true)
 
 ##### Plotting ORs estimated by MCMC vs those estimated by VI
 top.pts <- 20
@@ -205,8 +205,8 @@ for(sim in 1:10){
   ### VI
   smc.vi.df <- data.frame(OR=sort(unique(dat.sim$est_vi_lab)),
                           smc=smc(dat.sim$group_vi,dat.sim$group_mcmc))
-  smc.vi.df$label <- format(smc.vi.df$smc,digits=1)
-  smc.vi.df$label[smc.vi.df$label=="1"] <- rep("1.00",nrow(smc.vi.df))
+  smc.vi.df$label <- sprintf("%.3f",smc.vi.df$smc)
+  smc.vi.df$label[smc.vi.df$label=="1"] <- rep("1.000",nrow(smc.vi.df))
   plot.vi.smc <- ggplot(smc.vi.df,aes(y=OR,x=1)) + 
     geom_tile(aes(fill=smc),colour="black",size=0.1) +
     geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
@@ -231,8 +231,8 @@ for(sim in 1:10){
   ### mcmc
   smc.mcmc.df <- data.frame(OR=sort(unique(dat.sim$est_mcmc_lab)),
                           smc=smc(dat.sim$group_mcmc,dat.sim$group_vi))
-  smc.mcmc.df$label <- format(smc.mcmc.df$smc,digits=1)
-  smc.mcmc.df$label[smc.mcmc.df$label=="1"] <- rep("1.00",nrow(smc.mcmc.df))
+  smc.mcmc.df$label <- sprintf("%.3f",smc.mcmc.df$smc)
+  smc.mcmc.df$label[smc.mcmc.df$label=="1"] <- rep("1.000",nrow(smc.mcmc.df))
   plot.mcmc.smc <- ggplot(smc.mcmc.df,aes(y=1,x=OR)) + 
     geom_tile(aes(fill=smc),colour="black",size=0.1) +
     geom_label(aes(y=1,x=OR,label=label),

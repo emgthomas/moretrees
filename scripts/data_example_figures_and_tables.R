@@ -78,6 +78,8 @@ for(i in 1:(nperm)){
   #plot(beta_est,beta_est_true)
 }
 smc.mean <- rowMeans(perm.smc)
+cat("\n\nSMC for each original group, averaged across 10 permutations:\n\n")
+cbind(group=1:8,SMC=smc.mean)
 
 dat <- as.data.frame(cbind(perm.est,perm.group))
 est.names <- sapply(1:10,function(i) paste0("est.",i))
@@ -109,9 +111,9 @@ n.df <- data.frame(change.group=names(n.outcomes),
                    n.cases=n.cases)
 dat.df <- merge(dat.df,n.df,by="change.group",all.x=T,all.y=F)
 dat.df$est.group.orig <- exp(dat.df$est.orig*10)
-dat.df$est.group.orig <- as.factor(format(dat.df$est.group.orig,digits=3))
+dat.df$est.group.orig <- as.factor(sprintf("%.3f",dat.df$est.group.orig))
 dat.df$est.group <- exp(dat.df$est*10)
-dat.df$est.group <- format(dat.df$est.group,digits=3)
+dat.df$est.group <- as.factor(sprintf("%.3f",dat.df$est.group))
 perm.smc <- cbind(rep(1,nrow(perm.smc)),perm.smc)
 
 ##### OR for original groups vs permuted groups, showing number of outcomes
@@ -142,7 +144,7 @@ for(i in 0:10){
 
   # simple matching coefficient plot
   smc.df <- data.frame(OR=as.factor(unique(dat.df$est.group.orig)),smc=perm.smc[,i+1],perm="kappa")
-  smc.df$label <- format(smc.df$smc,digits=1)
+  smc.df$label <- sprintf("%.3f",smc.df$smc)
   if(i==0) smc.df$label <- rep("1.00",nrow(smc.df))
   plot.smc <- ggplot(smc.df,aes(y=OR,x=1)) + 
     geom_tile(aes(fill=smc),colour="black",size=0.1) +
@@ -179,8 +181,8 @@ for(i in 0:10){
   }
 }
 
-pdf(file = paste0("./figures_and_tables/figureA4.pdf"),width=18,height=7)
-wrap_plots(plot.list,ncol=5,widths=rep(1,5),heights=rep(1,2))
+pdf(file = paste0("./figures_and_tables/figureA4.pdf"),width=8,height=17.5)
+wrap_plots(plot.list,ncol=2,widths=rep(1,2),heights=rep(1,5))
 dev.off()
 
 # ##### OR for original groups vs permuted groups, showing number of cases
@@ -438,6 +440,7 @@ latex_groups <- character(length=max(beta_groups))
 small_table <- data.frame(group=character(max(beta_groups)),
                           codes=character(max(beta_groups)),
                           num_cases=character(max(beta_groups)),
+                          smc=character(max(beta_groups)),
                           OR_moretrees=character(max(beta_groups)),
                           OR_ml=character(max(beta_groups)),
                           stringsAsFactors = F)
@@ -463,12 +466,17 @@ for(g in 1:max(beta_groups)){
   beta_ml_frmt <- sprintf(frmt,exp(beta_ml))
   beta_ml_ciu_frmt <- sprintf(frmt,exp(ci_ml[2]))
   beta_ml_cil_frmt <- sprintf(frmt,exp(ci_ml[1]))
+  smc_frmt <- sprintf(frmt,smc.mean[g])
   if(g != 7){
     codes_g <- as.character(icd_short_to_decimal(leaves))
   } else {
     codes_g <- "All 420 remaining codes"
   }
-  small_table[g,] <- c(g,format(paste(codes_g,collapse=", "),big.mark=","),format(sum(nsamp),big.mark=","),paste0(beta_moretrees_frmt," (",beta_moretrees_cil_frmt,",",beta_moretrees_ciu_frmt,")"),paste0(beta_ml_frmt," (",beta_ml_cil_frmt,",",beta_ml_ciu_frmt,")"))
+  small_table[g,] <- c(g,format(paste(codes_g,collapse=", "),big.mark=","),
+                       format(sum(nsamp),big.mark=","),
+                       smc_frmt,
+                       paste0(beta_moretrees_frmt," (",beta_moretrees_cil_frmt,",",beta_moretrees_ciu_frmt,")"),
+                       paste0(beta_ml_frmt," (",beta_ml_cil_frmt,",",beta_ml_ciu_frmt,")"))
 }
 
 # write big table
@@ -476,9 +484,9 @@ write(paste("\\renewcommand\\arraystretch{0.6}\\begin{longtable}{p{\\textwidth}}
 
 # write small table
 row.names(small_table) <- NULL
-small_xtable <- xtable(small_table,align=c("l","c","p{6cm}","c","c","c"),digits=3,
-                       display=c("d","d","s","d","f","f"))
-names(small_xtable) <- c("Group","ICD9 codes","#Cases","OR (95%CI) MOReTreeS","OR (95% CI) Maximum Likelihood")
+small_xtable <- xtable(small_table,align=c("l","c","p{6cm}","c","c","c","c"),digits=3,
+                       display=c("d","d","s","d","d","f","f"))
+names(small_xtable) <- c("Group","ICD9 codes","#Cases","Permuted SMC","OR (95%CI) MOReTreeS","OR (95% CI) Maximum Likelihood")
 
 write(print(small_xtable,floating=FALSE,include.rownames = FALSE),file="./figures_and_tables/table1.tex")
 
