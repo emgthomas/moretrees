@@ -21,7 +21,3 @@ The following object is masked from ‘package:stats’:
 
     rWishart
 
-Error in apply(sapply(strsplit(memstuff, ":"), as.numeric), 1, diff) : 
-  dim(X) must have a positive length
-Calls: print -> summaryRprof -> pmax -> apply
-Execution halted

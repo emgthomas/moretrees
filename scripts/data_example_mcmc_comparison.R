@@ -102,8 +102,7 @@ if(exists(res)){
 
 # profiling to test speed of VI vs. MCMC
 prof <- paste0("./data_example_results/comparison_mcmc_prof",sim,"_chain",chain,".out")
-# Use append=TRUE in case we have already run some iterations
-Rprof(file=prof,memory.profiling=TRUE,append=TRUE)
+Rprof(file=prof,memory.profiling=TRUE)
 
 # run MCMC
 out_mcmc <- logit.spike.edit(Y ~ 0 + ., data=data.frame(Y=Yvec,X=as.matrix(Xstar)),
