@@ -37,6 +37,10 @@ A.conv <- A[(p-pL+1):p,] # matrix for conversion: beta <- A.conv %*% gamma
 
 ############################### Loading MCMC chains ###############################
 
+### how many iterations for burn-in?
+burnin <- 500
+
+### other parameters
 nsims <- 10
 nchains <- 3
 beta_mcmc <- list()
@@ -49,6 +53,8 @@ for(sim in 1:nsims){
   for(chain in 1:nchains){ 
     res_mcmc <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",chain,".csv")
     iters <- Matrix(as.matrix(read.csv(file=res_mcmc,header = F)))
+    niters <- nrow(iters)
+    iters <- iters[(burnin+1):niters,]
     gamma <- rbind(gamma,cbind(iters,rep(chain,nrow(iters))))
     beta_chain <- iters %*% t(A.conv)
     beta <- rbind(beta,cbind(beta_chain,rep(chain,nrow(beta_chain))))
@@ -72,7 +78,7 @@ for(sim in 1:nsims){
 ############################### Convergence diagnostics ###############################
 
 #### Trace plots
-for(sim in 2:nsims){
+for(sim in 1:nsims){
   plots.list <- list()
   codes <- names(beta_mcmc[[sim]])[1:pL]
   for(u in 1:pL){
@@ -115,6 +121,7 @@ cutoff <- 0.5
 p_s <- matrix(nrow=p,ncol=nsims)
 for(sim in 1:nsims){
   ## MCMC MOReTreeS estimate
+  niters <- nrow(gamma_mcmc[[sim]])
   p_s[,sim] <- colMeans(p_nonzero_mcmc[[sim]][,1:p])
   nonzero <- p_s[,sim] >= cutoff
   sgamma <- apply(gamma_mcmc[[sim]][,1:p],2,function(x) mean(x[x!=0]))
@@ -159,7 +166,7 @@ dat <- data.frame(est_vi=beta_est_vi,est_mcmc=beta_est_mcmc,
 dat.df <- reshape(dat,direction="long",
                   varying=list(1:10,11:20,21:30,31:40))
 names(dat.df)[1:6] <- c("sim","est_vi","est_mcmc","group_vi","group_mcmc","node")
-dat.df$est_true <- beta_sim
+# dat.df$est_true <- beta_sim
 change.group <- apply(X=cbind(as.character(dat.df$sim-1),
                               as.character(dat.df$group_vi),
                               as.character(dat.df$group_mcmc)),
@@ -175,7 +182,7 @@ dat.df$est_vi <- exp(dat.df$est_vi)
 dat.df$est_mcmc <- exp(dat.df$est_mcmc)
 dat.df$est_vi_lab <- sprintf("%.4f",dat.df$est_vi)
 dat.df$est_mcmc_lab <- sprintf("%.4f",dat.df$est_mcmc)
-dat.df$est_true_lab <- sprintf("%.4f",dat.df$est_true)
+# dat.df$est_true_lab <- sprintf("%.4f",dat.df$est_true)
 
 ##### Plotting ORs estimated by MCMC vs those estimated by VI
 top.pts <- 20
@@ -184,12 +191,32 @@ plot.list <- list()
 for(sim in 1:10){
   # groups plot
   dat.sim <- dat.df[dat.df$sim==sim,]
+  dat.sim$node_icd9 <- as.character(icd_short_to_decimal(V(tree)$name[dat.sim$node+(p-pL)]))
+  nodeslist <- tapply(dat.sim$node_icd9,dat.sim$change.group,glue_collapse,sep=", ")
+  # nodeslist <- tapply(dat.sim$node_icd9,dat.sim$change.group,
+  #                     FUN=function(x,ncol){
+  #                       x <- sort(x)
+  #                       idx1 <- rep(1:ncol,length.out=length(x))
+  #                       idx2 <- 1:length(x)
+  #                       x[idx1!=ncol & idx2 != length(x)] <- sapply(x[idx1!=ncol & idx2 != length(x)],paste0,sep=",")
+  #                       x[idx1==ncol & idx2 != length(x)] <- sapply(x[idx1==ncol & idx2 != length(x)],paste0,sep=",<br>")
+  #                       return(glue_collapse(x,sep=" "))
+  #                     },
+  #                     ncol=10
+  # )
+  nodeslist <- data.frame(change.group=names(nodeslist),nodes=nodeslist)
+  dat.sim$node <- NULL
+  dat.sim$node_icd9 <- NULL
+  dat.sim <- dat.sim[!duplicated(dat.sim),]
+  dat.sim <- merge(dat.sim,nodeslist,by="change.group")
   dat.sim$est_vi_lab <- factor(dat.sim$est_vi_lab,
                            levels=sort(unique(dat.sim$est_vi_lab),decreasing = F))
   dat.sim$est_mcmc_lab <- factor(dat.sim$est_mcmc_lab,
                            levels=sort(unique(dat.sim$est_mcmc_lab),decreasing = F))
   plot.groups <- ggplot(dat.sim,
-                        aes(x=est_mcmc_lab,y=est_vi_lab,label=n.outcomes)) + 
+                        aes(x=est_mcmc_lab,y=est_vi_lab,
+                            label=n.outcomes,
+                            text=nodes)) + 
     geom_point(color="white",size=6) +
     geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
     theme_bw() +
@@ -200,6 +227,8 @@ for(sim in 1:10){
           axis.text=element_text(size=7)) +
     xlab("MCMC Estimates") +
     ylab("VI Estimates")
+  
+  # plot.groups <- ggplotly(plot.groups,tooltip="text")
   
   # simple matching coefficient plot
   ### VI
@@ -259,9 +288,10 @@ for(sim in 1:10){
   
   # filler plot for corner
   dat.fill <- data.frame(x=1,y=1,label="kappa")
-  plot.filler <- ggplot(dat.fill,aes(x=x,y=y,label=label)) +
+  plot.filler <- ggplot(dat.fill,aes(x=x,y=y,label=label),label.size=0) +
     theme_bw() +
-    geom_text(parse = TRUE,size=6)+
+    geom_label(parse = TRUE,size=6,
+               label.size=0)+
     theme(legend.position="none",
           axis.text.x=element_blank(),
           axis.ticks.x=element_blank(),
@@ -274,7 +304,12 @@ for(sim in 1:10){
           plot.margin = margin(t=top.pts,r=0,b=0,l=0, unit = "pt"),
           panel.border=element_blank())
   
-  # Save plots as pdf
+  # # Save plots as pdf
+  # subplot(plot.mcmc.smc,plot.filler,
+  #         plot.groups,plot.vi.smc,
+  #         nrows = 2,
+  #         widths=c(7/8,1/8),heights=c(1/8,7/8))
+  
   plot.list[[sim]] <- plot.mcmc.smc + 
     plot.filler + 
     plot.groups + 
@@ -284,8 +319,22 @@ for(sim in 1:10){
   print(sim)
 }
 
-pdf(file = paste0("./figures_and_tables/figureA5.pdf"),width=20,height=8)
-wrap_plots(plot.list,ncol=5,widths=rep(1,5),heights=rep(1,2))
+# wrapping parameters
+ncol <- 3
+nrow <- ceiling(nsims / ncol)
+nblanks <- ncol*nrow - nsims
+# add blank plots for wrapping purposes
+for(i in 1:nblanks){
+  plot.list[[nsims+i]] <- ggplot() + theme_void()
+}
+
+# Save as pdf
+plot.widths <- 4
+plot.heights <- 4
+pdf(file = paste0("./figures_and_tables/figureA5.pdf"),
+    width=ncol*plot.widths,
+    height=nrow*plot.heights)
+wrap_plots(plot.list,ncol=3,widths=rep(1,3),heights=rep(1,2))
 dev.off()
 
 ### compute variance estimates ###

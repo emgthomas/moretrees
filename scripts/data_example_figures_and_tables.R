@@ -118,21 +118,33 @@ perm.smc <- cbind(rep(1,nrow(perm.smc)),perm.smc)
 
 ##### OR for original groups vs permuted groups, showing number of outcomes
 plot.list <- list()
+# plotly.list <- list()
+plotly.df <- data.frame(matrix(nrow=0,ncol=13))
 top.pts <- 10
 left.pts <- 10
 for(i in 0:10){
   # groups plot
   dat.i <- dat.df[dat.df$perm==i,]
   dat.i$est.group2 <- as.factor(dat.i$est.group)
+  dat.i$node_icd9 <- as.character(icd_short_to_decimal(V(tree)$name[dat.i$v+(p-pL)]))
+  nodeslist <- tapply(dat.i$node_icd9,dat.i$change.group,
+                      glue_collapse,sep=", ",width=80)
+  nodeslist <- data.frame(change.group=names(nodeslist),nodes=nodeslist)
+  dat.i$v <- NULL
+  dat.i$node_icd9 <- NULL
+  dat.i$Y <- NULL
+  dat.i <- dat.i[!duplicated(dat.i),]
+  dat.i <- merge(dat.i,nodeslist,by="change.group")
   if(i > 0){
     plot_title <- paste0("Permutation ",i)
   } else {
     plot_title <- "No permutation" 
   }
   plot.groups <- ggplot(dat.i,aes(x=as.factor(est.group),y=est.group.orig,
-                             color=group,label=n.outcomes)) + 
+                                  label=n.outcomes,text=nodes)) + 
     geom_point(color="white",size=6) +
-    geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+    # geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+    geom_text(size=4) +
     theme_bw() +
     theme(legend.position="none",
           plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
@@ -141,6 +153,13 @@ for(i in 0:10){
     ggtitle(plot_title) +
     xlab("Permuted OR") +
     ylab("Original OR")
+  
+  if(i > 0){
+    # plotly.list[[i]] <- ggplotly(plot.groups,tooltip="text")
+    dat.i$perm <- paste0("Permutation ",i)
+    names(plotly.df) <- names(dat.i)
+    plotly.df <- rbind(plotly.df,dat.i)
+  }
 
   # simple matching coefficient plot
   smc.df <- data.frame(OR=as.factor(unique(dat.df$est.group.orig)),smc=perm.smc[,i+1],perm="kappa")
@@ -149,6 +168,7 @@ for(i in 0:10){
   plot.smc <- ggplot(smc.df,aes(y=OR,x=1)) + 
     geom_tile(aes(fill=smc),colour="black",size=0.1) +
     geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+    # geom_text(aes(x=1,y=OR,label=label)) +
     theme_bw() +
     theme(legend.position="none",
           #axis.text.x=element_blank(),
@@ -181,8 +201,41 @@ for(i in 0:10){
   }
 }
 
-pdf(file = paste0("./figures_and_tables/figureA4.pdf"),width=8,height=17.5)
-wrap_plots(plot.list,ncol=2,widths=rep(1,2),heights=rep(1,5))
+plotly.df$perm <- factor(plotly.df$perm,levels=unique(plotly.df$perm))
+plotly.groups <- ggplot(plotly.df,aes(x=as.factor(est.group),y=est.group.orig,
+                 label=n.outcomes,text=nodes)) + 
+  # geom_point(color="white",size=6) +
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
+        axis.text=element_text(size=7)) +
+  xlab("Permuted OR") +
+  ylab("Original OR") +
+  facet_wrap(.~perm,ncol=4,scales="free_x")
+
+# run this to examine which outcomes fall into which groups
+p <- ggplotly(plotly.groups,tooltip="text")
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(p), "permutation_groups.html")
+setwd("../")
+
+# wrapping parameters
+ncol <- 3
+nrow <- ceiling(nperm / ncol)
+nblanks <- ncol*nrow - nperm
+# add blank plots for wrapping purposes
+for(i in 1:nblanks){
+  plot.list[[nperm+i]] <- ggplot() + theme_void()
+}
+
+# Save as pdf
+plot.widths <- 4
+plot.heights <- 4
+pdf(file = paste0("./figures_and_tables/figureA4.pdf"),
+    width=ncol*plot.widths,
+    height=nrow*plot.heights)
+wrap_plots(plot.list,ncol=3,widths=rep(1,3),heights=rep(1,2))
 dev.off()
 
 # ##### OR for original groups vs permuted groups, showing number of cases
