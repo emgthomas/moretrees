@@ -39,7 +39,7 @@ indiv.beta.sd.calc <- function(idx,VIsims,ancestors,pL,p){
 }
 
 beta.var.calc <- function(mu_gamma,sigma2_gamma,u_s,ancestors,pL,p){
-  pi_s <- 1/(1+exp(u_s))
+  pi_s <- 1/(1+exp(-u_s))
   # beta_est <- numeric(length=pL)
   var_est <- numeric(length=pL)
   for(v in 1:pL){

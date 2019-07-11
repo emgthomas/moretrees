@@ -201,6 +201,7 @@ for(i in 0:10){
   }
 }
 
+## interactive plot
 plotly.df$perm <- factor(plotly.df$perm,levels=unique(plotly.df$perm))
 plotly.groups <- ggplot(plotly.df,aes(x=as.factor(est.group),y=est.group.orig,
                  label=n.outcomes,text=nodes)) + 

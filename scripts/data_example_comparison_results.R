@@ -53,6 +53,9 @@ for(sim in 1:nsims){
   for(chain in 1:nchains){ 
     res_mcmc <- paste0("./data_example_results/comparison_mcmc_samples",sim,"_chain",chain,".csv")
     iters <- Matrix(as.matrix(read.csv(file=res_mcmc,header = F)))
+    if(sim == 9){
+      iters <- iters[1:4000,]
+    }
     niters <- nrow(iters)
     iters <- iters[(burnin+1):niters,]
     gamma <- rbind(gamma,cbind(iters,rep(chain,nrow(iters))))
@@ -77,7 +80,7 @@ for(sim in 1:nsims){
 
 ############################### Convergence diagnostics ###############################
 
-#### Trace plots
+#### Trace plots for beta
 for(sim in 1:nsims){
   plots.list <- list()
   codes <- names(beta_mcmc[[sim]])[1:pL]
@@ -106,6 +109,38 @@ for(sim in 1:nsims){
   dev.off()
 }
 
+#### Trace plots for gamma
+for(sim in 2:nsims){
+  plots.list <- list()
+  codes <- names(gamma_mcmc[[sim]])[1:p]
+  for(u in 1:p){
+    outcome <- codes[u]
+    outcome_icd9 <- as.character(icd_short_to_decimal(outcome))
+    if(is.na(outcome_icd9)){
+      outcome_icd9 <- outcome
+    }
+    plots.list[[u]] <- mcmc_trace(gamma_mcmc[[sim]],
+                                  par=outcome,
+                                  size=0.2) + 
+      theme_minimal() +
+      theme(legend.position="none",
+            axis.text.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            panel.grid = element_blank(),
+            plot.title=element_text(hjust=0.5,size=10)) +
+      ggtitle(outcome_icd9)
+  }
+  # reordering
+  plots.list <- plots.list[c(1:10,order(codes[11:length(codes)])+10)]
+  png(file=paste0("./figures_and_tables/figureA7_",sim,".png"),width=16,height=36,units="in",
+      res=500)
+  print(wrap_plots(plots.list,ncol=16))
+  dev.off()
+}
+
 ############################### Mean and variance comparison ###############################
 
 ### compute beta estimates ###
@@ -118,25 +153,26 @@ names(beta_est_vi) <- names(A)[(p-pL+1):p]
 group_est_vi <- data.frame(beta=matrix(nrow=pL,ncol=nsims))
 names(group_est_vi) <- names(A)[(p-pL+1):p]
 cutoff <- 0.5
-p_s <- matrix(nrow=p,ncol=nsims)
+p_s_mcmc <- matrix(nrow=p,ncol=nsims)
+p_s_vi <- matrix(nrow=p,ncol=nsims)
 for(sim in 1:nsims){
   ## MCMC MOReTreeS estimate
   niters <- nrow(gamma_mcmc[[sim]])
-  p_s[,sim] <- colMeans(p_nonzero_mcmc[[sim]][,1:p])
-  nonzero <- p_s[,sim] >= cutoff
+  p_s_mcmc[,sim] <- colMeans(p_nonzero_mcmc[[sim]][,1:p])
+  nonzero <- p_s_mcmc[,sim] >= cutoff
   sgamma <- apply(gamma_mcmc[[sim]][,1:p],2,function(x) mean(x[x!=0]))
   sgamma[!nonzero] <- 0
   beta_est <- as.numeric(sgamma %*% t(A.conv))
   beta_est_mcmc[,sim] <- beta_est
   group_est_mcmc[,sim] <- as.integer(factor(beta_est,
-                                          levels=sort(unique(beta_est))))
+                                            levels=sort(unique(beta_est))))
   ## VI MOReTreeS estimate
   res_VI <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
   load(res_VI)
   beta_est_vi[,sim] <- out_vi$moretrees_est
   group_est_vi[,sim] <- as.integer(factor(out_vi$moretrees_est,
                                           levels=sort(unique(out_vi$moretrees_est))))
-  p_s_vi <- 1/(1+exp(-out_vi$VI_params$u_s))
+  p_s_vi[,sim] <- 1/(1+exp(-out_vi$VI_params$u_s))
 }
 
 ########## Compare VI and MCMC estimates of beta ##############
@@ -176,7 +212,7 @@ n.outcomes <- tapply(change.group,as.factor(change.group),length)
 # n.cases <- tapply(dat.df$Y,as.factor(change.group),sum)
 n.df <- data.frame(change.group=names(n.outcomes),
                    n.outcomes=n.outcomes)
-                   #, n.cases=n.cases)
+#, n.cases=n.cases)
 dat.df <- merge(dat.df,n.df,by="change.group",all.x=T,all.y=F)
 dat.df$est_vi <- exp(dat.df$est_vi)
 dat.df$est_mcmc <- exp(dat.df$est_mcmc)
@@ -188,11 +224,13 @@ dat.df$est_mcmc_lab <- sprintf("%.4f",dat.df$est_mcmc)
 top.pts <- 20
 left.pts <- 20
 plot.list <- list()
+plotly.df <- data.frame(matrix(nrow=0,ncol=10))
 for(sim in 1:10){
   # groups plot
   dat.sim <- dat.df[dat.df$sim==sim,]
   dat.sim$node_icd9 <- as.character(icd_short_to_decimal(V(tree)$name[dat.sim$node+(p-pL)]))
-  nodeslist <- tapply(dat.sim$node_icd9,dat.sim$change.group,glue_collapse,sep=", ")
+  nodeslist <- tapply(dat.sim$node_icd9,dat.sim$change.group,
+                      glue_collapse,sep=", ",width=80)
   # nodeslist <- tapply(dat.sim$node_icd9,dat.sim$change.group,
   #                     FUN=function(x,ncol){
   #                       x <- sort(x)
@@ -210,9 +248,9 @@ for(sim in 1:10){
   dat.sim <- dat.sim[!duplicated(dat.sim),]
   dat.sim <- merge(dat.sim,nodeslist,by="change.group")
   dat.sim$est_vi_lab <- factor(dat.sim$est_vi_lab,
-                           levels=sort(unique(dat.sim$est_vi_lab),decreasing = F))
+                               levels=sort(unique(dat.sim$est_vi_lab),decreasing = F))
   dat.sim$est_mcmc_lab <- factor(dat.sim$est_mcmc_lab,
-                           levels=sort(unique(dat.sim$est_mcmc_lab),decreasing = F))
+                                 levels=sort(unique(dat.sim$est_mcmc_lab),decreasing = F))
   plot.groups <- ggplot(dat.sim,
                         aes(x=est_mcmc_lab,y=est_vi_lab,
                             label=n.outcomes,
@@ -228,10 +266,15 @@ for(sim in 1:10){
     xlab("MCMC Estimates") +
     ylab("VI Estimates")
   
+  dat.sim$sim <- paste0("Simulation ",sim)
+  names(plotly.df) <- names(dat.sim)
+  plotly.df <- rbind(plotly.df,dat.sim)
+  
   # plot.groups <- ggplotly(plot.groups,tooltip="text")
   
   # simple matching coefficient plot
   ### VI
+  dat.sim <- dat.df[dat.df$sim==sim,]
   smc.vi.df <- data.frame(OR=sort(unique(dat.sim$est_vi_lab)),
                           smc=smc(dat.sim$group_vi,dat.sim$group_mcmc))
   smc.vi.df$label <- sprintf("%.3f",smc.vi.df$smc)
@@ -259,7 +302,7 @@ for(sim in 1:10){
   
   ### mcmc
   smc.mcmc.df <- data.frame(OR=sort(unique(dat.sim$est_mcmc_lab)),
-                          smc=smc(dat.sim$group_mcmc,dat.sim$group_vi))
+                            smc=smc(dat.sim$group_mcmc,dat.sim$group_vi))
   smc.mcmc.df$label <- sprintf("%.3f",smc.mcmc.df$smc)
   smc.mcmc.df$label[smc.mcmc.df$label=="1"] <- rep("1.000",nrow(smc.mcmc.df))
   plot.mcmc.smc <- ggplot(smc.mcmc.df,aes(y=1,x=OR)) + 
@@ -315,9 +358,36 @@ for(sim in 1:10){
     plot.groups + 
     plot.vi.smc +
     plot_layout(ncol=2,widths=c(7,1),heights=c(1,7))
-
+  
   print(sim)
 }
+
+## Interactive plot
+plotly.df$sim <- factor(plotly.df$sim,levels=unique(plotly.df$sim))
+vi_levels <- unique(as.character(plotly.df$est_vi_lab))
+vi_levels <- vi_levels[order(as.numeric(vi_levels))]
+plotly.df$est_vi_lab <- factor(plotly.df$est_vi_lab,levels=vi_levels)
+mcmc_levels <- unique(as.character(plotly.df$est_mcmc_lab))
+mcmc_levels <- mcmc_levels[order(as.numeric(mcmc_levels))]
+plotly.df$est_mcmc_lab <- factor(plotly.df$est_mcmc_lab,levels=mcmc_levels)
+plotly.groups <- ggplot(plotly.df,aes(x=est_mcmc_lab,y=est_vi_lab,
+                                      label=n.outcomes,text=nodes)) + 
+  # geom_point(color="white",size=6) +
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
+        axis.text=element_text(size=7)) +
+  xlab("MCMC Estimates") +
+  ylab("VI Estimates") +
+  facet_wrap(.~sim,ncol=4,scales="free") 
+
+# run this to examine which outcomes fall into which groups
+p <- ggplotly(plotly.groups,tooltip="text") %>%
+  layout(margin = list(l = 80, r = 0, t = 100, b = 100, pad = 0))
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(p), "mcmc_vi_comparison.html")
+setwd("../")
 
 # wrapping parameters
 ncol <- 3
@@ -358,14 +428,14 @@ for(sim in 1:nsims){
                                 pL=pL,p=p)
   var_MCMC[,sim] <- apply(beta_mcmc[[sim]][,1:pL],2,FUN=var)
   # Variance of non-zero gammas
-  which_nonzero <- which(p_s[,sim]>=cutoff)
+  which_nonzero <- which(p_s_mcmc[,sim]>=cutoff)
   var_VI_nonzero <- VI_params$sigma2_gamma[which_nonzero]
   var_MCMC_nonzero <- apply(gamma_mcmc[[sim]][,1:p],2,FUN=nonzero_var)[which_nonzero]
   var_nonzero_mat <- rbind(var_nonzero_mat,
-                         cbind(var_VI_nonzero,
-                               var_MCMC_nonzero,
-                               which_nonzero,
-                               rep(sim,length(var_VI_nonzero))))
+                           cbind(var_VI_nonzero,
+                                 var_MCMC_nonzero,
+                                 which_nonzero,
+                                 rep(sim,length(var_VI_nonzero))))
   row.names(var_nonzero_mat) <- NULL
 }
 
@@ -388,9 +458,18 @@ var_plot <- ggplot(var_dat,aes(x=VI,y=MCMC,col=SmallerVariance)) +
   scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-6,1)) +
   theme_minimal()
 
-pdf(file="./figures_and_tables/figureA7.pdf",width=10,height=4)
+pdf(file="./figures_and_tables/figureA8.pdf",width=10,height=4)
 var_plot
 dev.off()
+
+### Average variance ratio VI:MCMC across sims for nonzero components
+var_dat$ratio <- var_dat$VI/var_dat$MCMC
+ratio_sims <- tapply(var_dat$ratio,
+                     var_dat$sim,
+                     median)
+cat(paste0("\n\nThe VI estimate of variance of beta_v was ",
+           format(100*(1-median(ratio_sims)),digits=3),
+           "% lower than MCMC estimate (median)"))
 
 ### Plot variance for non-zero components
 var_nonzero_dat <- as.data.frame(var_nonzero_mat)
@@ -409,7 +488,7 @@ var_nonzero_plot <- ggplot(var_nonzero_dat,aes(x=VI,y=MCMC,col=SmallerVariance))
   scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-7,1E-5)) +
   theme_minimal()
 
-pdf(file="./figures_and_tables/figureA8.pdf",width=10,height=4)
+pdf(file="./figures_and_tables/figureA9.pdf",width=10,height=4)
 var_nonzero_plot
 dev.off()
 
@@ -417,9 +496,50 @@ dev.off()
 var_nonzero_dat$ratio <- var_nonzero_dat$VI/var_nonzero_dat$MCMC
 ratio_sims <- tapply(var_nonzero_dat$ratio,
                      var_nonzero_dat$sim,
-                     mean)
+                     median)
 cat(paste0("\n\nOn average, VI estimate of variance for nonzero gammas was ",
-           format(100*(1-mean(ratio_sims)),digits=3),
+           format(100*(1-median(ratio_sims)),digits=3),
            "% lower than MCMC estimate"))
 
+########## Comparing speed of VI and MCMC algorithms ##############
 
+vi_speed <- numeric(0)
+nrestarts <- 3
+for(sim in 1:nsims){
+  for(i in 1:nrestarts){
+    fileName <- paste0("./data_example_results/comparison_vi_print",sim,"_restart",i,".txt")
+    con <- file(fileName,open="r")
+    line <- readLines(con)
+    close(con)
+    line <- line[line!=""]
+    t <- line[length(line)]
+    t <- as.numeric(str_remove(t,fixed("[1] ")))
+    if(!is.na(t)){
+      vi_speed <- c(vi_speed,t)
+    }
+  }
+}
+cat("\n\nVI algorithm converged in an average of ",mean(vi_speed)/60," minutes")
+
+mcmc_speed <- numeric(0)
+nreps <- 6
+for(sim in 1:nsims){
+  for(j in 1:nreps){
+    for(i in 1:nchains){
+      fileName <- paste0("../mcmc_profiling_results_saved/iterations",j,"/comparison_mcmc_print",sim,"_chain",i,".txt")
+      if(file.exists(fileName)){
+        con <- file(fileName,open="r")
+        line <- readLines(con)
+        close(con)
+        idx <- which(line == "$sampling.time")
+        t <- line[idx+1]
+        t <- as.numeric(str_remove(t,fixed("[1] ")))
+        if(!is.na(t)){
+          mcmc_speed <- c(mcmc_speed,t)
+        }
+      }
+    }
+  }
+}
+cat("\n\nMCMC algorithm took an average of",mean(mcmc_speed)/60,"minutes (",
+    mean(mcmc_speed)/60^2,"hours) to run 1000 iterations")
