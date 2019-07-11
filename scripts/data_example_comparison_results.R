@@ -19,11 +19,12 @@ require(reshape2)
 require(ggplot2)
 require(glue)
 require(RColorBrewer)
-require(patchwork)
-require(icd)
 # # To install the patchwork package:
 # library(devtools)
 # install_github("thomasp85/patchwork")
+require(patchwork)
+require(icd)
+require(stringr)
 source("scripts/processing_functions.R")
 
 ### Load ICD9 tree
@@ -60,6 +61,8 @@ for(sim in 1:nsims){
     iters <- iters[(burnin+1):niters,]
     gamma <- rbind(gamma,cbind(iters,rep(chain,nrow(iters))))
     beta_chain <- iters %*% t(A.conv)
+    # beta_chain <- A %*% t(iters)
+    # beta_chain <- t(beta_chain)[,(p-pL+1):p]
     beta <- rbind(beta,cbind(beta_chain,rep(chain,nrow(beta_chain))))
     p_nonzero <- rbind(p_nonzero,cbind(iters!=0,rep(chain,nrow(iters))))
   }
@@ -383,10 +386,10 @@ plotly.groups <- ggplot(plotly.df,aes(x=est_mcmc_lab,y=est_vi_lab,
   facet_wrap(.~sim,ncol=4,scales="free") 
 
 # run this to examine which outcomes fall into which groups
-p <- ggplotly(plotly.groups,tooltip="text") %>%
+ggplotly.groups <- ggplotly(plotly.groups,tooltip="text") %>%
   layout(margin = list(l = 80, r = 0, t = 100, b = 100, pad = 0))
 setwd("./figures_and_tables/")
-htmlwidgets::saveWidget(as_widget(p), "mcmc_vi_comparison.html")
+htmlwidgets::saveWidget(as_widget(ggplotly.groups), "mcmc_vi_comparison.html")
 setwd("../")
 
 # wrapping parameters
@@ -543,3 +546,4 @@ for(sim in 1:nsims){
 }
 cat("\n\nMCMC algorithm took an average of",mean(mcmc_speed)/60,"minutes (",
     mean(mcmc_speed)/60^2,"hours) to run 1000 iterations")
+
