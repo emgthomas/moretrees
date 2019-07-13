@@ -1,7 +1,7 @@
-# --------------------------------------------------------------------- #
-# ------------------------- Sensitivity analysis ---------------------- #
-# -------- (only one episode of hospitalization per individual) --------#
-# --------------------------------------------------------------------- #
+# ---------------------------------------------------------------------------------------- #
+# --------------------------------- Sensitivity analysis --------------------------------- #
+# -------------- Using only one episode of hospitalization per individual ---------------- #
+# ---------------------------------------------------------------------------------------- #
 
 # direc <- "../moretrees/" # path of the moretrees repository
 # direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
