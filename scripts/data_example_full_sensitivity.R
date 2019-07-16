@@ -51,6 +51,10 @@ dat <- data.table(Q=Q.unlist,Z=Z.unlist,Y=Y.unlist)
 # sort by QID
 Q.tab <- setkey(dat,Q)
 Q.tab$rows <- 1:nrow(Q.tab)
+# summarize numberr of events per individual
+counts <- Q.tab[,.(count=.N),by=Q]$count
+mean(counts > 1)
+summary(counts[counts > 1])
 # Set seed
 set.seed(7683958)
 # Randomly select events to keep (one per enrollee)

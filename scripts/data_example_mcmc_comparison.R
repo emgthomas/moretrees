@@ -20,11 +20,18 @@ require(BoomSpikeSlab)
 ######### Algorithm parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-datArgs <- c(28,3,10,1,1) # Alternatively, enter arguments directly in R
+# datArgs <- c(28,3,10,1,1) # Alternatively, enter arguments directly in R
 
-nchains <- datArgs[2] # how may parallel chains to run
-sim <- datArgs[1] %/% nchains + 1 # which simulated dataset (integer from 1 to 10)
-chain <- datArgs[1] %% nchains + 1 # which chain (integer from 1 to nchains)
+#nchains <- datArgs[2] # how may parallel chains to run
+#sim <- datArgs[1] %/% nchains + 1 # which simulated dataset (integer from 1 to 10)
+if(datArgs[1] == 0){
+	sim <- 9
+	chain <- 1
+	} else {
+	sim <- 10
+	chain <- 2
+	}
+# chain <- datArgs[1] %% nchains + 1 # which chain (integer from 1 to nchains)
 niter <- datArgs[3] # number of MCMC samples
 nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
 ping <- datArgs[5] # print progress report after ping samples
