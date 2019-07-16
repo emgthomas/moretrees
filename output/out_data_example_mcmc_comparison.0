@@ -8,5 +8,5 @@ Check A is correct ancestor matrix
 Check prior looks correct
 
 [1] TRUE
-[1] TRUE
+[1] FALSE
 [1] TRUE
