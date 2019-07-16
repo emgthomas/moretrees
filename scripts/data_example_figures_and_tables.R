@@ -216,9 +216,9 @@ plotly.groups <- ggplot(plotly.df,aes(x=as.factor(est.group),y=est.group.orig,
   facet_wrap(.~perm,ncol=4,scales="free_x")
 
 # run this to examine which outcomes fall into which groups
-p <- ggplotly(plotly.groups,tooltip="text")
+ggplotly.groups <- ggplotly(plotly.groups,tooltip="text")
 setwd("./figures_and_tables/")
-htmlwidgets::saveWidget(as_widget(p), "permutation_groups.html")
+htmlwidgets::saveWidget(as_widget(ggplotly.groups), "permutation_groups.html")
 setwd("../")
 
 # wrapping parameters
@@ -258,6 +258,113 @@ dev.off()
 #   print(plot.i)
 #   dev.off()
 # }
+
+############################# Sensitivity analysis results #############################
+load("data_example_results/data_example_full.Rdata")
+beta_est_orig <- exp(final_ss$moretrees_est*10)
+beta_group_orig <- as.integer(as.factor(beta_est_orig))
+load("data_example_results/data_example_full_sensitivity.Rdata")
+beta_est_sens <- exp(final_ss$moretrees_est*10)
+beta_group_sens <- as.integer(as.factor(beta_est_sens))
+# Load tree
+load("simulation_inputs/inputs.Rdata")
+
+## data for plotting
+change.group <- apply(X=cbind(as.character(beta_group_orig),
+                              as.character(beta_group_sens)),
+                      MARGIN=1,FUN=glue_collapse,sep="")
+counts <- table(change.group)
+counts <- data.frame(change.group=names(counts),n.outcomes=as.integer(counts))
+dat <- data.frame(group_orig=beta_group_orig,
+                  est_orig=beta_est_orig,
+                  group_sens=beta_group_sens,
+                  est_sens=beta_est_sens,
+                  change.group=change.group)
+dat$node_icd9 <- as.character(icd_short_to_decimal(V(tree)$name[(p-pL+1):p]))
+nodeslist <- tapply(dat$node_icd9,dat$change.group,
+                    glue_collapse,sep=", ",width=40)
+nodeslist <- data.frame(change.group=names(nodeslist),nodes=nodeslist)
+dat$node_icd9 <- NULL
+
+# for group plot
+dat.plt<- dat[!duplicated(dat),]
+dat.plt <- merge(dat.plt,counts,by="change.group")
+dat.plt <- merge(dat.plt,nodeslist,by="change.group")
+dat.plt$lab_orig <- sprintf("%.3f",dat.plt$est_orig)
+dat.plt$lab_orig <- factor(dat.plt$lab_orig,levels=sort(unique(dat.plt$lab_orig)))
+dat.plt$lab_sens <- sprintf("%.3f",dat.plt$est_sens)
+dat.plt$lab_sens <- factor(dat.plt$lab_sens,levels=sort(unique(dat.plt$lab_sens)))
+
+#### Comparison plot ####
+top.pts <- 10
+left.pts <- 10
+# groups plot
+plot.groups <- ggplot(dat.plt,aes(x=lab_sens,y=lab_orig,
+                                label=n.outcomes,text=nodes)) + 
+  geom_point(color="white",size=6) +
+  # geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
+        plot.title = element_text(hjust = 0.5),
+        axis.text=element_text(size=7)) +
+  xlab("Sensitivity analysis OR") +
+  ylab("Original analysis OR")
+
+# simple matching coefficient plot
+smc.sens <- smc(x=dat$group_orig,y=dat$group_sens)
+smc.df <- data.frame(group_orig=1:length(smc.sens),smc=smc.sens)
+dat2 <- dat[,c("group_orig","est_orig")]
+dat2 <- dat2[!duplicated(dat2),]
+smc.df <- merge(smc.df,dat2,by="group_orig")
+smc.df$label <- sprintf("%.3f",smc.df$smc)
+smc.df$est_lab <- sprintf("%.3f",smc.df$est_orig)
+plot.smc <- ggplot(smc.df,aes(y=est_lab,x=1)) + 
+  geom_tile(aes(fill=smc),colour="black",size=0.1) +
+  geom_label(aes(x=1,y=est_lab,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+  # geom_text(aes(x=1,y=est_lab,label=label)) +
+  theme_bw() +
+  theme(legend.position="none",
+        #axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        plot.margin = margin(t=top.pts,r=0,b=0, unit = "pt"),
+        plot.title = element_text(hjust = 0.5),
+        panel.border=element_blank()) +
+  ggtitle(bquote(kappa)) +
+  xlab("") + 
+  scale_fill_gradientn(colours=brewer.pal(max(as.numeric(smc.df$group_orig)),
+                                          name="YlGnBu"),
+                       limits=c(0,1)) +
+  scale_x_continuous(breaks=0.5,labels="")
+
+### save as pdf
+pdf(file="./figures_and_tables/figureA10.pdf",width=4.2,height=4)
+plot.groups + plot.smc + plot_layout(ncol=2,widths=c(7,1))
+dev.off()
+
+### interactive plot ###
+plotly.groups <- ggplot(dat.plt,aes(y=lab_orig,x=lab_sens,
+                                      label=n.outcomes,text=nodes)) + 
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        axis.text=element_text(size=10)) +
+  xlab("Sensitivity analysis OR") +
+  ylab("Original analysis OR") 
+
+# run this to examine which outcomes fall into which groups
+ggplotly.groups <- ggplotly(plotly.groups,tooltip="text",width=500,height=500) %>% 
+  layout(margin=list(l = -10), yaxis=list(tickprefix="    "))
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(ggplotly.groups), "sensitivity_analysis_groups.html")
+setwd("../")
+
 
 ############################### Full data results ###############################
 load("data_example_results/data_example_full.Rdata")

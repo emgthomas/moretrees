@@ -214,45 +214,6 @@ smc <- function(x,y){
   # # two numbers below should be the same
   # require(fossil)
   # rand.index(x,y)
-  # sum(num)/(2*choose(n,2))
+  # sum(smc.xy*denom)/(sum(denom))
   return(smc.xy)
 }
-
-# purity <- function(x,y){
-#   # x and y must be integer vectors with entries from 1 to number of groups
-#   # where number of groups may be different for each clustering
-#   # x is "true" set of clusters to compare to new clustering, y
-#   p <- numeric(max(x))
-#   which.y <- numeric(max(x))
-#   for(i in 1:max(x)){
-#     p.i <- sapply(1:max(y),function(z,x,y) mean(y[x==i]==z),
-#                   x=x,y=y)
-#     which.y.i <- (1:max(y))[which.max(p.i)]
-#     p[i] <- p.i[which.y.i]
-#     which.y[i] <- which.y.i
-#   }
-#   names(p) <- as.character(1:max(x))
-#   df <- data.frame(x=1:max(x),y=which.y,p=p)
-#   return(df)
-# }
-
-# jidx <- function(x,y){
-#   # x and y must be integer vectors with entries from 1 to number of groups
-#   # where number of groups may be different for each clustering
-#   # x= "true" reference grouping
-#   pairs.x <- Matrix(outer(X=x,Y=x,FUN=function(x,y) x==y))
-#   pairs.x[lower.tri(pairs.x,diag = T)] <- FALSE # note: we keep TRUE on diagonal due to single outcome groups
-#   pairs.y <- Matrix(outer(X=y,Y=y,FUN=function(x,y) x==y))
-#   pairs.y[lower.tri(pairs.y,diag=T)] <- FALSE
-#   pairs.num <- pairs.x & pairs.y # which pairs of outcomes are assigned to same group by both x and y
-#   pairs.denom <- pairs.x | pairs.y # which pairs of outcomes are assigned to same group by at least one of x and y
-#   # ## Check: the two values below should be the same
-#   # sum(pairs.num[lower.tri(pairs.num)])/(sum(pairs.denom[lower.tri(pairs.denom)]))
-#   # cluster_similarity(x,y) # Jaccard index according to clusteval package
-#   # ##
-#   smc.xy <- numeric(length=max(x))
-#   for(i in 1:max(x)){
-#     smc.xy[i] <- sum(pairs.num[x==i,])/sum(pairs.denom[x==i,])
-#   }
-#   return(smc.xy)
-# }
