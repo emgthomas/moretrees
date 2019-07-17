@@ -2,8 +2,8 @@
 # ----------------------- Producing figures and tables for data example ----------------------- #
 # --------------------------------------------------------------------------------------------- #
 
-# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees/"
 # direc <- "../moretrees/" # path of the moretrees repository
+# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/moretrees/"
 direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
 setwd(direc)
 
@@ -11,42 +11,165 @@ setwd(direc)
 if(!dir.exists("./figures_and_tables")) dir.create("./figures_and_tables")
 
 # Load functions
+source("./scripts/VI_functions.R")
+source("./scripts/processing_functions.R")
+require(Matrix)
+require(igraph)
+require(ggplot2)
 require(igraph)
 require(mclust)
-require(ggplot2)
 require(patchwork)
 require(data.table)
 require(reshape2)
-require(Matrix)
+require(icd)
 require(glue)
 require(RColorBrewer)
 require(collapsibleTree)
 require(circlize)
 require(plotly)
 require(xtable)
-source("scripts/processing_functions.R")
 
 ############################### Cross-validation results ###############################
 
 # Load tree
 load("simulation_inputs/inputs.Rdata")
 
-### Load CV results ###
+### Select value of tuning parameter ###
 
 nfolds <- 10
-nmods <- 8
-cv.res <- as.data.frame(matrix(nrow=nfolds,ncol=nmods+1))
-names(cv.res) <- c("fold","ssMOReTreeS\n Collapsed","ssMOReTreeS\n Individual","Uncollapsed","sim_groups","Adhoc\n Grouping 1","Adhoc\n Grouping 2","Adhoc\n Grouping 3","Fully\n Collapsed")
+load(paste0("data_example_results/data_example_cv_fold1.Rdata"))
+ll.tp.folds <- as.data.frame(matrix(nrow=length(tp),ncol=nfolds))
 for(i in 1:nfolds){
   load(paste0("data_example_results/data_example_cv_fold",i,".Rdata"))
-  cv.res[i,] <- as.numeric(ll.cv)
+  ll.tp.folds[,i] <- ll.tp
+  #plot(tp,ll.tp,type="l",main = i)
+}
+
+# Get average LL over folds for each value of tuning parameter
+ll.tp <- rowMeans(ll.tp.folds)
+
+# Best value of tuning parameter
+ll.max <- max(ll.tp)
+tp.max <- tp[which(ll.tp==ll.max)]
+tp.max.mid <- tp.max[round(mean(1:length(tp.max)))]
+ll.max.folds <- ll.tp.folds[which(tp==tp.max.mid),]
+ll.5.folds <- ll.tp.folds[which(tp==0.5),]
+
+### How many groups result from each value of tp, in full data? ###
+
+# Load full data results
+load("data_example_results/data_example_full.Rdata")
+
+# Get ancestor matrix A
+A <- t(as_adj(tree,sparse = T))
+A <- expm(A)
+A[A>0] <- 1
+A <- A[(p-pL+1):p,]
+
+# Extract relevant VI params
+mu_gamma <- final_ss$VI_params$mu_gamma
+p_vi <- exp(loglogit(final_ss$VI_params$u_s))
+
+# Get number of groups for each value of tp
+ngroups <- numeric(length(tp))
+for(i in 1:length(tp)){
+  sgamma <- (mu_gamma * (p_vi >= tp[i]))
+  beta.tp <- A %*% sgamma
+  ngroups[i] <- length(unique(as.numeric(beta.tp)))
+}
+
+
+# Best beta
+sgamma <- (mu_gamma * (p_vi >= min(tp.max)))
+beta.tp.min <- A %*% sgamma
+sgamma <- (mu_gamma * (p_vi >= max(tp.max)))
+beta.tp.max <- A %*% sgamma
+
+# Is it same as beta_coll?
+all.equal(as.numeric(beta.tp.min),final_ss$moretrees_est)
+all.equal(as.numeric(beta.tp.max),final_ss$moretrees_est)
+
+# Best number of groups
+ngroups_max <- unique(ngroups[which(ll.tp==ll.max)])
+
+# Some plotting parameters
+grid_lwd <- 0.2
+fontsize <- 19
+tp.marks <- c(tp[1],min(tp.max),max(tp.max),tp[length(tp)])
+ll.marks <- c(ll.tp[1],ll.max,ll.tp[length(ll.tp)])
+dat <- data.frame(tp=tp,ngroups=ngroups,ll.tp=ll.tp)
+
+### Plot tuning parameter versus CV ll
+plot_tp <- ggplot(dat,aes(x=tp,y=ll.tp)) +
+  # Plot line
+  geom_line() +
+  # Aesthetics
+  theme_bw(base_size=fontsize) +
+  # Grid lines
+  theme(panel.grid.major=element_line(size=0.5,linetype=2),
+        panel.grid.minor=element_blank()) + 
+  # Axes
+  scale_x_continuous(limits=c(0,1),breaks=tp.marks) +
+  scale_y_continuous(limits=c(min(ll.tp),max(ll.tp)),
+                     breaks=ll.marks) +
+  xlab(expression(delta)) +
+  ylab("Cross-validated mean log likelihood")
+
+### Plot number of groups versus CV ll
+ngroups.marks <- c(ngroups[1],7,ngroups_max,26,ngroups[length(ngroups)])
+plot_ngroups <- ggplot(dat,aes(x=ngroups,y=ll.tp)) +
+  # Plot line
+  geom_line() +
+  # Aesthetics
+  theme_bw(base_size=fontsize) +
+  # Grid lines
+  theme(panel.grid.major=element_line(size=0.5,linetype=2),
+        panel.grid.minor=element_blank()) + 
+  # Axes
+  scale_x_log10(breaks=ngroups.marks) +
+  scale_y_continuous(limits=c(min(ll.tp),max(ll.tp)),
+                     breaks=ll.marks) +
+  xlab(expression("G("*delta*")")) +
+  ylab("Cross-validated mean log likelihood")
+
+############### Figure A3 ################
+pdf("figures_and_tables/figureA3_a.pdf",width=8,height=5)
+plot_tp
+dev.off()
+
+pdf("figures_and_tables/figureA3_b.pdf",width=8,height=5)
+plot_ngroups
+dev.off()
+
+### Load other CV results ###
+nmods <- 9
+cv.res <- as.data.frame(matrix(nrow=nfolds,ncol=nmods+1))
+names(cv.res) <- c("fold",
+                   "ssMOReTreeS\n Collapsed",
+                   "ssMOReTreeS\n Collapsed\n Max Delta",
+                   "ssMOReTreeS\n Individual",
+                   "Uncollapsed",
+                   "sim_groups",
+                   "Adhoc\n Grouping 1",
+                   "Adhoc\n Grouping 2",
+                   "Adhoc\n Grouping 3",
+                   "Fully\n Collapsed")
+cv.moretrees <- numeric(nfolds)
+for(i in 1:nfolds){
+  load(paste0("data_example_results/data_example_cv_fold",i,".Rdata"))
+  cv.res[i,] <- c(ll.cv[1,1:2],ll.max.folds[1,i],as.numeric(ll.cv[1,3:length(ll.cv)]))
 }
 cv.res$sim_groups <- NULL
 cv.df <- melt(cv.res,id.vars="fold",measure.vars=2:(nmods),variable.name="mod",value.name="ll")
 
-# Winner excluding MOReTreeS individual
-apply(cv.res[,-c(1,3)],1,which.max)
+# Cross validated predictive accuracy
+sort(colMeans(cv.res[,2:ncol(cv.res)]),decreasing = T)
+
+# Winner excluding MOReTreeS individual and MOReTreeS collapsed delta max
+apply(cv.res[,-c(1,3,4)],1,which.max)
 # How often does MOReTreeS individual beat MOReTrees collapsed?
+sum(cv.res[,2] <= cv.res[,4])
+# How often does MOReTreeS collpsed delta max beat MOReTrees collapsed?
 sum(cv.res[,2] <= cv.res[,3])
 
 ############### Figure 4 ################
@@ -56,7 +179,7 @@ cv.plot <- ggplot(cv.df,aes(x=mod,y=ll)) +
   xlab("Model") +
   ylab("Mean log likelihood in test set")
 
-pdf("figures_and_tables/figure4.pdf",width=12,height=5)
+pdf("figures_and_tables/figure4.pdf",width=14,height=5)
 cv.plot
 dev.off()
 
@@ -364,7 +487,6 @@ ggplotly.groups <- ggplotly(plotly.groups,tooltip="text",width=500,height=500) %
 setwd("./figures_and_tables/")
 htmlwidgets::saveWidget(as_widget(ggplotly.groups), "sensitivity_analysis_groups.html")
 setwd("../")
-
 
 ############################### Full data results ###############################
 load("data_example_results/data_example_full.Rdata")
