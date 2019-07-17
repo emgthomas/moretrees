@@ -36,5 +36,5 @@ Log = ../output/log_data_example_mcmc_comparison.$(Process)
 # 
 Arguments = --no-save --no-restore --slave --args $(Process) 3 1000 1 10
 #Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1 10
-Queue 2 # must be nchains*nsims 
+Queue 1 # must be nchains*nsims 
 
