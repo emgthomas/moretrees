@@ -38,6 +38,20 @@ indiv.beta.sd.calc <- function(idx,VIsims,ancestors,pL,p){
   return(data.frame(beta_indiv=beta_est,sd_indiv=sd_est,sim=VIsims$sim[idx[1:pL]]))
 }
 
+beta.var.calc <- function(mu_gamma,sigma2_gamma,u_s,ancestors,pL,p){
+  pi_s <- 1/(1+exp(-u_s))
+  # beta_est <- numeric(length=pL)
+  var_est <- numeric(length=pL)
+  for(v in 1:pL){
+    u <- ancestors[[v+p-pL]]
+    sigma2_gamma_u <- sigma2_gamma[u]
+    mu_gamma_u <- mu_gamma[u]
+    pi_s_u <- pi_s[u]
+    var_est[v] <- sum(pi_s_u*(sigma2_gamma_u + (1-pi_s_u)*mu_gamma_u^2))
+  }
+  return(var_est)
+}
+
 gamma.sim.fun <- function(u,mu_gamma,sigma2_gamma,n.sim) rnorm(n.sim,mu_gamma[u],sigma2_gamma[u])
 
 indiv.beta.ci.calc <- function(VI_params,ancestors,pL,p,n.sim=1000){
@@ -84,9 +98,9 @@ groups.calc.fun <- function(tree,beta_groups,beta_est,VI_params){
 explainer.latex <- function(df){
   if(df["leaf"]==1){
     nsamp_frmt <- as.character(format(as.numeric(df["nsamp"]),big.mark=","))
-    collapse(c("\\-\\ \\hspace{",df["indent"],"pt}\\footnotesize{-- {\\color{ForestGreen} \\textbf{",df["icd9_decimal"],"}}: ",df["explainer"]," (n=",nsamp_frmt,")} \\\\ "))
+    glue_collapse(c("\\-\\ \\hspace{",df["indent"],"pt}\\footnotesize{-- {\\color{ForestGreen} \\textbf{",df["icd9_decimal"],"}}: ",df["explainer"]," (n=",nsamp_frmt,")} \\\\ "))
   } else {
-    collapse(c("\\-\\ \\hspace{",df["indent"],"pt}\\footnotesize{-- ",df["icd9_decimal"],": ",df["explainer"],"} \\\\ "))
+    glue_collapse(c("\\-\\ \\hspace{",df["indent"],"pt}\\footnotesize{-- ",df["icd9_decimal"],": ",df["explainer"],"} \\\\ "))
   }
 }
 
@@ -147,12 +161,12 @@ expand_groups_latex <- function(g,nodes,beta,ci,nsamp,digits=3,tree_g,indent.mul
       paste.df <- data.frame(icd9_decimal=icd9_decimal[codes.extract],explainer=explainer[codes.extract],
                              indent=indent,leaf=as.numeric(V(subtr.comp)$leaf[codes.extract]),nsamp=V(subtr.comp)$nsamp[codes.extract],row.names=NULL,stringsAsFactors = FALSE)
       # collapse
-      latex_out <- c(latex_out,collapse(apply(paste.df,1,explainer.latex)))
+      latex_out <- c(latex_out,glue_collapse(apply(paste.df,1,explainer.latex)))
     } else {
       latex_out <- c(latex_out,paste0("--",icd9_decimal[comp==co],": ",explainer[comp==co],"\\\\"))
     }
   }
-  latex_out <- paste0("\\textbf{\\emph{Group ",g,"}}\\\\ \n\\textbf{Odds Ratio (95\\% Credible Interval) = ",beta_frmt," (",beta_cil_frmt,",",beta_ciu_frmt,")} \\\\ \\textbf{Number of Cases = ",nsamp_total,"} \\\\ ","\\textbf{Group contains the following ",ncodes," ICD9 codes:} \\\\ ",collapse(latex_out))
+  latex_out <- paste0("\\textbf{\\emph{Group ",g,"}}\\\\ \n\\textbf{Odds Ratio (95\\% Credible Interval) = ",beta_frmt," (",beta_cil_frmt,",",beta_ciu_frmt,")} \\\\ \\textbf{Number of Cases = ",nsamp_total,"} \\\\ ","\\textbf{Group contains the following ",ncodes," ICD9 codes:} \\\\ ",glue_collapse(latex_out))
   return(latex_out)
 }
 
@@ -165,4 +179,41 @@ bias_n_fun <- function(beta_sim,beta_true,n=20){
   beta_est_n <- beta_sim[top_n]
   beta_true_n <- beta_true[top_n] 
   mean(abs((beta_true_n-beta_est_n)/beta_true_n))
+}
+
+smc <- function(x,y){
+  # x and y must be integer vectors with entries from 1 to number of groups
+  # where number of groups may be different for each clustering
+  # x= "true" reference grouping
+  
+  # pairs.x is a matrix where pairs.x[i,j]=1 if i and j are in the same cluster in x
+  pairs.x <- Matrix(outer(X=x,Y=x,FUN=function(x,y) x==y))
+
+  # pairs.y is a matrix where pairs.y[i,j]=1 if i and j are in the same cluster in y
+  pairs.y <- Matrix(outer(X=y,Y=y,FUN=function(x,y) x==y))
+  
+  # when do x and y agree on which outcomes are paired together?
+  pairs.xy <- pairs.x == pairs.y
+  # remove the lower triangle (including diagonal)
+  # pairs.xy[lower.tri(pairs.xy,diag=T)] <- FALSE
+  diag(pairs.xy) <- FALSE
+  pairs.count <- Matrix(TRUE,nrow=length(x),ncol=length(x))
+  diag(pairs.count) <- FALSE
+  
+  # get average agreement for each group in x 
+  num <- numeric(length=max(x))
+  denom <- numeric(length=max(x))
+  n <- length(x)
+  for(i in 1:max(x)){
+    n.i <- sum(x==i)
+    n.ni <- n-n.i
+    num[i] <- sum(pairs.xy[x==i,])
+    denom[i] <- sum(pairs.count[x==i,])
+  }
+  smc.xy <- num/denom
+  # # two numbers below should be the same
+  # require(fossil)
+  # rand.index(x,y)
+  # sum(smc.xy*denom)/(sum(denom))
+  return(smc.xy)
 }

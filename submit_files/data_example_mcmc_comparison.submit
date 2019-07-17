@@ -1,0 +1,40 @@
+# Universe should always be 'vanilla'. This line MUST be 
+#included in your submit file, exactly as shown below.
+Universe = vanilla
+
+# The following arguments are _optional_. If included
+# they are used to specify the requirements for the
+# submission.
+request_cpus = 1
+request_disk = 1GB
+request_memory = 30GB
+
+# Enter the path to the program you wish to run.
+# The default runs the R program. To run another
+# program just change '/user/local/bin/R' to the
+# path to the program you want to run. For example,
+# to run Stata set Executable to '/usr/local/bin/stata'.
+Executable = /usr/local/bin/R
+
+# Specify the relative path to the input file (if any). If you
+# are using R this should be your R script. If you are using
+# Stata this should be your do file.
+input = ../scripts/data_example_mcmc_comparison.R
+
+# Specify where to output any results printed by your program.
+output = ../output/out_data_example_mcmc_comparison.$(Process)
+# Specify where to save any errors returned by your program.
+error = ../output/error_data_example_mcmc_comparison.$(Process)
+# Specify where to save the log file.
+Log = ../output/log_data_example_mcmc_comparison.$(Process)
+# Enter the number of processes to request. This should 
+# always be the last part of your submit file.
+#Queue 4
+
+# Specify any arguments you want to pass to the executable.
+# Arguments in order: sim nchains niter nthreads ping
+# 
+Arguments = --no-save --no-restore --slave --args $(Process) 3 1000 1 10
+#Arguments = --no-save --no-restore --slave --args $(Process) 3 10 1 10
+Queue 1 # must be nchains*nsims 
+

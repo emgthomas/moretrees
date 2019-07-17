@@ -16,8 +16,19 @@ source("./scripts/processing_functions.R")
 require(Matrix)
 require(igraph)
 require(ggplot2)
+require(igraph)
+require(mclust)
+require(patchwork)
+require(data.table)
+require(reshape2)
+require(glue)
+require(RColorBrewer)
+require(collapsibleTree)
+require(circlize)
+require(plotly)
+require(xtable)
 
-############################### Cross-validation results ##############################
+############################### Cross-validation results ###############################
 
 # Load tree
 load("simulation_inputs/inputs.Rdata")
@@ -147,7 +158,6 @@ for(i in 1:nfolds){
   load(paste0("data_example_results/data_example_cv_fold",i,".Rdata"))
   cv.res[i,] <- c(ll.cv[1,1:2],ll.max.folds[1,i],as.numeric(ll.cv[1,3:length(ll.cv)]))
 }
-require(data.table)
 cv.res$sim_groups <- NULL
 cv.df <- melt(cv.res,id.vars="fold",measure.vars=2:(nmods),variable.name="mod",value.name="ll")
 
@@ -172,6 +182,310 @@ pdf("figures_and_tables/figure4.pdf",width=14,height=5)
 cv.plot
 dev.off()
 
+############################# Permutation results #############################
+load("data_example_results/data_example_full.Rdata")
+beta_est_true <- beta_est
+group_est_true <- as.integer(as.factor(beta_est_true))
+
+nperm <- 10
+perm.est <- matrix(nrow=pL,ncol=nperm)
+perm.group <- matrix(nrow=pL,ncol=nperm)
+perm.smc <- matrix(nrow=max(group_est_true),ncol=nperm)
+
+for(i in 1:(nperm)){
+  load(paste0("data_example_results/data_example_full_perm",i,".Rdata"))
+  perm.est[,i] <- beta_est
+  perm.group[,i] <- as.integer(as.factor(beta_est))
+  perm.smc[,i] <- smc(group_est_true,perm.group[,i])
+  #plot(beta_est,beta_est_true)
+}
+smc.mean <- rowMeans(perm.smc)
+cat("\n\nSMC for each original group, averaged across 10 permutations:\n\n")
+cbind(group=1:8,SMC=smc.mean)
+
+dat <- as.data.frame(cbind(perm.est,perm.group))
+est.names <- sapply(1:10,function(i) paste0("est.",i))
+names(dat)[1:10] <- est.names
+group.names <- sapply(1:10,function(i) paste0("group.",i))
+names(dat)[11:20] <- group.names
+dat$est.orig <- beta_est_true
+dat$group.orig <- group_est_true
+dat$est.0 <- dat$est.orig
+dat$group.0 <- dat$group.orig
+dat$Y <- Y
+dat.df <- reshape(dat,direction="long",
+                  varying=list(c("est.0",est.names),
+                               c("group.0",group.names)))
+names(dat.df)[4:7] <- c("perm","est","group","v")
+dat.df$group.orig <- as.factor(dat.df$group.orig)
+dat.df$perm <- dat.df$perm-1
+dat.df$perm <- as.factor(dat.df$perm)
+dat.df$group <- as.factor(dat.df$group)
+change.group <- apply(X=cbind(as.character(dat.df$perm),
+                              as.character(dat.df$group.orig),
+                              as.character(dat.df$group)),
+                      MARGIN=1,FUN=glue_collapse,sep="")
+dat.df$change.group <- change.group
+n.outcomes <- tapply(change.group,as.factor(change.group),length)
+n.cases <- tapply(dat.df$Y,as.factor(change.group),sum)
+n.df <- data.frame(change.group=names(n.outcomes),
+                   n.outcomes=n.outcomes,
+                   n.cases=n.cases)
+dat.df <- merge(dat.df,n.df,by="change.group",all.x=T,all.y=F)
+dat.df$est.group.orig <- exp(dat.df$est.orig*10)
+dat.df$est.group.orig <- as.factor(sprintf("%.3f",dat.df$est.group.orig))
+dat.df$est.group <- exp(dat.df$est*10)
+dat.df$est.group <- as.factor(sprintf("%.3f",dat.df$est.group))
+perm.smc <- cbind(rep(1,nrow(perm.smc)),perm.smc)
+
+##### OR for original groups vs permuted groups, showing number of outcomes
+plot.list <- list()
+# plotly.list <- list()
+plotly.df <- data.frame(matrix(nrow=0,ncol=13))
+top.pts <- 10
+left.pts <- 10
+for(i in 0:10){
+  # groups plot
+  dat.i <- dat.df[dat.df$perm==i,]
+  dat.i$est.group2 <- as.factor(dat.i$est.group)
+  dat.i$node_icd9 <- as.character(icd_short_to_decimal(V(tree)$name[dat.i$v+(p-pL)]))
+  nodeslist <- tapply(dat.i$node_icd9,dat.i$change.group,
+                      glue_collapse,sep=", ",width=80)
+  nodeslist <- data.frame(change.group=names(nodeslist),nodes=nodeslist)
+  dat.i$v <- NULL
+  dat.i$node_icd9 <- NULL
+  dat.i$Y <- NULL
+  dat.i <- dat.i[!duplicated(dat.i),]
+  dat.i <- merge(dat.i,nodeslist,by="change.group")
+  if(i > 0){
+    plot_title <- paste0("Permutation ",i)
+  } else {
+    plot_title <- "No permutation" 
+  }
+  plot.groups <- ggplot(dat.i,aes(x=as.factor(est.group),y=est.group.orig,
+                                  label=n.outcomes,text=nodes)) + 
+    geom_point(color="white",size=6) +
+    # geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+    geom_text(size=4) +
+    theme_bw() +
+    theme(legend.position="none",
+          plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
+          plot.title = element_text(hjust = 0.5),
+          axis.text=element_text(size=7)) +
+    ggtitle(plot_title) +
+    xlab("Permuted OR") +
+    ylab("Original OR")
+  
+  if(i > 0){
+    # plotly.list[[i]] <- ggplotly(plot.groups,tooltip="text")
+    dat.i$perm <- paste0("Permutation ",i)
+    names(plotly.df) <- names(dat.i)
+    plotly.df <- rbind(plotly.df,dat.i)
+  }
+
+  # simple matching coefficient plot
+  smc.df <- data.frame(OR=as.factor(unique(dat.df$est.group.orig)),smc=perm.smc[,i+1],perm="kappa")
+  smc.df$label <- sprintf("%.3f",smc.df$smc)
+  if(i==0) smc.df$label <- rep("1.00",nrow(smc.df))
+  plot.smc <- ggplot(smc.df,aes(y=OR,x=1)) + 
+    geom_tile(aes(fill=smc),colour="black",size=0.1) +
+    geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+    # geom_text(aes(x=1,y=OR,label=label)) +
+    theme_bw() +
+    theme(legend.position="none",
+          #axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),
+          plot.margin = margin(t=top.pts,r=0,b=0, unit = "pt"),
+          plot.title = element_text(hjust = 0.5),
+          panel.border=element_blank()) +
+    ggtitle(bquote(kappa)) +
+    xlab("") + 
+    scale_fill_gradientn(colours=brewer.pal(max(as.numeric(dat.df$group.orig)),
+                                              name="YlGnBu"),
+                         limits=c(0,1)) +
+    scale_x_continuous(breaks=0.5,labels="")
+
+  # Save plots as pdf
+  if(i > 0){
+    plot.list[[i]] <- plot.groups + plot.smc +
+      plot_layout(ncol=2,widths=c(7,1))
+  } else {
+    pdf(file = paste0("./figures_and_tables/figureA4_",i,".pdf"),
+        width=4,height=3.5)
+    print(plot.groups + plot.smc +
+            plot_layout(ncol=2,widths=c(7,1)))
+    dev.off()
+  }
+}
+
+## interactive plot
+plotly.df$perm <- factor(plotly.df$perm,levels=unique(plotly.df$perm))
+plotly.groups <- ggplot(plotly.df,aes(x=as.factor(est.group),y=est.group.orig,
+                 label=n.outcomes,text=nodes)) + 
+  # geom_point(color="white",size=6) +
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
+        axis.text=element_text(size=7)) +
+  xlab("Permuted OR") +
+  ylab("Original OR") +
+  facet_wrap(.~perm,ncol=4,scales="free_x")
+
+# run this to examine which outcomes fall into which groups
+ggplotly.groups <- ggplotly(plotly.groups,tooltip="text")
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(ggplotly.groups), "permutation_groups.html")
+setwd("../")
+
+# wrapping parameters
+ncol <- 3
+nrow <- ceiling(nperm / ncol)
+nblanks <- ncol*nrow - nperm
+# add blank plots for wrapping purposes
+for(i in 1:nblanks){
+  plot.list[[nperm+i]] <- ggplot() + theme_void()
+}
+
+# Save as pdf
+plot.widths <- 4
+plot.heights <- 4
+pdf(file = paste0("./figures_and_tables/figureA4.pdf"),
+    width=ncol*plot.widths,
+    height=nrow*plot.heights)
+wrap_plots(plot.list,ncol=3,widths=rep(1,3),heights=rep(1,2))
+dev.off()
+
+# ##### OR for original groups vs permuted groups, showing number of cases
+# for(i in 0:10){
+#   dat.i <- dat.df[dat.df$perm==i,]
+#   dat.i$est.group2 <- as.factor(dat.i$est.group)
+#   plot.i <- ggplot(dat.i,aes(x=as.factor(est.group),y=est.group.orig,
+#                              color=group,label=round(n.cases/10^3))) + 
+#     geom_point(color="white",size=6) +
+#     geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+#     theme_bw() +
+#     theme(legend.position="none") +
+#     facet_wrap(.~perm,nrow=1) +
+#     xlab("Permuted OR") +
+#     ylab("Original OR")
+#   # Save plot as pdf
+#   pdf(file = paste0("./figures_and_tables/figureA5_",i,".pdf"),
+#       width=4,height=3)
+#   print(plot.i)
+#   dev.off()
+# }
+
+############################# Sensitivity analysis results #############################
+load("data_example_results/data_example_full.Rdata")
+beta_est_orig <- exp(final_ss$moretrees_est*10)
+beta_group_orig <- as.integer(as.factor(beta_est_orig))
+load("data_example_results/data_example_full_sensitivity.Rdata")
+beta_est_sens <- exp(final_ss$moretrees_est*10)
+beta_group_sens <- as.integer(as.factor(beta_est_sens))
+# Load tree
+load("simulation_inputs/inputs.Rdata")
+
+## data for plotting
+change.group <- apply(X=cbind(as.character(beta_group_orig),
+                              as.character(beta_group_sens)),
+                      MARGIN=1,FUN=glue_collapse,sep="")
+counts <- table(change.group)
+counts <- data.frame(change.group=names(counts),n.outcomes=as.integer(counts))
+dat <- data.frame(group_orig=beta_group_orig,
+                  est_orig=beta_est_orig,
+                  group_sens=beta_group_sens,
+                  est_sens=beta_est_sens,
+                  change.group=change.group)
+dat$node_icd9 <- as.character(icd_short_to_decimal(V(tree)$name[(p-pL+1):p]))
+nodeslist <- tapply(dat$node_icd9,dat$change.group,
+                    glue_collapse,sep=", ",width=40)
+nodeslist <- data.frame(change.group=names(nodeslist),nodes=nodeslist)
+dat$node_icd9 <- NULL
+
+# for group plot
+dat.plt<- dat[!duplicated(dat),]
+dat.plt <- merge(dat.plt,counts,by="change.group")
+dat.plt <- merge(dat.plt,nodeslist,by="change.group")
+dat.plt$lab_orig <- sprintf("%.3f",dat.plt$est_orig)
+dat.plt$lab_orig <- factor(dat.plt$lab_orig,levels=sort(unique(dat.plt$lab_orig)))
+dat.plt$lab_sens <- sprintf("%.3f",dat.plt$est_sens)
+dat.plt$lab_sens <- factor(dat.plt$lab_sens,levels=sort(unique(dat.plt$lab_sens)))
+
+#### Comparison plot ####
+top.pts <- 10
+left.pts <- 10
+# groups plot
+plot.groups <- ggplot(dat.plt,aes(x=lab_sens,y=lab_orig,
+                                label=n.outcomes,text=nodes)) + 
+  geom_point(color="white",size=6) +
+  # geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        plot.margin = margin(t=top.pts,r=0,b=10,l=left.pts, unit = "pt"),
+        plot.title = element_text(hjust = 0.5),
+        axis.text=element_text(size=7)) +
+  xlab("Sensitivity analysis OR") +
+  ylab("Original analysis OR")
+
+# simple matching coefficient plot
+smc.sens <- smc(x=dat$group_orig,y=dat$group_sens)
+smc.df <- data.frame(group_orig=1:length(smc.sens),smc=smc.sens)
+dat2 <- dat[,c("group_orig","est_orig")]
+dat2 <- dat2[!duplicated(dat2),]
+smc.df <- merge(smc.df,dat2,by="group_orig")
+smc.df$label <- sprintf("%.3f",smc.df$smc)
+smc.df$est_lab <- sprintf("%.3f",smc.df$est_orig)
+plot.smc <- ggplot(smc.df,aes(y=est_lab,x=1)) + 
+  geom_tile(aes(fill=smc),colour="black",size=0.1) +
+  geom_label(aes(x=1,y=est_lab,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
+  # geom_text(aes(x=1,y=est_lab,label=label)) +
+  theme_bw() +
+  theme(legend.position="none",
+        #axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        plot.margin = margin(t=top.pts,r=0,b=0, unit = "pt"),
+        plot.title = element_text(hjust = 0.5),
+        panel.border=element_blank()) +
+  ggtitle(bquote(kappa)) +
+  xlab("") + 
+  scale_fill_gradientn(colours=brewer.pal(max(as.numeric(smc.df$group_orig)),
+                                          name="YlGnBu"),
+                       limits=c(0,1)) +
+  scale_x_continuous(breaks=0.5,labels="")
+
+### save as pdf
+pdf(file="./figures_and_tables/figureA10.pdf",width=4.2,height=4)
+plot.groups + plot.smc + plot_layout(ncol=2,widths=c(7,1))
+dev.off()
+
+### interactive plot ###
+plotly.groups <- ggplot(dat.plt,aes(y=lab_orig,x=lab_sens,
+                                      label=n.outcomes,text=nodes)) + 
+  geom_text(size=4) +
+  theme_bw() +
+  theme(legend.position="none",
+        axis.text=element_text(size=10)) +
+  xlab("Sensitivity analysis OR") +
+  ylab("Original analysis OR") 
+
+# run this to examine which outcomes fall into which groups
+ggplotly.groups <- ggplotly(plotly.groups,tooltip="text",width=500,height=500) %>% 
+  layout(margin=list(l = -10), yaxis=list(tickprefix="    "))
+setwd("./figures_and_tables/")
+htmlwidgets::saveWidget(as_widget(ggplotly.groups), "sensitivity_analysis_groups.html")
+setwd("../")
 
 ############################### Full data results ###############################
 load("data_example_results/data_example_full.Rdata")
@@ -198,7 +512,6 @@ l.big[,1] <- 4*l.big[,1]
 l.big[488:499,1] <- l.big[488:499,1] + 6
 l.big[149:151,1] <- l.big[149:151,1] + c(8,16,24)
 beta_out <- final_ss$moretrees_est
-require(RColorBrewer)
 cols <- rainbow(7, alpha = 1)
 col1 <- rep(NA,p[1])
 col1[V(tree)$leaf] <- groups
@@ -253,7 +566,6 @@ dev.off()
 
 mult <- 10 # show results in units of 10 micrograms per cubic metre
 digits <- 3 # number of digits to display
-require(glue)
 
 {
   # Step 1: collapse to parent node when all children have same beta value
@@ -300,7 +612,7 @@ require(glue)
   sibs.leaves <- vertex.attributes(trPrune,leaves)$parent
   beta.leaves <- vertex.attributes(trPrune,leaves)$beta_grouped
   sibscols <- cbind(as.character(sibs.leaves),as.character(beta.leaves))
-  groupings <- as.numeric(as.factor(apply(sibscols,1,collapse,sep=",")))
+  groupings <- as.numeric(as.factor(apply(sibscols,1,glue_collapse,sep=",")))
 }
 # groupings is a vector that uniquely identifies groups of leaf siblings with the same beta value.
 # These need to be merged.
@@ -319,8 +631,6 @@ while(length(leaves)>0){
   groupings <- groupings[groupings!=gr]
 }
 
-require(collapsibleTree)
-require(circlize)
 edgelist2 <- as.data.frame(get.edgelist(trPrune),stringsAsFactors=F)
 names(edgelist2) <- c("parent","child")
 edgelist2 <- rbind(c(NA,root.node),edgelist2)
@@ -357,7 +667,6 @@ edgelist2_child <- as.character(icd_short_to_decimal(edgelist2$child))
 edgelist2$child[!is.na(edgelist2_child)] <- edgelist2_child[!is.na(edgelist2_child)]
 
 # Plot
-require(plotly)
 pl <-   collapsibleTreeNetwork2(edgelist2,attribute="beta",aggFun=identity, fill="col",
                                tooltipHtml="tooltip",nodeSize="nodesize",nodeSizeAggFun=identity,
                                nodeSizeScaleFun=max,width=800,height=1000,fontSize=14)
@@ -413,6 +722,7 @@ latex_groups <- character(length=max(beta_groups))
 small_table <- data.frame(group=character(max(beta_groups)),
                           codes=character(max(beta_groups)),
                           num_cases=character(max(beta_groups)),
+                          smc=character(max(beta_groups)),
                           OR_moretrees=character(max(beta_groups)),
                           OR_ml=character(max(beta_groups)),
                           stringsAsFactors = F)
@@ -438,23 +748,27 @@ for(g in 1:max(beta_groups)){
   beta_ml_frmt <- sprintf(frmt,exp(beta_ml))
   beta_ml_ciu_frmt <- sprintf(frmt,exp(ci_ml[2]))
   beta_ml_cil_frmt <- sprintf(frmt,exp(ci_ml[1]))
+  smc_frmt <- sprintf(frmt,smc.mean[g])
   if(g != 7){
     codes_g <- as.character(icd_short_to_decimal(leaves))
   } else {
     codes_g <- "All 420 remaining codes"
   }
-  small_table[g,] <- c(g,format(paste(codes_g,collapse=", "),big.mark=","),format(sum(nsamp),big.mark=","),paste0(beta_moretrees_frmt," (",beta_moretrees_cil_frmt,",",beta_moretrees_ciu_frmt,")"),paste0(beta_ml_frmt," (",beta_ml_cil_frmt,",",beta_ml_ciu_frmt,")"))
+  small_table[g,] <- c(g,format(paste(codes_g,collapse=", "),big.mark=","),
+                       format(sum(nsamp),big.mark=","),
+                       smc_frmt,
+                       paste0(beta_moretrees_frmt," (",beta_moretrees_cil_frmt,",",beta_moretrees_ciu_frmt,")"),
+                       paste0(beta_ml_frmt," (",beta_ml_cil_frmt,",",beta_ml_ciu_frmt,")"))
 }
 
 # write big table
 write(paste("\\renewcommand\\arraystretch{0.6}\\begin{longtable}{p{\\textwidth}} \\hline",paste(latex_groups,sep="",collapse=" \n \\hline \n \n "),"\\end{longtable}",sep="\n \n"),file="./figures_and_tables/tableC_supplementary_material.tex")
 
 # write small table
-require(xtable)
 row.names(small_table) <- NULL
-small_xtable <- xtable(small_table,align=c("l","c","p{6cm}","c","c","c"),digits=3,
-                       display=c("d","d","s","d","f","f"))
-names(small_xtable) <- c("Group","ICD9 codes","#Cases","OR (95%CI) MOReTreeS","OR (95% CI) Maximum Likelihood")
+small_xtable <- xtable(small_table,align=c("l","c","p{6cm}","c","c","c","c"),digits=3,
+                       display=c("d","d","s","d","d","f","f"))
+names(small_xtable) <- c("Group","ICD9 codes","#Cases","Permuted SMC","OR (95%CI) MOReTreeS","OR (95% CI) Maximum Likelihood")
 
 write(print(small_xtable,floating=FALSE,include.rownames = FALSE),file="./figures_and_tables/table1.tex")
 

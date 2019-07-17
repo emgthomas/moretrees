@@ -215,7 +215,7 @@ loglogit <- function(x){
   
   ## Outputs ##
   
-  # Returns the value -1*log(1 + 1/e^x) for each element of x
+  # Returns the value -1*log(1 + 1/e^(-x)) for each element of x
   
   ## Code ##
   
