@@ -24,14 +24,9 @@ datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to c
 
 #nchains <- datArgs[2] # how may parallel chains to run
 #sim <- datArgs[1] %/% nchains + 1 # which simulated dataset (integer from 1 to 10)
-if(datArgs[1] == 0){
-	sim <- 9
-	chain <- 1
-	} else {
-	sim <- 10
-	chain <- 2
-	}
+sim <- 9
 # chain <- datArgs[1] %% nchains + 1 # which chain (integer from 1 to nchains)
+chain <- 1
 niter <- datArgs[3] # number of MCMC samples
 nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
 ping <- datArgs[5] # print progress report after ping samples
