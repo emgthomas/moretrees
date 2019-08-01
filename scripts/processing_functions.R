@@ -217,3 +217,13 @@ smc <- function(x,y){
   # sum(smc.xy*denom)/(sum(denom))
   return(smc.xy)
 }
+
+prior_corr_betas <- function(u,v,ancestors){
+  # Computes the prior correlation implied by the tree
+  # u and v are two distinct leaf nodes
+  # ancestors is a list of length p, where ancestors[[p]] is a vector of ancestors nodes
+  anc_u <- length(ancestors[[u]])
+  anc_v <- length(ancestors[[v]])
+  anc_common <- length(intersect(ancestors[[u]],ancestors[[v]]))
+  return(anc_common/sqrt(anc_u*anc_v))
+}
