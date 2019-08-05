@@ -41,14 +41,15 @@ load(file="./simulation_inputs/permutations.Rdata")
 load(file="./data_example_results/data_example_full.Rdata")
 
 # Permute data
-permutation <- permutations[,perm]
-Y <- Y[permutation]
-Z <- Z[permutation]
+set.seed(permutations[perm])
+for(v in 1:pL){
+  Z[[v]] <- Z[[v]]*sample(c(-1,1),Y[v],replace=T)
+}
 
 ############### Run analysis on whole dataset ###############
 
 # Adhoc collapsing estimates
-adhoc_coeffs <- adhoc_coeffs[permutation,]
+adhoc_coeffs <- adhoc_collapsing(Z,Y,pL,groups)
 
 # Initial values for node coefficients
 nodes_init <- initial_node_coeffs(Z,Y,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
@@ -74,12 +75,11 @@ for(j in 1:nrestarts){
 }
 final_ss <- restarts_ss[[which.max(ELBOS)]]
 
-# Get final estimates and unpermute them
-unpermutation <- order(permutation,decreasing = F)
-beta_est <- final_ss$moretrees_est[unpermutation]
+# Get final estimates
+beta_est <- final_ss$moretrees_est
 groups <- as.numeric(as.factor(beta_est))
 
 ############### Save results ###############
 
-save(permutation,beta_est,groups,final_ss,ELBOS,
+save(beta_est,groups,final_ss,ELBOS,
      file = paste0("./data_example_results/data_example_full_perm",perm,".Rdata"))
