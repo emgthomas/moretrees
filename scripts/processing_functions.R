@@ -52,7 +52,7 @@ beta.var.calc <- function(mu_gamma,sigma2_gamma,u_s,ancestors,pL,p){
   return(var_est)
 }
 
-gamma.sim.fun <- function(u,mu_gamma,sigma2_gamma,n.sim) rnorm(n.sim,mu_gamma[u],sigma2_gamma[u])
+gamma.sim.fun <- function(u,mu_gamma,sigma2_gamma,n.sim) rnorm(n.sim,mu_gamma[u],sqrt(sigma2_gamma[u]))
 
 indiv.beta.ci.calc <- function(VI_params,ancestors,pL,p,n.sim=1000){
   pi_s <- 1/(1+exp(-VI_params$u_s))
@@ -60,6 +60,7 @@ indiv.beta.ci.calc <- function(VI_params,ancestors,pL,p,n.sim=1000){
   sigma2_gamma <- VI_params$sigma2_gamma
   ci_l <- numeric(length=pL)
   ci_u <- numeric(length=pL)
+  beta_est <- numeric(pL)
   for(v in 1:pL){
     u <- ancestors[[v+p-pL]]
     # Estimate
@@ -179,6 +180,24 @@ bias_n_fun <- function(beta_sim,beta_true,n=20){
   beta_est_n <- beta_sim[top_n]
   beta_true_n <- beta_true[top_n] 
   mean(abs((beta_true_n-beta_est_n)/beta_true_n))
+}
+
+groups.coverage.fun <- function(sim,betasims,VIsims,beta_true,tree){
+  beta <- betasims$moretrees_est[betasims$sim==sim]
+  VIparams <- VIsims[VIsims$sim==sim,2:4]
+  tree_ci <- groups.calc.fun(tree=tree,beta_groups=as.factor(beta),
+                             beta=beta,VI_params=VIparams)
+  ci.lb <- V(tree_ci)$beta_grouped_cil[V(tree_ci)$leaf]
+  ci.ub <- V(tree_ci)$beta_grouped_ciu[V(tree_ci)$leaf]
+  return(mean(ci.lb <= beta_true & ci.ub >= beta_true))
+}
+
+indiv.coverage.fun <- function(sim,VIsims,beta_true,ancestors,pL,p){
+  VIparams <- VIsims[VIsims$sim==sim,2:4]
+  indiv_ci <- indiv.beta.ci.calc(VI_params=VIparams,ancestors=ancestors,pL=pL,p=p)
+  ci.lb <- indiv_ci$cil_indiv
+  ci.ub <- indiv_ci$ciu_indiv
+  return(mean(ci.lb <= beta_true & ci.ub >= beta_true))
 }
 
 smc <- function(x,y){
