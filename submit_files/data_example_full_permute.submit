@@ -5,9 +5,9 @@ Universe = vanilla
 # The following arguments are _optional_. If included
 # they are used to specify the requirements for the
 # submission.
-request_cpus = 3
+request_cpus = 1
 request_disk = 100KB
-request_memory = 50GB
+request_memory = 20GB
 
 # Enter the path to the program you wish to run.
 # The default runs the R program. To run another
@@ -35,5 +35,5 @@ Log = ../output/log_data_example_full_permute.$(Process)
 # Arguments in order: permutation restarts m.max tol
 # 
 Arguments = --no-save --no-restore --slave --args $(Process) 3 1E5 1E-16
-Queue 10
+Queue 30 # restarts * nperm
 

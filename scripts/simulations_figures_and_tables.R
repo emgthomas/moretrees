@@ -118,6 +118,21 @@ names(simres) <- c(rmse_names,ARI_names,nclust_names,bias_names,"groups_cov","in
 # est7 = adhoc4 (fully collpsed)
 # est8 = moretrees individual estimates
 
+# get hyperparams
+rho <- matrix(nrow=nsims,ncol=nrow(params))
+tau <- matrix(nrow=nsims,ncol=nrow(params))
+for(i in (1:nrow(params))){
+  # sim parameters
+  nsamp <- params$nsamp[i]
+  nsamp2 <- params$nsamp2[i]
+  whichbeta <- params$whichbeta[i]
+  outfile_hyp <- paste0(path_file,"hyperparams_n",nsamp,"_beta",whichbeta,".csv")
+  hyperparams_sims <- read.csv(file=outfile_hyp,header=T,row.names=NULL)
+  rho[,i] <- hyperparams_sims$rho
+  tau[,i] <- hyperparams_sims$tau
+}
+
+
 save(simres,params,file="simulation_results/simulation_results_df.Rdata")
 
 ######### Creating tables and figures ########

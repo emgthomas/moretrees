@@ -22,10 +22,11 @@ codes <- names(V(tree)[V(tree)$leaf])
 ######### Input parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-# datArgs <- c(0,3,1E5,1E-16) # Alternatively, enter arguments directly in R
+# datArgs <- c(4,3,1E5,1E-16) # Alternatively, enter arguments directly in R
 
-perm <- datArgs[1]+1 # permuation number
 nrestarts <- datArgs[2] # number of random restarts
+perm <- datArgs[1] %/% nrestarts + 1 # permuation number
+restart <- datArgs[1] %% nrestarts + 1
 m.max <- datArgs[3] # maximum number of time steps
 tol <- datArgs[4] # tolerance for convergence
 
@@ -54,32 +55,12 @@ adhoc_coeffs <- adhoc_collapsing(Z,Y,pL,groups)
 # Initial values for node coefficients
 nodes_init <- initial_node_coeffs(Z,Y,uncollapsed=adhoc_coeffs[,1],p,pL,leaf.descendants,ancestors)
 
-# For parallelization
-require(doParallel)
-registerDoParallel(cores=nrestarts)
-
-# Run spike & slab model using nrestarts random restarts
-restarts_ss <- foreach(j = 1:nrestarts) %dopar% {
-  
-  #out_ss <- 
-  VI_binary_ss(Z=Z,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
+# Run spike & slab model
+rm(.Random.seed, envir=globalenv()) # reset seed to get random initialization
+out_ss <-  VI_binary_ss(Z=Z,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
                leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
                tol=tol,m.max=m.max,m.print=10,more=FALSE,update_hyper=TRUE,update_hyper_freq=10)
-  
-}
-
-# Choose final model with highest ELBO
-ELBOS <- numeric(nrestarts)
-for(j in 1:nrestarts){
-  ELBOS[j] <- restarts_ss[[j]]$ELBO
-}
-final_ss <- restarts_ss[[which.max(ELBOS)]]
-
-# Get final estimates
-beta_est <- final_ss$moretrees_est
-groups <- as.numeric(as.factor(beta_est))
 
 ############### Save results ###############
 
-save(beta_est,groups,final_ss,ELBOS,
-     file = paste0("./data_example_results/data_example_full_perm",perm,".Rdata"))
+save(final_ss,file = paste0("./data_example_results/data_example_full_perm",perm,"_restart",restart,".Rdata"))
