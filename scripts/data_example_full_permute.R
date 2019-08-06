@@ -14,11 +14,6 @@ source("scripts/VI_functions.R")
 source("scripts/processing_functions.R")
 require(igraph)
 
-### load ICD9 tree ###
-load("./simulation_inputs/inputs.Rdata")
-# Extract list of relevant ICD9 codes
-codes <- names(V(tree)[V(tree)$leaf])
-
 ######### Input parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
@@ -38,8 +33,8 @@ load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/m
 # Load permutations
 load(file="./simulation_inputs/permutations.Rdata")
 
-# Load original results
-load(file="./data_example_results/data_example_full.Rdata")
+### load ICD9 tree ###
+load("./simulation_inputs/inputs.Rdata")
 
 # Permute data
 set.seed(permutations[perm])
@@ -63,4 +58,4 @@ out_ss <-  VI_binary_ss(Z=Z,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
 
 ############### Save results ###############
 
-save(final_ss,file = paste0("./data_example_results/data_example_full_perm",perm,"_restart",restart,".Rdata"))
+save(out_ss,file = paste0("./data_example_results/data_example_full_perm",perm,"_restart",restart,".Rdata"))
