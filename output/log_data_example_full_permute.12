@@ -29,3 +29,27 @@
 	   Disk (KB)            :        4      100   2072046
 	   Memory (MB)          :     3505    20480     20480
 ...
+000 (18463.012.000) 08/06 17:15:02 Job submitted from host: <10.0.0.43:9619?sock=8437_9f85_3>
+...
+001 (18463.012.000) 08/07 04:23:39 Job executing on host: <10.0.0.20:9619?sock=8693_aa4a_3>
+...
+006 (18463.012.000) 08/07 04:23:47 Image size of job updated: 371604
+	363  -  MemoryUsage of job (MB)
+	371604  -  ResidentSetSize of job (KB)
+...
+006 (18463.012.000) 08/07 04:28:47 Image size of job updated: 4244652
+	4146  -  MemoryUsage of job (MB)
+	4244652  -  ResidentSetSize of job (KB)
+...
+006 (18463.012.000) 08/07 04:33:47 Image size of job updated: 4561240
+	4455  -  MemoryUsage of job (MB)
+	4561240  -  ResidentSetSize of job (KB)
+...
+006 (18463.012.000) 08/07 04:38:48 Image size of job updated: 8621672
+	8420  -  MemoryUsage of job (MB)
+	8621672  -  ResidentSetSize of job (KB)
+...
+006 (18463.012.000) 08/07 04:43:49 Image size of job updated: 9890056
+	9659  -  MemoryUsage of job (MB)
+	9890056  -  ResidentSetSize of job (KB)
+...
