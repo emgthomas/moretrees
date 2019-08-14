@@ -1,0 +1,153 @@
+[1] 10
+[1] "Converged after 18 steps."
+
+
+Completed simulation 1 
+
+[1] 10
+[1] "Converged after 18 steps."
+
+
+Completed simulation 2 
+
+[1] 10
+[1] "Converged after 15 steps."
+
+
+Completed simulation 3 
+
+[1] 10
+[1] 20
+[1] "Converged after 20 steps."
+
+
+Completed simulation 4 
+
+[1] 10
+[1] "Converged after 19 steps."
+
+
+Completed simulation 5 
+
+[1] 10
+[1] "Converged after 19 steps."
+
+
+Completed simulation 6 
+
+[1] 10
+[1] "Converged after 16 steps."
+
+
+Completed simulation 7 
+
+[1] 10
+[1] 20
+[1] "Converged after 26 steps."
+
+
+Completed simulation 8 
+
+[1] 10
+[1] "Converged after 18 steps."
+
+
+Completed simulation 9 
+
+[1] 10
+[1] 20
+[1] 30
+[1] 40
+[1] "Converged after 40 steps."
+
+
+Completed simulation 10 
+
+[1] 10
+[1] "Converged after 15 steps."
+
+
+Completed simulation 11 
+
+[1] 10
+[1] "Converged after 19 steps."
+
+
+Completed simulation 12 
+
+[1] 10
+[1] "Converged after 15 steps."
+
+
+Completed simulation 13 
+
+[1] 10
+[1] "Converged after 16 steps."
+
+
+Completed simulation 14 
+
+[1] 10
+[1] "Converged after 18 steps."
+
+
+Completed simulation 15 
+
+[1] 10
+[1] 20
+[1] 30
+[1] 40
+[1] 50
+[1] "Converged after 59 steps."
+
+
+Completed simulation 16 
+
+[1] 10
+[1] 20
+[1] 30
+[1] 40
+[1] 50
+[1] "Converged after 58 steps."
+
+
+Completed simulation 17 
+
+[1] 10
+[1] "Converged after 10 steps."
+
+
+Completed simulation 18 
+
+[1] 10
+[1] "Converged after 16 steps."
+
+
+Completed simulation 19 
+
+[1] 10
+[1] 20
+[1] 30
+[1] 40
+[1] "Converged after 40 steps."
+
+
+Completed simulation 20 
+
+[1] 10
+[1] "Converged after 16 steps."
+
+
+Completed simulation 21 
+
+[1] "Converged after 8 steps."
+
+
+Completed simulation 22 
+
+[1] "Converged after 9 steps."
+
+
+Completed simulation 23 
+
+[1] 10
