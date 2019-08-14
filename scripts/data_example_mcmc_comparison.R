@@ -20,16 +20,12 @@ require(BoomSpikeSlab)
 ######### Algorithm parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-# datArgs <- c(28,3,10,1,1) # Alternatively, enter arguments directly in R
+# datArgs <- c(0,10,1,1) # Alternatively, enter arguments directly in R
 
-#nchains <- datArgs[2] # how may parallel chains to run
-#sim <- datArgs[1] %/% nchains + 1 # which simulated dataset (integer from 1 to 10)
-sim <- 9
-# chain <- datArgs[1] %% nchains + 1 # which chain (integer from 1 to nchains)
-chain <- 1
-niter <- datArgs[3] # number of MCMC samples
-nthreads <- datArgs[4] # number of threads for data augmentation (see ?logit.spike)
-ping <- datArgs[5] # print progress report after ping samples
+chain <- datArgs[1] + 1 # which chain
+niter <- datArgs[2] # number of MCMC samples
+nthreads <- datArgs[3] # number of threads for data augmentation (see ?logit.spike)
+ping <- datArgs[4] # print progress report after ping samples
 
 ######################## Load data ########################
 
@@ -37,11 +33,10 @@ ping <- datArgs[5] # print progress report after ping samples
 load("./simulation_inputs/inputs.Rdata")
 
 # Load VI results
-VI_res <- paste0("./data_example_results/comparison_vi_results",sim,".Rdata")
-load(VI_res)
+load("./data_example_results/data_example_full.Rdata")
 
-# Load simulated data
-load(file=paste0("./simulation_inputs/simulate_data_comparison",1,".Rdata"))
+# Load data
+load("/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
 
 ######################## Prepare data for MCMC ########################
 
@@ -56,7 +51,7 @@ for(v in 1:p) A_check[v] <- setequal(which(A[v,]>0),ancestors[[v]])
 sum(A_check) == p
 
 # Construct design matrix
-Xmat <- bdiag(Z.sim)
+Xmat <- bdiag(Z)
 Xmat <- cbind(Matrix(0,nrow=nrow(Xmat),ncol=p-pL,sparse=T),Xmat)
 Xstar <- Xmat %*% A
 
