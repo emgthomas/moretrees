@@ -36,9 +36,15 @@ m.print <- datArgs[5] # how often to print progress for VI algorithm
 load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
 
 # Load original results
-load(file="./data_example_results/data_example_full.Rdata",verbose = T)
+load(file="./data_example_results/data_example_full.Rdata")
 # Use the collapsed estimates as true betas in simulation
 beta_true <- beta_est
+# Use other estimates as initial values for VI algorithm in simulation
+mu_gamma_init <- final_ss$VI_params$mu_gamma
+sigma2_gamma_init <- final_ss$VI_params$sigma2_gamma
+u_s_init <- final_ss$VI_params$u_s
+tau_init <- final_ss$hyperparams[2]
+rho_init <- final_ss$hyperparams[1]
 
 ###################### Simulate case/control status ####################
 
@@ -46,7 +52,7 @@ beta_true <- beta_est
 Z.sim <- list()
 for(v in 1:pL){
   # Compute probability unit 1 is a case
-  prob_unit1 <- 1/(1+exp(-beta_sim[v]*Z[[v]]))
+  prob_unit1 <- 1/(1+exp(-beta_true[v]*Z[[v]]))
   probs <- as.data.frame(rbind(prob_unit1,1-prob_unit1))
   # Randomly assign case or control status
   cc <- sapply(probs,sample,x=c(1,-1),size=1,replace=FALSE)
@@ -79,8 +85,10 @@ sink(file=pr)
 while(i < nsims){
   
   # run VI algorithm
-  out_vi <- VI_binary_ss(Z=Z.sim,Y=Y.sim,n=nsamp,p=p,pL=pL,ancestors=ancestors,
-                         leaf.descendants=leaf.descendants,cutoff=0.5,mu_gamma_init=nodes_init,
+  out_vi <- VI_binary_ss(Z=Z.sim,Y=Y,n=nsamp,p=p,pL=pL,ancestors=ancestors,
+                         leaf.descendants=leaf.descendants,cutoff=0.5,
+                         mu_gamma_init=nodes_init,u_s_init=u_s_init,sigma2_gamma_init=sigma2_gamma_init,
+                         tau_init=tau_init,rho_init=rho_init,
                          tol=tol,m.max=m.max,m.print=m.print,more=FALSE,update_hyper=T,update_hyper_freq=10)
   
   # iterate sim number
