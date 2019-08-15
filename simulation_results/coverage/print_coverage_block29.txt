@@ -151,3 +151,9 @@ Completed simulation 24
 Completed simulation 25 
 
 [1] 10
+[1] 20
+[1] "Converged after 29 steps."
+
+
+Completed simulation 26 
+
