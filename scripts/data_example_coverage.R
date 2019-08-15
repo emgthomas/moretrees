@@ -48,18 +48,18 @@ rho_init <- final_ss$hyperparams[1]
 # For storing results
 if(!dir.exists("simulation_results/coverage")) dir.create("simulation_results/coverage")
 
-beta_file <- paste0("simulation_results/coverage/beta_coverage_block",block,".csv")
+betaML_file <- paste0("simulation_results/coverage/beta_ML_coverage_block",block,".csv")
 VI_file <- paste0("simulation_results/coverage/VI_coverage_block",block,".csv")
 hyper_file <- paste0("simulation_results/coverage/hyper_coverage_block",block,".csv")
 
-if(file.exists(beta_file)){
-  i <- nrow(read.csv(beta_file))
+if(file.exists(betaML_file) & file.exists(VI_file) & file.exists(hyper_file)){
+  i <- nrow(read.csv(hyper_file))
 } else {
-  file.create(beta_file)
+  file.create(betaML_file)
+  file.create(VI_file)
+  file.create(hyper_file)
   i <- 0
 }
-if(!file.exists(VI_file))  file.create(VI_file)
-if(!file.exists(hyper_file)) file.create(hyper_file)
 
 
 # saving output to track number of time steps
@@ -71,7 +71,7 @@ Z.sim <- Z
 
 while(i <= nsims){
   
-  # Simulate exposures and case/control status\
+  # Simulate exposures and case/control status
   for(v in 1:pL){
     # Compute probability unit 1 is a case
     prob_unit1 <- 1/(1+exp(-beta_true[v]*Z[[v]]))
@@ -80,19 +80,44 @@ while(i <= nsims){
     Z.sim[[v]] <- Z[[v]]*(2*cc-1)
   }
   
+  # add a little perturbation to initial values for variational parameters
+  f <- 0.1
+  mu_gamma_init2 <- mu_gamma_init + sapply(abs(mu_gamma_init)*f,rnorm,mean=0,n=1)
+  u_s_init2 <- u_s_init + sapply(abs(u_s_init)*f,rnorm,mean=0,n=1)
+  sigma2_gamma_init2 <- sigma2_gamma_init + sapply(abs(sigma2_gamma_init)*f,rnorm,mean=0,n=1)
+  
   # run VI algorithm
   out_vi <- VI_binary_ss(Z=Z.sim,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
                          leaf.descendants=leaf.descendants,cutoff=0.5,
-                         mu_gamma_init=mu_gamma_init,u_s_init=u_s_init,sigma2_gamma_init=sigma2_gamma_init,
+                         mu_gamma_init=mu_gamma_init2,u_s_init=u_s_init2,sigma2_gamma_init=sigma2_gamma_init2,
                          tau_init=tau_init,rho_init=rho_init,
                          tol=tol,m.max=m.max,m.print=m.print,more=FALSE,update_hyper=T,update_hyper_freq=10)
+  
+  # fit MLE to discovered groups
+  beta_est <- out_vi$moretrees_est
+  groups <- as.numeric(as.factor(beta_est))
+  beta.ml.groups <- numeric(pL)
+  beta.cil.groups <- numeric(pL)
+  beta.ciu.groups <- numeric(pL)
+  for(g in 1:max(groups)){
+    which.dat <- groups==g
+    Y.g <- sum(Y[which.dat])
+    if(Y.g == 0){
+      beta.groups[which.dat,i] <- NA
+    } else {
+      beta_ml <- glm(rep(1,Y.g) ~ 0 + unlist(Z[which.dat]),family="binomial")
+      beta.ml.groups[which.dat] <- beta_ml$coefficients[1]
+      beta.cil.groups[which.dat] <- beta_ml$coefficients[1]+qnorm(0.025)*sqrt(vcov(beta_ml))
+      beta.ciu.groups[which.dat] <- beta_ml$coefficients[1]+qnorm(0.975)*sqrt(vcov(beta_ml))
+    }
+  }
   
   # iterate sim number
   i <- i + 1
   cat("\n\nCompleted simulation",i,"\n\n")
   
   # write output to csv file
-  write.table(rbind(c(i,out_vi$moretrees_est)), file = beta_file, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+  write.table(cbind(rep(i,pL),beta.ml.groups,beta.cil.groups,beta.ciu.groups), file = betaML_file, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
   
   write.table(cbind(rep(i,p),out_vi$VI_params), file = VI_file, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
   

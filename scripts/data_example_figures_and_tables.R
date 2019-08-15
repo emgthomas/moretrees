@@ -405,26 +405,6 @@ pdf(file = paste0("./figures_and_tables/figureA4.pdf"),
 wrap_plots(plot.list,ncol=3,widths=rep(1,3),heights=rep(1,2))
 dev.off()
 
-# ##### OR for original groups vs permuted groups, showing number of cases
-# for(i in 0:10){
-#   dat.i <- dat.df[dat.df$perm==i,]
-#   dat.i$est.group2 <- as.factor(dat.i$est.group)
-#   plot.i <- ggplot(dat.i,aes(x=as.factor(est.group),y=est.group.orig,
-#                              color=group,label=round(n.cases/10^3))) + 
-#     geom_point(color="white",size=6) +
-#     geom_label(size=4,label.size=0,label.padding=unit(0,"lines")) +
-#     theme_bw() +
-#     theme(legend.position="none") +
-#     facet_wrap(.~perm,nrow=1) +
-#     xlab("Permuted OR") +
-#     ylab("Original OR")
-#   # Save plot as pdf
-#   pdf(file = paste0("./figures_and_tables/figureA5_",i,".pdf"),
-#       width=4,height=3)
-#   print(plot.i)
-#   dev.off()
-# }
-
 ############################# Sensitivity analysis results #############################
 load("data_example_results/data_example_full.Rdata")
 beta_est_orig <- exp(final_ss$moretrees_est*10)
@@ -816,5 +796,78 @@ names(small_xtable) <- c("Group","ICD9 codes","#Cases","Permuted SMC","OR (95%CI
 
 write(print(small_xtable,floating=FALSE,include.rownames = FALSE),file="./figures_and_tables/table1.tex")
 
+########################## Conditional coverage analysis #############################
+
+# # Appending simulation blocks
+# VI_files <- list.files(path="simulation_results/coverage/",pattern="VI_coverage_block*")
+# VI_new_file <- "simulation_results/VI_conditional_coverage.csv"
+# file.create(VI_new_file)
+# write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s")), file = VI_new_file, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
+# i <- 0
+# for(fn in VI_files){
+#   sims <- read.csv(file=paste0("simulation_results/coverage/",fn),header=F,row.names=NULL)
+#   sims[,1] <- sims[,1] + i
+#   i <- max(sims[,1])
+#   write.table(sims, file="simulation_results/VI_conditional_coverage.csv", row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+# }
+
+
+####### Get coverage per group #######
+# Load simulation results
+VIsims <- read.csv("simulation_results/VI_conditional_coverage.csv",header = T)
+# Load full data results
+load("data_example_results/data_example_full.Rdata",verbose = T)
+beta_true <- beta_est # used the estimated betas as true betas in this simulation
+groups_true <- groups
+
+# Load tree
+load("simulation_inputs/inputs.Rdata")
+
+# Get ancestor matrix A
+A <- t(as_adj(tree,sparse = T))
+A <- expm(A)
+A[A>0] <- 1 # row A[v,] indicates which nodes are ancestors of v
+
+# Modify it so that only non-zero nodes are equal to one
+nonzero <- exp(loglogit(final_ss$VI_params$u_s)) >= 0.5
+A <- A %*% diag(nonzero)
+A.conv <- A[(p-pL+1):p,] # matrix for conversion: beta <- A.conv %*% gamma
+
+# check it worked
+beta_true <- as.numeric(A.conv %*% final_ss$VI_params$mu_gamma)
+all.equal(beta_true,beta_est) # yep
+
+# list to store coverage results
+coverage <- rep(list(numeric(0)),8)
+pbias <- rep(list(numeric(0)),8)
+# get binary coverage indicator for each simulation
+for(i in 1:max(VIsims$sim)){
+  VIsims_i <- VIsims[VIsims$sim==i,]
+  # Get CIs for simulation
+  beta_est <- as.numeric(A.conv %*% VIsims_i$mu_gamma)
+  groups_est <- as.integer(as.factor(beta_est))
+  gtab <- table(groups_est,groups_true)
+  for(g in 1:max(groups_true)){ # for each true group
+    if(sum(gtab[,g]>0)==1){ # did we estimate exactly the same group g in simulated dataset?
+      beta_true_g <- unique(beta_true[groups_true==g]) # what was the true beta for this group?
+      h <- as.integer(which(gtab[,g]>0)) # which estimated group corresponds to group g?
+      v <- which(groups_est==h)[1] # select a representative outcome from the group (results will be same for any such v)
+      beta_est_g <- unique(beta_est[v]) # get estimated beta for group h
+      sd_est_g <- sqrt(as.numeric(A.conv[v,] %*% VIsims_i$sigma2_gamma)) # get sd for group h
+      ci_l <- beta_est_g - qnorm(0.975)*sd_est_g # lower bound of CI
+      ci_u <- beta_est_g + qnorm(0.975)*sd_est_g # upper bound of CI
+      covered <- (ci_l <= beta_true_g) & (ci_u >= beta_true_g) # does the CI cover the true beta?
+      coverage[[g]] <- c(coverage[[g]],covered) # store in list
+      pbias[[g]] <- c(pbias[[g]],abs(beta_est_g-beta_true_g)/abs(beta_true_g))
+    }
+  }
+  if(i %% 100 == 0) print(i)
+}
+
+# compute group-specific coverage
+cov_groups <- sapply(coverage,mean)
+
+# compute group-specific percentage bias
+pbias_groups <- sapply(pbias,mean)
 
 
