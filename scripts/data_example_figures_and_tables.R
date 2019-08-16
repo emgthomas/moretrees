@@ -798,23 +798,36 @@ write(print(small_xtable,floating=FALSE,include.rownames = FALSE),file="./figure
 
 ########################## Conditional coverage analysis #############################
 
-# # Appending simulation blocks
-# VI_files <- list.files(path="simulation_results/coverage/",pattern="VI_coverage_block*")
-# VI_new_file <- "simulation_results/VI_conditional_coverage.csv"
-# file.create(VI_new_file)
-# write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s")), file = VI_new_file, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-# i <- 0
-# for(fn in VI_files){
-#   sims <- read.csv(file=paste0("simulation_results/coverage/",fn),header=F,row.names=NULL)
-#   sims[,1] <- sims[,1] + i
-#   i <- max(sims[,1])
-#   write.table(sims, file="simulation_results/VI_conditional_coverage.csv", row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-# }
+# Appending simulation blocks
+VI_files <- list.files(path="simulation_results/coverage/",pattern="VI_coverage_block*")
+VI_new_file <- "simulation_results/VI_conditional_coverage.csv"
+file.create(VI_new_file)
+write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s")), file = VI_new_file, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
+i <- 0
+for(fn in VI_files){
+  sims <- read.csv(file=paste0("simulation_results/coverage/",fn),header=F,row.names=NULL)
+  sims[,1] <- sims[,1] + i
+  i <- max(sims[,1])
+  write.table(sims, file=VI_new_file, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+}
+
+beta_ML_files <- list.files(path="simulation_results/coverage/",pattern="beta_ML_coverage_block*")
+beta_ML_new_file <- "simulation_results/beta_ML_conditional_coverage.csv"
+file.create(beta_ML_new_file)
+write.table(rbind(c("sim","beta_ML","ci_l","ci_u")), file = beta_ML_new_file, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
+i <- 0
+for(fn in beta_ML_files){
+  sims <- read.csv(file=paste0("simulation_results/coverage/",fn),header=F,row.names=NULL)
+  sims[,1] <- sims[,1] + i
+  i <- max(sims[,1])
+  write.table(sims, file=beta_ML_new_file, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
+}
 
 
 ####### Get coverage per group #######
 # Load simulation results
 VIsims <- read.csv("simulation_results/VI_conditional_coverage.csv",header = T)
+betaMLsims <- read.csv("simulation_results/beta_ML_conditional_coverage.csv",header = T)
 # Load full data results
 load("data_example_results/data_example_full.Rdata",verbose = T)
 beta_true <- beta_est # used the estimated betas as true betas in this simulation
@@ -838,11 +851,14 @@ beta_true <- as.numeric(A.conv %*% final_ss$VI_params$mu_gamma)
 all.equal(beta_true,beta_est) # yep
 
 # list to store coverage results
-coverage <- rep(list(numeric(0)),8)
-pbias <- rep(list(numeric(0)),8)
+coverage_VI <- rep(list(numeric(0)),8)
+coverage_ML <- rep(list(numeric(0)),8)
+pbias_VI <- rep(list(numeric(0)),8)
+pbias_ML <- rep(list(numeric(0)),8)
 # get binary coverage indicator for each simulation
 for(i in 1:max(VIsims$sim)){
   VIsims_i <- VIsims[VIsims$sim==i,]
+  betaMLsims
   # Get CIs for simulation
   beta_est <- as.numeric(A.conv %*% VIsims_i$mu_gamma)
   groups_est <- as.integer(as.factor(beta_est))
@@ -859,6 +875,7 @@ for(i in 1:max(VIsims$sim)){
       covered <- (ci_l <= beta_true_g) & (ci_u >= beta_true_g) # does the CI cover the true beta?
       coverage[[g]] <- c(coverage[[g]],covered) # store in list
       pbias[[g]] <- c(pbias[[g]],abs(beta_est_g-beta_true_g)/abs(beta_true_g))
+      # Same for ML
     }
   }
   if(i %% 100 == 0) print(i)
