@@ -32,8 +32,7 @@ Log = ../output/log_data_example_coverage.$(Process)
 #Queue 4
 
 # Specify any arguments you want to pass to the executable.
-# Arguments in order: block nsims n.max tol m.print
+# Arguments in order: block nsims m.max tol m.print
 # 
 Arguments = --no-save --no-restore --slave --args $(Process) 25 1E5 1E-8 10
 Queue 40 # should have nsims * queue = total number of sims (1000)
-

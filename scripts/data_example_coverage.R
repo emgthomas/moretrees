@@ -18,7 +18,7 @@ load("./simulation_inputs/inputs.Rdata")
 ######### Algorithm parameters #########
 
 datArgs <- as.integer(as.character(commandArgs(trailingOnly = TRUE))) # Use to call arguments from the command line
-# datArgs <- c(0,20,1E5,1E-8,10) # Alternatively, enter arguments directly in R
+# datArgs <- c(0,2,3,1E-8,1) # Alternatively, enter arguments directly in R
 
 block <- datArgs[1]+1 # which block of simulations is this
 nsims <- datArgs[2] # how many sims to do here
@@ -80,17 +80,19 @@ while(i <= nsims){
     Z.sim[[v]] <- Z[[v]]*(2*cc-1)
   }
   
-  # add a little perturbation to initial values for variational parameters
+  # add a little perturbation to initial values
   f <- 0.1
   mu_gamma_init2 <- mu_gamma_init + sapply(abs(mu_gamma_init)*f,rnorm,mean=0,n=1)
   u_s_init2 <- u_s_init + sapply(abs(u_s_init)*f,rnorm,mean=0,n=1)
   sigma2_gamma_init2 <- sigma2_gamma_init + sapply(abs(sigma2_gamma_init)*f,rnorm,mean=0,n=1)
+  tau_init2 <- exp(log(tau_init) + rnorm(1,sd=0.1*abs(log(tau_init))))
+  rho_init2 <- rho_init + runif(1,rho_init/2,rho_init*3/2)
   
   # run VI algorithm
   out_vi <- VI_binary_ss(Z=Z.sim,Y=Y,n=sum(Y),p=p,pL=pL,ancestors=ancestors,
                          leaf.descendants=leaf.descendants,cutoff=0.5,
                          mu_gamma_init=mu_gamma_init2,u_s_init=u_s_init2,sigma2_gamma_init=sigma2_gamma_init2,
-                         tau_init=tau_init,rho_init=rho_init,
+                         tau_init=tau_init2,rho_init=rho_init2,
                          tol=tol,m.max=m.max,m.print=m.print,more=FALSE,update_hyper=T,update_hyper_freq=10)
   
   # fit MLE to discovered groups
