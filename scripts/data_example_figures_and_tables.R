@@ -843,8 +843,8 @@ A[A>0] <- 1 # row A[v,] indicates which nodes are ancestors of v
 
 # Modify it so that only non-zero nodes are equal to one
 nonzero <- exp(loglogit(final_ss$VI_params$u_s)) >= 0.5
-A <- A %*% diag(nonzero)
-A.conv <- A[(p-pL+1):p,] # matrix for conversion: beta <- A.conv %*% gamma
+A.mod <- A %*% diag(nonzero)
+A.conv <- A.mod[(p-pL+1):p,] # matrix for conversion: beta <- A.conv %*% gamma
 
 # check it worked
 beta_true <- as.numeric(A.conv %*% final_ss$VI_params$mu_gamma)
@@ -858,33 +858,56 @@ pbias_ML <- rep(list(numeric(0)),8)
 # get binary coverage indicator for each simulation
 for(i in 1:max(VIsims$sim)){
   VIsims_i <- VIsims[VIsims$sim==i,]
-  betaMLsims
+  betaMLsims_i <- betaMLsims[betaMLsims$sim==i,]
   # Get CIs for simulation
+  nonzero <- exp(loglogit(VIsims_i$u_s)) >= 0.5
+  A.mod <- A %*% diag(nonzero)
+  A.conv <- A.mod[(p-pL+1):p,] # matrix for conversion: beta <- A.conv %*% gamma
   beta_est <- as.numeric(A.conv %*% VIsims_i$mu_gamma)
   groups_est <- as.integer(as.factor(beta_est))
   gtab <- table(groups_est,groups_true)
   for(g in 1:max(groups_true)){ # for each true group
-    if(sum(gtab[,g]>0)==1){ # did we estimate exactly the same group g in simulated dataset?
-      beta_true_g <- unique(beta_true[groups_true==g]) # what was the true beta for this group?
-      h <- as.integer(which(gtab[,g]>0)) # which estimated group corresponds to group g?
-      v <- which(groups_est==h)[1] # select a representative outcome from the group (results will be same for any such v)
-      beta_est_g <- unique(beta_est[v]) # get estimated beta for group h
-      sd_est_g <- sqrt(as.numeric(A.conv[v,] %*% VIsims_i$sigma2_gamma)) # get sd for group h
-      ci_l <- beta_est_g - qnorm(0.975)*sd_est_g # lower bound of CI
-      ci_u <- beta_est_g + qnorm(0.975)*sd_est_g # upper bound of CI
-      covered <- (ci_l <= beta_true_g) & (ci_u >= beta_true_g) # does the CI cover the true beta?
-      coverage[[g]] <- c(coverage[[g]],covered) # store in list
-      pbias[[g]] <- c(pbias[[g]],abs(beta_est_g-beta_true_g)/abs(beta_true_g))
-      # Same for ML
+    if(sum(gtab[,g]>0)==1){ # did true group get split into multiple estimated groups?
+      # If no...
+      h <- as.integer(which(gtab[,g]>0)) # which estimated group contains all outcomes in group g?
+      if(sum(gtab[h,]>0)==1){ # does this group contain other outcomes, outside group g?
+        # If no, groups g and h are identical. Proceed with estimating coverage.
+        
+        # Did the moretrees estimate cover the true coefficient?
+        beta_true_g <- unique(beta_true[groups_true==g]) # what was the true beta for this group?
+        v <- which(groups_est==h)[1] # select a representative outcome from the group (results will be same for any such v)
+        beta_est_g <- unique(beta_est[v]) # get estimated beta for group h
+        sd_est_g <- sqrt(as.numeric(A.conv[v,] %*% VIsims_i$sigma2_gamma)) # get sd for group h
+        ci_l <- beta_est_g - qnorm(0.975)*sd_est_g # lower bound of CI
+        ci_u <- beta_est_g + qnorm(0.975)*sd_est_g # upper bound of CI
+        covered <- (ci_l <= beta_true_g) & (ci_u >= beta_true_g) # does the CI cover the true beta?
+        coverage_VI[[g]] <- c(coverage_VI[[g]],covered) # store in list
+        pbias_VI[[g]] <- c(pbias_VI[[g]],abs(beta_est_g-beta_true_g)/abs(beta_true_g))
+        
+        # Did the ML estimate cover the true coefficient?
+        beta_ML_g <- unique(betaMLsims_i$beta_ML[groups_true==g])
+        ci_ML_l <- unique(betaMLsims_i$ci_l[groups_true==g])
+        ci_ML_u <- unique(betaMLsims_i$ci_u[groups_true==g])
+        covered_ML <- (ci_ML_l <= beta_true_g) & (ci_ML_u >= beta_true_g)
+        coverage_ML[[g]] <- c(coverage_ML[[g]],covered_ML) 
+        pbias_ML[[g]] <- c(pbias_ML[[g]],abs(beta_ML_g-beta_true_g)/abs(beta_true_g))
+      }
     }
   }
   if(i %% 100 == 0) print(i)
 }
 
+# what's our conditional sample size for each group?
+nsamp_g <- sapply(coverage_ML,length)
+
 # compute group-specific coverage
-cov_groups <- sapply(coverage,mean)
+cov_groups_VI <- sapply(coverage_VI,mean)
+cov_groups_ML <- sapply(coverage_ML,mean)
+cov_tab <- data.frame("Group"=1:8,"ssMOReTreeS"=cov_groups_VI*100,"Maximum likelihood"=cov_groups_ML*100)
+print(xtable(cov_tab),include.rownames=F)
 
 # compute group-specific percentage bias
-pbias_groups <- sapply(pbias,mean)
+pbias_groups_VI <- sapply(pbias_VI,mean)
+pbias_groups_ML <- sapply(pbias_ML,mean)
 
 
