@@ -107,7 +107,7 @@ while(i <= nsims){
     if(Y.g == 0){
       beta.groups[which.dat,i] <- NA
     } else {
-      beta_ml <- glm(rep(1,Y.g) ~ 0 + unlist(Z[which.dat]),family="binomial")
+      beta_ml <- glm(rep(1,Y.g) ~ 0 + unlist(Z.sim[which.dat]),family="binomial")
       beta.ml.groups[which.dat] <- beta_ml$coefficients[1]
       beta.cil.groups[which.dat] <- beta_ml$coefficients[1]+qnorm(0.025)*sqrt(vcov(beta_ml))
       beta.ciu.groups[which.dat] <- beta_ml$coefficients[1]+qnorm(0.975)*sqrt(vcov(beta_ml))
