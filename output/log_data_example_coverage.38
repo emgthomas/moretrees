@@ -98,3 +98,53 @@
 	   Disk (KB)            :        7      500   1844750
 	   Memory (MB)          :    14539    20480     20480
 ...
+000 (72488.038.000) 08/16 17:13:00 Job submitted from host: <10.0.0.94:9619?sock=3420_d77c_3>
+...
+001 (72488.038.000) 08/16 19:19:56 Job executing on host: <10.0.0.207:9619?sock=8684_04e9_3>
+...
+006 (72488.038.000) 08/16 19:20:04 Image size of job updated: 406556
+	398  -  MemoryUsage of job (MB)
+	406556  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/16 19:25:04 Image size of job updated: 5569844
+	5440  -  MemoryUsage of job (MB)
+	5569844  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/16 19:30:04 Image size of job updated: 6313112
+	6166  -  MemoryUsage of job (MB)
+	6313112  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/16 19:35:05 Image size of job updated: 9431952
+	9211  -  MemoryUsage of job (MB)
+	9431952  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/16 19:40:06 Image size of job updated: 9568832
+	9345  -  MemoryUsage of job (MB)
+	9568832  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/16 19:45:06 Image size of job updated: 11523972
+	11254  -  MemoryUsage of job (MB)
+	11523972  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/16 21:25:18 Image size of job updated: 14186152
+	13854  -  MemoryUsage of job (MB)
+	14186152  -  ResidentSetSize of job (KB)
+...
+006 (72488.038.000) 08/17 15:22:11 Image size of job updated: 17107596
+	16707  -  MemoryUsage of job (MB)
+	17107596  -  ResidentSetSize of job (KB)
+...
+004 (72488.038.000) 08/17 16:29:36 Job was evicted.
+	(0) Job was not checkpointed.
+		Usr 0 20:47:00, Sys 0 00:22:05  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 1         1
+	   Disk (KB)            :        7      500   9118389
+	   Memory (MB)          :    16707    20480     20480
+...
+009 (72488.038.000) 08/17 16:29:36 Job was aborted by the user.
+	via condor_rm (by user ethomas)
+...

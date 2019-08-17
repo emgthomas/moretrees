@@ -122,3 +122,54 @@
 	   Disk (KB)            :        7      500   1844034
 	   Memory (MB)          :    12833    20480     20480
 ...
+000 (72488.014.000) 08/16 17:12:59 Job submitted from host: <10.0.0.94:9619?sock=3420_d77c_3>
+...
+001 (72488.014.000) 08/16 17:13:19 Job executing on host: <10.0.0.5:9619?sock=8676_1c93_3>
+...
+006 (72488.014.000) 08/16 17:13:29 Image size of job updated: 519828
+	508  -  MemoryUsage of job (MB)
+	519828  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 17:18:29 Image size of job updated: 5008564
+	4892  -  MemoryUsage of job (MB)
+	5008564  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 17:23:30 Image size of job updated: 7645140
+	7466  -  MemoryUsage of job (MB)
+	7645140  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 17:28:30 Image size of job updated: 9639152
+	9414  -  MemoryUsage of job (MB)
+	9639152  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 17:38:31 Image size of job updated: 10803592
+	10551  -  MemoryUsage of job (MB)
+	10803592  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 17:48:32 Image size of job updated: 12176308
+	11891  -  MemoryUsage of job (MB)
+	12176308  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 17:53:32 Image size of job updated: 12250748
+	11964  -  MemoryUsage of job (MB)
+	12250748  -  ResidentSetSize of job (KB)
+...
+006 (72488.014.000) 08/16 19:28:43 Image size of job updated: 13806204
+	13483  -  MemoryUsage of job (MB)
+	13806204  -  ResidentSetSize of job (KB)
+...
+005 (72488.014.000) 08/17 01:49:26 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 08:28:57, Sys 0 00:07:02  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 08:28:57, Sys 0 00:07:02  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 1         1
+	   Disk (KB)            :        7      500   8358481
+	   Memory (MB)          :    13483    20480     20480
+...

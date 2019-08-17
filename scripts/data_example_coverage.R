@@ -53,8 +53,8 @@ VI_file <- paste0("simulation_results/coverage/VI_coverage_block",block,".csv")
 hyper_file <- paste0("simulation_results/coverage/hyper_coverage_block",block,".csv")
 
 if(file.exists(betaML_file) & file.exists(VI_file) & file.exists(hyper_file)){
-  i <- nrow(read.csv(hyper_file))
-} else {
+  i <- nrow(read.csv(hyper_file,header=F))
+# } else {
   file.create(betaML_file)
   file.create(VI_file)
   file.create(hyper_file)

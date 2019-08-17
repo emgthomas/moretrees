@@ -253,3 +253,50 @@
 	   Disk (KB)            :        7      500   2155954
 	   Memory (MB)          :    12984    20480     20480
 ...
+000 (72488.000.000) 08/16 17:12:59 Job submitted from host: <10.0.0.94:9619?sock=3420_d77c_3>
+...
+001 (72488.000.000) 08/16 17:13:19 Job executing on host: <10.0.1.120:9619?sock=12443_d608_3>
+...
+006 (72488.000.000) 08/16 17:13:28 Image size of job updated: 450036
+	440  -  MemoryUsage of job (MB)
+	450036  -  ResidentSetSize of job (KB)
+...
+006 (72488.000.000) 08/16 17:18:29 Image size of job updated: 5846160
+	5710  -  MemoryUsage of job (MB)
+	5846160  -  ResidentSetSize of job (KB)
+...
+006 (72488.000.000) 08/16 17:23:29 Image size of job updated: 8972016
+	8762  -  MemoryUsage of job (MB)
+	8972016  -  ResidentSetSize of job (KB)
+...
+006 (72488.000.000) 08/16 17:28:30 Image size of job updated: 10942144
+	10686  -  MemoryUsage of job (MB)
+	10942144  -  ResidentSetSize of job (KB)
+...
+006 (72488.000.000) 08/16 17:58:34 Image size of job updated: 11793336
+	11517  -  MemoryUsage of job (MB)
+	11793336  -  ResidentSetSize of job (KB)
+...
+006 (72488.000.000) 08/16 18:18:36 Image size of job updated: 12451120
+	12160  -  MemoryUsage of job (MB)
+	12451120  -  ResidentSetSize of job (KB)
+...
+006 (72488.000.000) 08/16 19:08:41 Image size of job updated: 14638676
+	14296  -  MemoryUsage of job (MB)
+	14638676  -  ResidentSetSize of job (KB)
+...
+005 (72488.000.000) 08/16 23:57:06 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 06:34:44, Sys 0 00:08:59  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 06:34:44, Sys 0 00:08:59  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	0  -  Total Bytes Sent By Job
+	0  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated
+	   Cpus                 :                 1         1
+	   Disk (KB)            :        7      500   2157642
+	   Memory (MB)          :    14296    20480     20480
+...
