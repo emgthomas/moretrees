@@ -1,0 +1,61 @@
+[1] 10
+[1] 20
+[1] 30
+[1] 40
+[1] 50
+[1] 60
+[1] 70
+[1] "Converged after 70 steps."
+
+
+Completed simulation 1 
+
+[1] 10
+[1] "Converged after 19 steps."
+
+
+Completed simulation 2 
+
+[1] 10
+[1] "Converged after 16 steps."
+
+
+Completed simulation 3 
+
+[1] 10
+[1] 20
+[1] 30
+[1] 40
+[1] "Converged after 49 steps."
+
+
+Completed simulation 4 
+
+[1] 10
+[1] 20
+[1] "Converged after 20 steps."
+
+
+Completed simulation 5 
+
+[1] 10
+[1] "Converged after 16 steps."
+
+
+Completed simulation 6 
+
+[1] 10
+[1] "Converged after 19 steps."
+
+
+Completed simulation 7 
+
+[1] 10
+[1] 20
+[1] 30
+[1] "Converged after 36 steps."
+
+
+Completed simulation 8 
+
+[1] 10
