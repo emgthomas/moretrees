@@ -823,8 +823,10 @@ for(fn in beta_ML_files){
   write.table(sims, file=beta_ML_new_file, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
 }
 
+rm(sims)
 
 ####### Get coverage per group #######
+
 # Load simulation results
 VIsims <- read.csv("simulation_results/VI_conditional_coverage.csv",header = T)
 betaMLsims <- read.csv("simulation_results/beta_ML_conditional_coverage.csv",header = T)
@@ -909,5 +911,8 @@ print(xtable(cov_tab),include.rownames=F)
 # compute group-specific percentage bias
 pbias_groups_VI <- sapply(pbias_VI,mean)
 pbias_groups_ML <- sapply(pbias_ML,mean)
+cbind(pbias_groups_ML,pbias_groups_VI)
 
-
+# remove csv files because they are too large for github
+file.remove(beta_ML_new_file)
+file.remove(VI_new_file)
