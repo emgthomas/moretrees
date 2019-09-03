@@ -38,37 +38,55 @@ load("data_example_results/data_example_full.Rdata")
 # Compute prior correlation based on tree
 outcome_pairs <- data.frame(t(combn((p-pL+1):p,m=2)))
 names(outcome_pairs) <- c("u","v")
-outcome_pairs$prior_corr <- mapply(FUN=prior_corr_betas,u=outcome_pairs$u,outcome_pairs$v,MoreArgs=list(ancestors=ancestors))
-outcome_pairs$prior_corr_rounded <- round(outcome_pairs$prior_corr,digits=1)
-outcome_pairs$prior_corr_rounded <- factor(outcome_pairs$prior_corr_rounded,
-                                              levels=seq(0.2,0.8,0.1))
+outcome_pairs$prior_corr <- 
+# outcome_pairs$prior_corr <- mapply(FUN=prior_corr_betas,u=outcome_pairs$u,outcome_pairs$v,MoreArgs=list(ancestors=ancestors))
+# outcome_pairs$prior_corr_rounded <- round(outcome_pairs$prior_corr,digits=1)
+# outcome_pairs$prior_corr_rounded <- factor(outcome_pairs$prior_corr_rounded,
+#                                               levels=seq(0.2,0.8,0.1))
 
 # Compute difference in individual MLE estimates
 outcome_pairs$mle_u <- adhoc_coeffs$uncollapsed[outcome_pairs$u-(p-pL)]
 outcome_pairs$mle_v <- adhoc_coeffs$uncollapsed[outcome_pairs$v-(p-pL)]
 outcome_pairs$mle_diff <- abs(outcome_pairs$mle_u-outcome_pairs$mle_v)
-# outcome_pairs$mle_diff <- outcome_pairs$mle_u-outcome_pairs$mle_v
 
 # Sample size
 outcome_pairs$n_u <- Y[outcome_pairs$u]
 outcome_pairs$n_v <- Y[outcome_pairs$v]
 
+# Box plots
+prior_plot <- ggplot(outcome_pairs,
+                     aes(group=as.factor(prior_corr),
+                         x=prior_corr,y=mle_diff)) + 
+  geom_smooth(aes(x=prior_corr,y=mle_diff,group=NA),method = "lm",
+              colour="blue",lty=2,lwd=0.5,se=TRUE) +
+  geom_boxplot(outlier.size=1,outlier.alpha=0.3,alpha=0.5) +
+  scale_y_continuous(trans = "log10") +
+  theme_bw() +
+  xlab(bquote("Corr(" ~ beta[u] ~","~ beta[v] ~ ")")) + 
+  ylab(bquote("|" ~ beta[v]^{MLE} - beta[u]^{MLE} ~ "|"))
+
+pdf(file="./figures_and_tables/figure4a.pdf",width=5,height=3)
+prior_plot
+dev.off()
+
 # Consider subset of outcomes with minimum sample size
-n_thresh <- 1000
+n_thresh <- 10000
 outcome_pairs_subset <- subset(outcome_pairs,n_u >= n_thresh & n_v >= n_thresh)
 
 # Box plots
-prior_plot <- ggplot(outcome_pairs_subset,
-                     aes(x=prior_corr_rounded,y=mle_diff)) + 
-  # geom_boxplot(outlier.shape = NA) +
-  geom_boxplot() +
+prior_plot2 <- ggplot(outcome_pairs_subset,
+                      aes(group=as.factor(prior_corr),
+                          x=prior_corr,y=mle_diff))+ 
+  geom_smooth(aes(x=prior_corr,y=mle_diff,group=NA),method = "lm",
+              colour="blue",lty=2,lwd=0.5,se=TRUE) +
+  geom_boxplot(outlier.size=1,outlier.alpha=0.5,alpha=0.5) +
   scale_y_continuous(trans = "log10") +
   theme_bw() +
-  xlab("Prior correlation rounded to one decimal place") + 
-  ylab("Absolute difference in MLE estimates (log10 scale)")
+  xlab(bquote("Corr(" ~ beta[u] ~","~ beta[v] ~ ")")) + 
+  ylab(bquote("|" ~ beta[v]^{MLE} - beta[u]^{MLE} ~ "|"))
 
-pdf(file="./figures_and_tables/prior_MLE_comparison.pdf",width=6,height=4)
-prior_plot
+pdf(file="./figures_and_tables/figure4b.pdf",width=5,height=3)
+prior_plot2
 dev.off()
 
 
