@@ -411,7 +411,8 @@ VI_step_ss <- function(ELBO,VI_params,hyperparams,Z,Y,n,p,pL,ancestors,leaf.desc
   
 }
 
-VI_binary_ss <- function(Z,Y,n,p,pL,ancestors,leaf.descendants,cutoff=0.5,mu_gamma_init=NULL,
+VI_binary_ss <- function(Z,Y,n,p,pL,ancestors,leaf.descendants,cutoff=0.5,
+                         mu_gamma_init=NULL,u_s_init=NULL,sigma2_gamma_init=NULL,tau_init=NULL,rho_init=NULL,
                          tol=1E-16,m.max=10000,m.print=m.max+1,more=FALSE,update_hyper=T,update_hyper_freq=10){
   
   ## Inputs ##
@@ -473,20 +474,36 @@ VI_binary_ss <- function(Z,Y,n,p,pL,ancestors,leaf.descendants,cutoff=0.5,mu_gam
   
   ## Code ##
   
-  # If initial values for mu_gamma were not supplied, compute them now
+  # If initial values for mu_gamma were not supplied, initialize randomly
   if(is.null(mu_gamma_init)){
     mu_gamma_init <- rnorm(p,initialize_params$m_mu_init,initialize_params$sd_mu_init)
   }
   
-  # Variational params (initialize randomly)
-  pi_init <- runif(p)
-  u_s_init <- log(pi_init/(1-pi_init))
-  sigma2_gamma_init <- rgamma(p,1,1)
+  # If initial values for u_s_init were not supplied, initialize randomly
+  if(is.null(u_s_init)){
+    pi_init <- runif(p)
+    u_s_init <- log(pi_init/(1-pi_init))
+  }
+  
+  # If initial values for sigma2_gamma_init were not supplied, intialize randomly
+  if(is.null(sigma2_gamma_init)){
+    sigma2_gamma_init <- rgamma(p,1,1)
+  }
   
   # Hyperparams 
-  eta_init <- sapply(Y,rnorm) # initialize randomly
-  tau_init <- var(mu_gamma_init)
-  rho_init <- 0.5
+  
+  # If initial value for tau_init was not supplied, initialize randomly
+  if(is.null(tau_init)){
+    tau_init <- var(mu_gamma_init)
+  }
+  
+  # If initial value for tau_init was not supplied, initialize randomly
+  if(is.null(rho_init)){
+    rho_init <- 0.5
+  }
+  
+  # Randomly initialize eta (will be updated immediately)
+  eta_init <- sapply(Y,rnorm)
   
   # Put initial values in list
   VI_params <- list(mu_gamma=mu_gamma_init,sigma2_gamma=sigma2_gamma_init,u_s=u_s_init)

@@ -200,7 +200,9 @@ indiv.coverage.fun <- function(sim,VIsims,beta_true,ancestors,pL,p){
   return(mean(ci.lb <= beta_true & ci.ub >= beta_true))
 }
 
-smc <- function(x,y){
+GRI_fun <- function(x,y){
+  # Compute the Group-Specific Rand Index
+  
   # x and y must be integer vectors with entries from 1 to number of groups
   # where number of groups may be different for each clustering
   # x= "true" reference grouping
@@ -213,8 +215,6 @@ smc <- function(x,y){
   
   # when do x and y agree on which outcomes are paired together?
   pairs.xy <- pairs.x == pairs.y
-  # remove the lower triangle (including diagonal)
-  # pairs.xy[lower.tri(pairs.xy,diag=T)] <- FALSE
   diag(pairs.xy) <- FALSE
   pairs.count <- Matrix(TRUE,nrow=length(x),ncol=length(x))
   diag(pairs.count) <- FALSE
