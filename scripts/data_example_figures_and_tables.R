@@ -72,6 +72,7 @@ dev.off()
 # Consider subset of outcomes with minimum sample size
 n_thresh <- 10000
 outcome_pairs_subset <- subset(outcome_pairs,n_u >= n_thresh & n_v >= n_thresh)
+sum(Y>= n_thresh)
 
 # Box plots
 prior_plot2 <- ggplot(outcome_pairs_subset,
@@ -156,7 +157,7 @@ ngroups_max <- unique(ngroups[which(ll.tp==ll.max)])
 # Some plotting parameters
 grid_lwd <- 0.2
 fontsize <- 19
-tp.marks <- c(tp[1],min(tp.max),max(tp.max),tp[length(tp)])
+tp.marks <- c(tp[1],0.122,min(tp.max),max(tp.max),0.999)
 ll.marks <- c(ll.tp[1],ll.max,ll.tp[length(ll.tp)])
 dat <- data.frame(tp=tp,ngroups=ngroups,ll.tp=ll.tp)
 
@@ -193,21 +194,21 @@ plot_ngroups <- ggplot(dat,aes(x=ngroups,y=ll.tp)) +
   xlab(expression("G("*delta*")")) +
   ylab("Cross-validated mean log likelihood")
 
-############### Figure A3 ################
-pdf("figures_and_tables/figureA3_a.pdf",width=8,height=5)
+############### Figure R.1 (reviewer response) ################
+pdf("figures_and_tables/figure_cv_delta_a.pdf",width=8,height=5)
 plot_tp
 dev.off()
 
-pdf("figures_and_tables/figureA3_b.pdf",width=8,height=5)
+pdf("figures_and_tables/figure_cv_delta_b.pdf",width=8,height=5)
 plot_ngroups
 dev.off()
 
 ### Load other CV results ###
-nmods <- 9
+nmods <- 8
 cv.res <- as.data.frame(matrix(nrow=nfolds,ncol=nmods+1))
 names(cv.res) <- c("fold",
                    "ssMOReTreeS\n Collapsed",
-                   "ssMOReTreeS\n Collapsed\n Max Delta",
+                   #"ssMOReTreeS\n Collapsed\n Max Delta",
                    "ssMOReTreeS\n Individual",
                    "Uncollapsed",
                    "sim_groups",
@@ -218,7 +219,8 @@ names(cv.res) <- c("fold",
 cv.moretrees <- numeric(nfolds)
 for(i in 1:nfolds){
   load(paste0("data_example_results/data_example_cv_fold",i,".Rdata"))
-  cv.res[i,] <- c(ll.cv[1,1:2],ll.max.folds[1,i],as.numeric(ll.cv[1,3:length(ll.cv)]))
+  # cv.res[i,] <- c(ll.cv[1,1:2],ll.max.folds[1,i],as.numeric(ll.cv[1,3:length(ll.cv)]))
+  cv.res[i,] <- ll.cv
 }
 cv.res$sim_groups <- NULL
 cv.df <- melt(cv.res,id.vars="fold",measure.vars=2:(nmods),variable.name="mod",value.name="ll")
@@ -226,11 +228,9 @@ cv.df <- melt(cv.res,id.vars="fold",measure.vars=2:(nmods),variable.name="mod",v
 # Cross validated predictive accuracy
 sort(colMeans(cv.res[,2:ncol(cv.res)]),decreasing = T)
 
-# Winner excluding MOReTreeS individual and MOReTreeS collapsed delta max
-apply(cv.res[,-c(1,3,4)],1,which.max)
+# Winner excluding MOReTreeS individual
+apply(cv.res[,-c(1,3)],1,which.max)
 # How often does MOReTreeS individual beat MOReTrees collapsed?
-sum(cv.res[,2] <= cv.res[,4])
-# How often does MOReTreeS collpsed delta max beat MOReTrees collapsed?
 sum(cv.res[,2] <= cv.res[,3])
 
 ############### Figure 4 ################
@@ -240,7 +240,7 @@ cv.plot <- ggplot(cv.df,aes(x=mod,y=ll)) +
   xlab("Model") +
   ylab("Mean log likelihood in test set")
 
-pdf("figures_and_tables/figure4.pdf",width=14,height=5)
+pdf("figures_and_tables/figure5.pdf",width=12,height=5)
 cv.plot
 dev.off()
 
@@ -477,7 +477,7 @@ plot.groups <- ggplot(dat.plt,aes(x=lab_sens,y=lab_orig,
   ylab("Original analysis OR")
 
 # simple matching coefficient plot
-smc.sens <- smc(x=dat$group_orig,y=dat$group_sens)
+smc.sens <- GRI_fun(x=dat$group_orig,y=dat$group_sens)
 smc.df <- data.frame(group_orig=1:length(smc.sens),smc=smc.sens)
 dat2 <- dat[,c("group_orig","est_orig")]
 dat2 <- dat2[!duplicated(dat2),]
