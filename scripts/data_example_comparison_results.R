@@ -84,66 +84,66 @@ for(sim in 1:nsims){
 ############################### Convergence diagnostics ###############################
 
 {
-  #### Trace plots for beta
-  for(sim in 1:nsims){
-    plots.list <- list()
-    codes <- names(beta_mcmc[[sim]])[1:pL]
-    for(u in 1:pL){
-      outcome <- codes[u]
-      plots.list[[u]] <- mcmc_trace(beta_mcmc[[sim]],
-                                    par=outcome,
-                                    size=0.2) + 
-        theme_minimal() +
-        theme(legend.position="none",
-              axis.text.x=element_blank(),
-              axis.ticks.x=element_blank(),
-              axis.title.y=element_blank(),
-              axis.text.y=element_blank(),
-              axis.ticks.y=element_blank(),
-              panel.grid = element_blank(),
-              plot.title=element_text(hjust=0.5,size=10)) +
-        ggtitle(as.character(icd_short_to_decimal(outcome)))
-    }
-    # reordering
-    plots.list <- plots.list[order(codes)]
-    # pdf(file=paste0("./figures_and_tables/figureA6_",sim,".pdf"),width=16,height=27)
-    png(file=paste0("./figures_and_tables/figureA6_",sim,".png"),width=16,height=27,units="in",
-        res=500)
-    print(wrap_plots(plots.list,ncol=16))
-    dev.off()
-  }
-  
-  #### Trace plots for gamma
-  for(sim in 2:nsims){
-    plots.list <- list()
-    codes <- names(gamma_mcmc[[sim]])[1:p]
-    for(u in 1:p){
-      outcome <- codes[u]
-      outcome_icd9 <- as.character(icd_short_to_decimal(outcome))
-      if(is.na(outcome_icd9)){
-        outcome_icd9 <- outcome
-      }
-      plots.list[[u]] <- mcmc_trace(gamma_mcmc[[sim]],
-                                    par=outcome,
-                                    size=0.2) + 
-        theme_minimal() +
-        theme(legend.position="none",
-              axis.text.x=element_blank(),
-              axis.ticks.x=element_blank(),
-              axis.title.y=element_blank(),
-              axis.text.y=element_blank(),
-              axis.ticks.y=element_blank(),
-              panel.grid = element_blank(),
-              plot.title=element_text(hjust=0.5,size=10)) +
-        ggtitle(outcome_icd9)
-    }
-    # reordering
-    plots.list <- plots.list[c(1:10,order(codes[11:length(codes)])+10)]
-    png(file=paste0("./figures_and_tables/figureA7_",sim,".png"),width=16,height=36,units="in",
-        res=500)
-    print(wrap_plots(plots.list,ncol=16))
-    dev.off()
-  }
+  # #### Trace plots for beta
+  # for(sim in 1:nsims){
+  #   plots.list <- list()
+  #   codes <- names(beta_mcmc[[sim]])[1:pL]
+  #   for(u in 1:pL){
+  #     outcome <- codes[u]
+  #     plots.list[[u]] <- mcmc_trace(beta_mcmc[[sim]],
+  #                                   par=outcome,
+  #                                   size=0.2) + 
+  #       theme_minimal() +
+  #       theme(legend.position="none",
+  #             axis.text.x=element_blank(),
+  #             axis.ticks.x=element_blank(),
+  #             axis.title.y=element_blank(),
+  #             axis.text.y=element_blank(),
+  #             axis.ticks.y=element_blank(),
+  #             panel.grid = element_blank(),
+  #             plot.title=element_text(hjust=0.5,size=10)) +
+  #       ggtitle(as.character(icd_short_to_decimal(outcome)))
+  #   }
+  #   # reordering
+  #   plots.list <- plots.list[order(codes)]
+  #   # pdf(file=paste0("./figures_and_tables/figureA6_",sim,".pdf"),width=16,height=27)
+  #   png(file=paste0("./figures_and_tables/figureA6_",sim,".png"),width=16,height=27,units="in",
+  #       res=500)
+  #   print(wrap_plots(plots.list,ncol=16))
+  #   dev.off()
+  # }
+  # 
+  # #### Trace plots for gamma
+  # for(sim in 2:nsims){
+  #   plots.list <- list()
+  #   codes <- names(gamma_mcmc[[sim]])[1:p]
+  #   for(u in 1:p){
+  #     outcome <- codes[u]
+  #     outcome_icd9 <- as.character(icd_short_to_decimal(outcome))
+  #     if(is.na(outcome_icd9)){
+  #       outcome_icd9 <- outcome
+  #     }
+  #     plots.list[[u]] <- mcmc_trace(gamma_mcmc[[sim]],
+  #                                   par=outcome,
+  #                                   size=0.2) + 
+  #       theme_minimal() +
+  #       theme(legend.position="none",
+  #             axis.text.x=element_blank(),
+  #             axis.ticks.x=element_blank(),
+  #             axis.title.y=element_blank(),
+  #             axis.text.y=element_blank(),
+  #             axis.ticks.y=element_blank(),
+  #             panel.grid = element_blank(),
+  #             plot.title=element_text(hjust=0.5,size=10)) +
+  #       ggtitle(outcome_icd9)
+  #   }
+  #   # reordering
+  #   plots.list <- plots.list[c(1:10,order(codes[11:length(codes)])+10)]
+  #   png(file=paste0("./figures_and_tables/figureA7_",sim,".png"),width=16,height=36,units="in",
+  #       res=500)
+  #   print(wrap_plots(plots.list,ncol=16))
+  #   dev.off()
+  # }
 }
 
 ############################### Mean and variance comparison ###############################
@@ -200,8 +200,8 @@ for(sim in 1:nsims){
   beta_sim <- beta_indiv_est$beta_indiv*m
   
   ####### Prepare data for plotting ########
-  vi.mcmc.smc <- matrix(nrow=0,ncol=3)
-  mcmc.vi.smc <- matrix(nrow=0,ncol=3)
+  vi.mcmc.GRI <- matrix(nrow=0,ncol=3)
+  mcmc.vi.GRI <- matrix(nrow=0,ncol=3)
   
   vi.dat <- data.frame(est=beta_est_vi,group=group_est_vi,method="VI")
   mcmc.dat <- data.frame(est=beta_est_mcmc,group=group_est_mcmc,method="MCMC")
@@ -284,12 +284,12 @@ for(sim in 1:nsims){
     # simple matching coefficient plot
     ### VI
     dat.sim <- dat.df[dat.df$sim==sim,]
-    smc.vi.df <- data.frame(OR=sort(unique(dat.sim$est_vi_lab)),
-                            smc=smc(dat.sim$group_vi,dat.sim$group_mcmc))
-    smc.vi.df$label <- sprintf("%.3f",smc.vi.df$smc)
-    smc.vi.df$label[smc.vi.df$label=="1"] <- rep("1.000",nrow(smc.vi.df))
-    plot.vi.smc <- ggplot(smc.vi.df,aes(y=OR,x=1)) + 
-      geom_tile(aes(fill=smc),colour="black",size=0.1) +
+    GRI.vi.df <- data.frame(OR=sort(unique(dat.sim$est_vi_lab)),
+                            GRI=GRI_fun(dat.sim$group_vi,dat.sim$group_mcmc))
+    GRI.vi.df$label <- sprintf("%.3f",GRI.vi.df$GRI)
+    GRI.vi.df$label[GRI.vi.df$label=="1"] <- rep("1.000",nrow(GRI.vi.df))
+    plot.vi.GRI <- ggplot(GRI.vi.df,aes(y=OR,x=1)) + 
+      geom_tile(aes(fill=GRI),colour="black",size=0.1) +
       geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
       theme_bw() +
       theme(legend.position="none",
@@ -310,12 +310,12 @@ for(sim in 1:nsims){
       scale_x_continuous(breaks=0.5,labels="")
     
     ### mcmc
-    smc.mcmc.df <- data.frame(OR=sort(unique(dat.sim$est_mcmc_lab)),
-                              smc=smc(dat.sim$group_mcmc,dat.sim$group_vi))
-    smc.mcmc.df$label <- sprintf("%.3f",smc.mcmc.df$smc)
-    smc.mcmc.df$label[smc.mcmc.df$label=="1"] <- rep("1.000",nrow(smc.mcmc.df))
-    plot.mcmc.smc <- ggplot(smc.mcmc.df,aes(y=1,x=OR)) + 
-      geom_tile(aes(fill=smc),colour="black",size=0.1) +
+    GRI.mcmc.df <- data.frame(OR=sort(unique(dat.sim$est_mcmc_lab)),
+                              GRI=GRI_fun(dat.sim$group_mcmc,dat.sim$group_vi))
+    GRI.mcmc.df$label <- sprintf("%.3f",GRI.mcmc.df$GRI)
+    GRI.mcmc.df$label[GRI.mcmc.df$label=="1"] <- rep("1.000",nrow(GRI.mcmc.df))
+    plot.mcmc.GRI <- ggplot(GRI.mcmc.df,aes(y=1,x=OR)) + 
+      geom_tile(aes(fill=GRI),colour="black",size=0.1) +
       geom_label(aes(y=1,x=OR,label=label),
                  size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
       theme_bw() +
@@ -339,10 +339,10 @@ for(sim in 1:nsims){
       ggtitle(paste0("Simulation ",sim))
     
     # filler plot for corner
-    dat.fill <- data.frame(x=1,y=1,label="kappa")
+    dat.fill <- data.frame(x=1,y=1,label="GRI[g]")
     plot.filler <- ggplot(dat.fill,aes(x=x,y=y,label=label),label.size=0) +
       theme_bw() +
-      geom_label(parse = TRUE,size=6,
+      geom_label(parse = TRUE,size=4,
                  label.size=0)+
       theme(legend.position="none",
             axis.text.x=element_blank(),
@@ -357,15 +357,15 @@ for(sim in 1:nsims){
             panel.border=element_blank())
     
     # # Save plots as pdf
-    # subplot(plot.mcmc.smc,plot.filler,
-    #         plot.groups,plot.vi.smc,
+    # subplot(plot.mcmc.GRI,plot.filler,
+    #         plot.groups,plot.vi.GRI,
     #         nrows = 2,
     #         widths=c(7/8,1/8),heights=c(1/8,7/8))
     
-    plot.list[[sim]] <- plot.mcmc.smc + 
+    plot.list[[sim]] <- plot.mcmc.GRI + 
       plot.filler + 
       plot.groups + 
-      plot.vi.smc +
+      plot.vi.GRI +
       plot_layout(ncol=2,widths=c(7,1),heights=c(1,7))
     
     print(sim)
@@ -410,7 +410,7 @@ for(sim in 1:nsims){
   # Save as pdf
   plot.widths <- 4
   plot.heights <- 4
-  pdf(file = paste0("./figures_and_tables/figureA5.pdf"),
+  pdf(file = paste0("./figures_and_tables/figureA6.pdf"),
       width=ncol*plot.widths,
       height=nrow*plot.heights)
   wrap_plots(plot.list,ncol=3,widths=rep(1,3),heights=rep(1,2))
@@ -452,7 +452,6 @@ for(sim in 1:nsims){
 
 ################## Compare SD for betas ###################
 {
-  # plot
   sd_dat <- data.frame(MCMC=sd_MCMC,VI=sd_VI,node=1:pL)
   sd_dat <- reshape(sd_dat,varying=list(1:10,11:20),direction="long")
   sd_dat$id <- NULL
@@ -460,20 +459,21 @@ for(sim in 1:nsims){
   sd_dat$SmallerSD[sd_dat$VI <= sd_dat$MCMC] <- "VI"
   names(sd_dat) <- c("node","sim","MCMC","VI","SmallerSD")
   
-  axis.min <- min(as.matrix(sd_dat[,c("VI","MCMC")]))
-  axis.max <- max(as.matrix(sd_dat[,c("VI","MCMC")]))
-  line.x <- c(axis.min,axis.max)
-  sd_plot <- ggplot(sd_dat,aes(x=VI,y=MCMC,col=SmallerSD)) + 
-    geom_abline(intercept=0,slope=1) +
-    geom_point(alpha=0.8,shape=1) +
-    facet_wrap(.~sim,ncol=5) +
-    scale_x_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1)) +
-    scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1)) +
-    theme_minimal()
-  
-  pdf(file="./figures_and_tables/figureA8.pdf",width=10,height=4)
-  sd_plot
-  dev.off()
+  # # plot
+  # axis.min <- min(as.matrix(sd_dat[,c("VI","MCMC")]))
+  # axis.max <- max(as.matrix(sd_dat[,c("VI","MCMC")]))
+  # line.x <- c(axis.min,axis.max)
+  # sd_plot <- ggplot(sd_dat,aes(x=VI,y=MCMC,col=SmallerSD)) + 
+  #   geom_abline(intercept=0,slope=1) +
+  #   geom_point(alpha=0.8,shape=1) +
+  #   facet_wrap(.~sim,ncol=5) +
+  #   scale_x_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1)) +
+  #   scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1)) +
+  #   theme_minimal()
+  # 
+  # pdf(file="./figures_and_tables/figureA8.pdf",width=10,height=4)
+  # sd_plot
+  # dev.off()
   
   ### Average SD ratio VI:MCMC for individual betas
   sd_dat$ratio <- sd_dat$VI/sd_dat$MCMC
@@ -487,26 +487,26 @@ for(sim in 1:nsims){
 
 ############## Compare SD for non-zero components #############
 {
-  # plot
   sd_nonzero_dat <- as.data.frame(sd_nonzero_mat)
   names(sd_nonzero_dat) <- c("VI","MCMC","nodes","sim")
   sd_nonzero_dat$SmallerSD <- "MCMC"
   sd_nonzero_dat$SmallerSD[sd_nonzero_dat$VI <= sd_nonzero_dat$MCMC] <- "VI"
   
-  axis.min <- min(as.matrix(sd_nonzero_dat[,c("VI","MCMC")]))
-  axis.max <- max(as.matrix(sd_nonzero_dat[,c("VI","MCMC")]))
-  line.x <- c(axis.min,axis.max)
-  sd_nonzero_plot <- ggplot(sd_nonzero_dat,aes(x=VI,y=MCMC,col=SmallerSD)) + 
-    geom_abline(intercept=0,slope=1) +
-    geom_point(alpha=1,shape=1,size=3) +
-    facet_wrap(.~sim,ncol=5) +
-    scale_x_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1E-2)) + 
-    scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1E-2)) +
-    theme_minimal()
-  
-  pdf(file="./figures_and_tables/figureA9.pdf",width=10,height=4)
-  sd_nonzero_plot
-  dev.off()
+  ## plot
+  # axis.min <- min(as.matrix(sd_nonzero_dat[,c("VI","MCMC")]))
+  # axis.max <- max(as.matrix(sd_nonzero_dat[,c("VI","MCMC")]))
+  # line.x <- c(axis.min,axis.max)
+  # sd_nonzero_plot <- ggplot(sd_nonzero_dat,aes(x=VI,y=MCMC,col=SmallerSD)) + 
+  #   geom_abline(intercept=0,slope=1) +
+  #   geom_point(alpha=1,shape=1,size=3) +
+  #   facet_wrap(.~sim,ncol=5) +
+  #   scale_x_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1E-2)) + 
+  #   scale_y_log10(lim=c(axis.min,axis.max),breaks=c(1E-3,1E-2)) +
+  #   theme_minimal()
+  # 
+  # pdf(file="./figures_and_tables/figureA9.pdf",width=10,height=4)
+  # sd_nonzero_plot
+  # dev.off()
   
   ### Average SD ratio VI:MCMC across sims for nonzero components
   sd_nonzero_dat$ratio <- sd_nonzero_dat$VI/sd_nonzero_dat$MCMC

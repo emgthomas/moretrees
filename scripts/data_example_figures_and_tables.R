@@ -252,18 +252,18 @@ group_est_true <- as.integer(as.factor(beta_est_true))
 nperm <- 10
 perm.est <- matrix(nrow=pL,ncol=nperm)
 perm.group <- matrix(nrow=pL,ncol=nperm)
-perm.smc <- matrix(nrow=max(group_est_true),ncol=nperm)
+perm.GRI <- matrix(nrow=max(group_est_true),ncol=nperm)
 
 for(i in 1:(nperm)){
   load(paste0("data_example_results/data_example_full_perm",i,".Rdata"))
   perm.est[,i] <- beta_est
   perm.group[,i] <- as.integer(as.factor(beta_est))
-  perm.smc[,i] <- smc(group_est_true,perm.group[,i])
+  perm.GRI[,i] <- GRI_fun(group_est_true,perm.group[,i])
   #plot(beta_est,beta_est_true)
 }
-smc.mean <- rowMeans(perm.smc)
-cat("\n\nSMC for each original group, averaged across 10 permutations:\n\n")
-cbind(group=1:8,SMC=smc.mean)
+GRI.mean <- rowMeans(perm.GRI)
+cat("\n\nGRI_g for each original group, averaged across 10 permutations:\n\n")
+cbind(g=1:8,GRI_g=GRI.mean)
 
 dat <- as.data.frame(cbind(perm.est,perm.group))
 est.names <- sapply(1:10,function(i) paste0("est.",i))
@@ -298,7 +298,7 @@ dat.df$est.group.orig <- exp(dat.df$est.orig*10)
 dat.df$est.group.orig <- as.factor(sprintf("%.3f",dat.df$est.group.orig))
 dat.df$est.group <- exp(dat.df$est*10)
 dat.df$est.group <- as.factor(sprintf("%.3f",dat.df$est.group))
-perm.smc <- cbind(rep(1,nrow(perm.smc)),perm.smc)
+perm.GRI <- cbind(rep(1,nrow(perm.GRI)),perm.GRI)
 
 ##### OR for original groups vs permuted groups, showing number of outcomes
 plot.list <- list()
@@ -345,12 +345,12 @@ for(i in 0:10){
     plotly.df <- rbind(plotly.df,dat.i)
   }
 
-  # simple matching coefficient plot
-  smc.df <- data.frame(OR=as.factor(unique(dat.df$est.group.orig)),smc=perm.smc[,i+1],perm="kappa")
-  smc.df$label <- sprintf("%.3f",smc.df$smc)
-  if(i==0) smc.df$label <- rep("1.00",nrow(smc.df))
-  plot.smc <- ggplot(smc.df,aes(y=OR,x=1)) + 
-    geom_tile(aes(fill=smc),colour="black",size=0.1) +
+  # GRI_g plot
+  GRI.df <- data.frame(OR=as.factor(unique(dat.df$est.group.orig)),smc=perm.GRI[,i+1],perm="GRI")
+  GRI.df$label <- sprintf("%.3f",GRI.df$smc)
+  if(i==0) GRI.df$label <- rep("1.00",nrow(GRI.df))
+  plot.GRI <- ggplot(GRI.df,aes(y=OR,x=1)) + 
+    geom_tile(aes(fill=GRI),colour="black",size=0.1) +
     geom_label(aes(x=1,y=OR,label=label),size=2,alpha=0.6,label.size=0,label.padding=unit(0.1,"lines")) +
     # geom_text(aes(x=1,y=OR,label=label)) +
     theme_bw() +
@@ -365,7 +365,7 @@ for(i in 0:10){
           plot.margin = margin(t=top.pts,r=0,b=0, unit = "pt"),
           plot.title = element_text(hjust = 0.5),
           panel.border=element_blank()) +
-    ggtitle(bquote(kappa)) +
+    ggtitle(bquote(GRI[g])) +
     xlab("") + 
     scale_fill_gradientn(colours=brewer.pal(max(as.numeric(dat.df$group.orig)),
                                               name="YlGnBu"),
@@ -500,7 +500,7 @@ plot.smc <- ggplot(smc.df,aes(y=est_lab,x=1)) +
         plot.margin = margin(t=top.pts,r=0,b=0, unit = "pt"),
         plot.title = element_text(hjust = 0.5),
         panel.border=element_blank()) +
-  ggtitle(bquote(kappa)) +
+  ggtitle(bquote(GRI[g])) +
   xlab("") + 
   scale_fill_gradientn(colours=brewer.pal(max(as.numeric(smc.df$group_orig)),
                                           name="YlGnBu"),
@@ -508,7 +508,7 @@ plot.smc <- ggplot(smc.df,aes(y=est_lab,x=1)) +
   scale_x_continuous(breaks=0.5,labels="")
 
 ### save as pdf
-pdf(file="./figures_and_tables/figureA10.pdf",width=4.2,height=4)
+pdf(file="./figures_and_tables/figureA5.pdf",width=4.2,height=4)
 plot.groups + plot.smc + plot_layout(ncol=2,widths=c(7,1))
 dev.off()
 
