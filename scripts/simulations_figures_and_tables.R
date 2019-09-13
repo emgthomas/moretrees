@@ -2,9 +2,9 @@
 # ----------------------- Producing figures and tables for simulations ------------------------ #
 # --------------------------------------------------------------------------------------------- #
 
-# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
-direc <- "../moretrees/" # path of the moretrees repository
+# direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/moretrees/"
+direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees/"
+# direc <- "../moretrees/" # path of the moretrees repository
 setwd(direc)
 
 #### Create directory for saving results ###
@@ -17,136 +17,18 @@ nsims <- 1000
 
 require(mclust)
 require(igraph)
+require(xtable)
 
 # Functions needed
 source("scripts/processing_functions.R")
 
-############ Stitching results together ###############
+############ Processing results ########
 
 path_file <- "simulation_results/"
 params$nsamp2 <- as.character(params$nsamp)
 params$nsamp2[params$nsamp==1E05] <- "1e\\+05"
 params$nsamp2[params$nsamp==1E06] <- "1e\\+06"
-
-# for(i in c(4,8)){ # only need to do this for 4th and 8th sim
-#   # params
-#   nsamp <- params$nsamp[i]
-#   nsamp2 <- params$nsamp2[i]
-#   whichbeta <- params$whichbeta[i]
-#   evenness <- params$evenness[i]
-#   sim_params <- paste("n",nsamp,"_beta",whichbeta,"_evenness",evenness,sep="")
-#   sim_params2 <- paste("n",nsamp2,"_beta",whichbeta,"_evenness",evenness,sep="")
-# 
-#   # betas
-#   beta_files <- list.files(path=path_file,pattern=paste("part_betasims_",sim_params2,"_*",sep=""))
-#   outfile_beta <- paste0(path_file,"betasims_all_",sim_params,".csv")
-#   file.create(outfile_beta)
-#   write.table(rbind(c("sim","moretrees_est","uncollapse","truth","adhoc1","adhoc2","adhoc3","adhoc4")), file = outfile_beta, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   sims_idx <- character(0)
-#   for(fn in beta_files){
-#     sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
-#     process_id <- sub(pattern=paste0("part_betasims_",sim_params2,"_"),replace="",x=fn)
-#     process_id <- paste0("_",sub(pattern=".csv",replace="",x=process_id))
-#     sims[,1] <- sapply(sims[,1],paste0,process_id)
-#     sims_idx <- c(sims_idx,unique(sims[,1]))
-#     write.table(sims, file=outfile_beta, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   }
-#   # Keep only first 1000
-#   sims <- read.csv(file=outfile_beta)
-#   if(length(sims_idx) > nsims){
-#     sims <- subset(sims,sim %in% sims_idx[1:nsims])
-#   }
-#   sim_n <- unique(sims$sim)
-#   sim_n <- data.frame(sim=as.character(sim_n),sim_n=1:length(sim_n))
-#   sims <- merge(sims,sim_n,by="sim",all.x=T)
-#   outfile_beta <- paste0(path_file,"betasims_",sim_params,".csv")
-#   file.create(outfile_beta)
-#   write.table(rbind(c("sim","moretrees_est","uncollapse","truth","adhoc1","adhoc2","adhoc3","adhoc4","sim_n")), file = outfile_beta, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   write.table(sims, file=outfile_beta, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-# 
-#   # VI params
-#   VI_files <- list.files(path=path_file,pattern=paste("part_VIsims_",sim_params2,"_*",sep=""))
-#   outfile_VI <- paste0(path_file,"VIsims_all_",sim_params,".csv")
-#   file.create(outfile_VI)
-#   write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s")), file = outfile_VI, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-#   sims_idx <- numeric(0)
-#   for(fn in VI_files){
-#     sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
-#     process_id <- sub(pattern=paste0("part_VIsims_",sim_params2,"_"),replace="",x=fn)
-#     process_id <- paste0("_",sub(pattern=".csv",replace="",x=process_id))
-#     sims[,1] <- sapply(sims[,1],paste0,process_id)
-#     sims_idx <- c(sims_idx,unique(sims[,1]))
-#     write.table(sims, file=outfile_VI, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   }
-#   # Keep only first 1000
-#   sims <- read.csv(file=outfile_VI)
-#   sims <- subset(sims,sim %in% sim_n$sim)
-#   sims <- merge(sims,sim_n,by="sim",all.x=T)
-#   #if(length(unique(sims$sim)) != nsims) stop(paste("Error in Simulation",i,sep=" "))
-#   outfile_VI <- paste0(path_file,"VIsims_",sim_params,".csv")
-#   file.create(outfile_VI)
-#   write.table(rbind(c("sim","mu_gamma","sigma2_gamma","u_s","sim_n")), file = outfile_VI, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-#   write.table(sims, file=outfile_VI, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-# 
-#   # hyperparams
-#   hyper_files <- list.files(path=path_file,pattern=paste("part_hyperparams_",sim_params2,"_*",sep=""))
-#   outfile_hyper <- paste0(path_file,"hyperparams_all_",sim_params,".csv")
-#   file.create(outfile_hyper)
-#   write.table(rbind(c("sim","rho","tau")), file = outfile_hyper, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-#   sims_idx <- numeric(0)
-#   for(fn in hyper_files){
-#     sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
-#     process_id <- sub(pattern=paste0("part_hyperparams_",sim_params2,"_"),replace="",x=fn)
-#     process_id <- paste0("_",sub(pattern=".csv",replace="",x=process_id))
-#     sims[,1] <- sapply(sims[,1],paste0,process_id)
-#     sims_idx <- c(sims_idx,unique(sims[,1]))
-#     write.table(sims, file=outfile_hyper, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   }
-#   # Keep only first 1000
-#   sims <- read.csv(file=outfile_hyper)
-#   sims <- subset(sims,sim %in% sim_n$sim)
-#   sims <- merge(sims,sim_n,by="sim",all.x=T)
-#   #if(length(unique(sims$sim)) != nsims) stop(paste("Error in Simulation",i,sep=" "))
-#   outfile_hyper <- paste0(path_file,"hyperparams_",sim_params,".csv")
-#   file.create(outfile_hyper)
-#   write.table(rbind(c("sim","rho","tau","sim_n")), file = outfile_hyper, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-#   write.table(sims, file=outfile_hyper, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-# 
-#   # reached_max
-#   reached_max_files <- list.files(path=path_file,pattern=paste("part_reached_max_",sim_params2,"_*",sep=""))
-#   outfile_reached_max <- paste0(path_file,"reached_max_all_",sim_params,".csv")
-#   file.create(outfile_reached_max)
-#   write.table(rbind(c("sim","reached_max")), file = outfile_reached_max, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-#   sims_idx <- numeric(0)
-#   for(fn in reached_max_files){
-#     sims <- read.csv(file=paste0(path_file,fn),header=F,row.names=NULL)
-#     process_id <- sub(pattern=paste0("part_reached_max_",sim_params2,"_"),replace="",x=fn)
-#     process_id <- paste0("_",sub(pattern=".csv",replace="",x=process_id))
-#     sims[,1] <- sapply(sims[,1],paste0,process_id)
-#     sims_idx <- c(sims_idx,unique(sims[,1]))
-#     write.table(sims, file=outfile_reached_max, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   }
-#   # Keep only first 1000
-#   sims <- read.csv(file=outfile_reached_max)
-#   sims <- subset(sims,sim %in% sim_n$sim)
-#   sims <- merge(sims,sim_n,by="sim",all.x=T)
-#   #if(length(unique(sims$sim)) != nsims) stop(paste("Error in Simulation",i,sep=" "))
-#   outfile_reached_max <- paste0(path_file,"reached_max_",sim_params,".csv")
-#   file.create(outfile_reached_max)
-#   write.table(rbind(c("sim","reached_max","sim_n")), file = outfile_reached_max, row.names=FALSE, col.names=FALSE, sep=",",append=TRUE)
-#   write.table(sims, file=outfile_reached_max, row.names =FALSE, col.names = FALSE,sep = ",", append = TRUE)
-#   
-#   # keep track
-#   print(paste0("Simulation ",i," done."))
-# }
-
-
-############ Processing results ########
-
-params$nsamp2 <- as.character(params$nsamp)
-params$nsamp2[params$nsamp==1E05] <- "1e\\+05"
-params$nsamp2[params$nsamp==1E06] <- "1e\\+06"
-simres <- data.frame(matrix(nrow=nrow(params),ncol=96))
+simres <- data.frame(matrix(nrow=nrow(params),ncol=98))
 
 for(i in (1:nrow(params))){
   # sim parameters
@@ -172,6 +54,12 @@ for(i in (1:nrow(params))){
   outfile_VI <- paste0(path_file,"VIsims_n",nsamp,"_beta",whichbeta,".csv")
   VIsims <- read.csv(file=outfile_VI,header=T,row.names=NULL)
   print(paste("processing simulation",i,"; number of NAs =", sum(is.na(betasims)),"; number of sims = ",length(unique(betasims$sim)),"; number not converged = ",sum(reached_max$reached_max)))
+  # Compute coverage of collapsed CI
+  groups_cov <- sapply(1:nsims,groups.coverage.fun,betasims=betasims,VIsims=VIsims,beta_true=beta_true,tree=tree)
+  groups_cov <- mean(groups_cov)
+  # Compute coverage of individual CI
+  indiv_cov <- sapply(1:nsims,indiv.coverage.fun,VIsims=VIsims,beta_true=beta_true,ancestors=ancestors,p=p,pL=pL)
+  indiv_cov <- mean(indiv_cov)
   # Compute RMSE of grouped estimate for individual betas (ssMOReTreeS)
   group.indiv.rmse <- apply(betasims[,2:8],2,function(x) tapply(x,betasims$sim,rmse.fun,beta=beta_true))
   group.indiv.rmse_tiles <- apply(group.indiv.rmse,2,quantile,c(0.25,0.5,0.75),na.rm=T)
@@ -204,7 +92,7 @@ for(i in (1:nrow(params))){
   bias50 <- apply(cbind(betasims[,2:8],indiv_betas_df$beta_indiv),2,function(x) tapply(X=x,INDEX=betasims$sim,FUN=bias_n_fun,beta_true=beta_true,n=50))
   bias50_tiles <- apply(bias50,2,quantile,p=c(0.25,0.5,0.75),na.rm=T)
   # Put it all into the results data frame
-  simres[i,] <- c(group.indiv.rmse_tiles,indiv.rmse_tiles,ARI_tiles,ARI_adhoc,nclust_tiles,nclust_adhoc,bias50_tiles)
+  simres[i,] <- c(group.indiv.rmse_tiles,indiv.rmse_tiles,ARI_tiles,ARI_adhoc,nclust_tiles,nclust_adhoc,bias50_tiles,groups_cov,indiv_cov)
 }
 
 # simulation 1 did not converge 11 times
@@ -215,7 +103,7 @@ rmse_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(
 ARI_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(c("fq_ARI","sq_ARI","tq_ARI"),times=n.ests),as.character(rep(1:n.ests,each=3))))
 nclust_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(c("fq_nclust","sq_nclust","tq_nclust"),times=n.ests),as.character(rep(1:n.ests,each=3))))
 bias_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(c("fq_bias","sq_bias","tq_bias"),times=n.ests),as.character(rep(1:n.ests,each=3))))
-names(simres) <- c(rmse_names,ARI_names,nclust_names,bias_names)
+names(simres) <- c(rmse_names,ARI_names,nclust_names,bias_names,"groups_cov","indiv_cov")
 
 # fq = first quartile of rmse
 # sq = second quartile of rmse
@@ -236,8 +124,8 @@ save(simres,params,file="simulation_results/simulation_results_df.Rdata")
 
 rm(list=ls())
 # direc <- "/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/R_code/MORETreeS/"
-# direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/"
-direc <- "../moretrees/" # path of the moretrees repository
+direc <- "/Users/emt380/Documents/PhD_Papers/Air_pollution/R_code/MORETreeS/moretrees"
+# direc <- "../moretrees/" # path of the moretrees repository
 setwd(direc)
 load("simulation_inputs/inputs.Rdata")
 load("simulation_results/simulation_results_df.Rdata")
@@ -290,9 +178,21 @@ for(i in 1:nrow(bias_df)){
 }
 bias_df2 <- dcast(bias_df[,c("whichbeta","mod_names","nsamp","bias")],whichbeta + mod_names ~ nsamp, value.var="bias",fun.aggregate=)
 
-require(xtable)
 bias_xtable <- xtable(bias_df2)
 write(print(bias_xtable,floating=FALSE,include.rownames = FALSE),file="figures_and_tables/tableA1.tex")
+
+############ Table A2 - coverage of moretrees estimates ###########
+
+cov_res <- simres[,c("whichbeta","nsamp","groups_cov","indiv_cov"),]
+digits <- 3
+frmt <- paste0("%.",digits,"f")
+cov_res$groups_cov <- sprintf(fmt=frmt,cov_res$groups_cov*100)
+cov_res$indiv_cov <- sprintf(fmt=frmt,cov_res$indiv_cov*100)
+names(cov_res) <- c("Scenario","n","ssMOReTreeS Collapsed","ssMOReTreeS Individual")
+
+cov_xtable <- xtable(cov_res)
+write(print(cov_xtable,floating=FALSE,include.rownames = FALSE),file="figures_and_tables/tableA2.tex")
+
 
 ############ RMSE of group estimates for individual true betas ###########
 

@@ -6,7 +6,7 @@ direc <- "../moretrees/" # path of the moretrees repository
 setwd(direc)
 
 # Load data
-load(file="data/moretrees_CC_data.Rdata")
+load(file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/moretrees_CC_data.Rdata")
 
 # Set seed
 set.seed(943860)
@@ -18,4 +18,4 @@ for(v in 1:pL){
   folds[[v]] <- sample(1:nfolds,n.v,replace=T)
 }
 
-save(folds,file="data/cv_folds.Rdata")
+save(folds,file="/nfs/home/E/ethomas/shared_space/ci3_nsaph/Emma/Data/moretrees_data/cv_folds.Rdata")
