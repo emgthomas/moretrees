@@ -18,6 +18,8 @@ nsims <- 1000
 require(mclust)
 require(igraph)
 require(xtable)
+require(reshape2)
+require(ggplot2)
 
 # Functions needed
 source("scripts/processing_functions.R")
@@ -28,7 +30,7 @@ path_file <- "simulation_results/"
 params$nsamp2 <- as.character(params$nsamp)
 params$nsamp2[params$nsamp==1E05] <- "1e\\+05"
 params$nsamp2[params$nsamp==1E06] <- "1e\\+06"
-simres <- data.frame(matrix(nrow=nrow(params),ncol=98))
+simres <- data.frame(matrix(nrow=nrow(params),ncol=96))
 
 for(i in (1:nrow(params))){
   # sim parameters
@@ -54,16 +56,10 @@ for(i in (1:nrow(params))){
   outfile_VI <- paste0(path_file,"VIsims_n",nsamp,"_beta",whichbeta,".csv")
   VIsims <- read.csv(file=outfile_VI,header=T,row.names=NULL)
   print(paste("processing simulation",i,"; number of NAs =", sum(is.na(betasims)),"; number of sims = ",length(unique(betasims$sim)),"; number not converged = ",sum(reached_max$reached_max)))
-  # Compute coverage of collapsed CI
-  groups_cov <- sapply(1:nsims,groups.coverage.fun,betasims=betasims,VIsims=VIsims,beta_true=beta_true,tree=tree)
-  groups_cov <- mean(groups_cov)
-  # Compute coverage of individual CI
-  indiv_cov <- sapply(1:nsims,indiv.coverage.fun,VIsims=VIsims,beta_true=beta_true,ancestors=ancestors,p=p,pL=pL)
-  indiv_cov <- mean(indiv_cov)
   # Compute RMSE of grouped estimate for individual betas (ssMOReTreeS)
   group.indiv.rmse <- apply(betasims[,2:8],2,function(x) tapply(x,betasims$sim,rmse.fun,beta=beta_true))
   group.indiv.rmse_tiles <- apply(group.indiv.rmse,2,quantile,c(0.25,0.5,0.75),na.rm=T)
-  # Compute RMSE and coverage of individual estimate for individual betas (ssMOReTreeS)
+  # Compute RMSE of individual estimate for individual betas (ssMOReTreeS)
   indiv_betas <- tapply(1:nrow(VIsims),VIsims$sim,indiv.beta.sd.calc,VIsims=VIsims,ancestors=ancestors,pL=pL,p=p,simplify=TRUE)
   indiv_betas_df <- data.frame(beta_indiv=numeric(length=pL*nsims.i),sd_indiv=numeric(length=pL*nsims.i),sim=numeric(length=pL*nsims.i))
   for(j in 1:length(indiv_betas)){
@@ -92,7 +88,7 @@ for(i in (1:nrow(params))){
   bias50 <- apply(cbind(betasims[,2:8],indiv_betas_df$beta_indiv),2,function(x) tapply(X=x,INDEX=betasims$sim,FUN=bias_n_fun,beta_true=beta_true,n=50))
   bias50_tiles <- apply(bias50,2,quantile,p=c(0.25,0.5,0.75),na.rm=T)
   # Put it all into the results data frame
-  simres[i,] <- c(group.indiv.rmse_tiles,indiv.rmse_tiles,ARI_tiles,ARI_adhoc,nclust_tiles,nclust_adhoc,bias50_tiles,groups_cov,indiv_cov)
+  simres[i,] <- c(group.indiv.rmse_tiles,indiv.rmse_tiles,ARI_tiles,ARI_adhoc,nclust_tiles,nclust_adhoc,bias50_tiles)
 }
 
 # simulation 1 did not converge 11 times
@@ -103,7 +99,7 @@ rmse_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(
 ARI_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(c("fq_ARI","sq_ARI","tq_ARI"),times=n.ests),as.character(rep(1:n.ests,each=3))))
 nclust_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(c("fq_nclust","sq_nclust","tq_nclust"),times=n.ests),as.character(rep(1:n.ests,each=3))))
 bias_names <- sapply(1:(3*n.ests),function(i,x) paste0(x[i,1],x[i,2]),cbind(rep(c("fq_bias","sq_bias","tq_bias"),times=n.ests),as.character(rep(1:n.ests,each=3))))
-names(simres) <- c(rmse_names,ARI_names,nclust_names,bias_names,"groups_cov","indiv_cov")
+names(simres) <- c(rmse_names,ARI_names,nclust_names,bias_names)
 
 # fq = first quartile of rmse
 # sq = second quartile of rmse
@@ -137,9 +133,6 @@ simres$nsamp_lab[simres$nsamp==10000] <- "n=10,000"
 simres$nsamp_lab[simres$nsamp==100000] <- "n=100,000"
 simres$nsamp_lab[simres$nsamp==1000000] <- "n=1,000,000"
 simres$nsamp_lab <- factor(simres$nsamp_lab,levels=c("n=1000","n=10,000","n=100,000","n=1,000,000"))
-
-require(reshape2)
-require(ggplot2)
 
 ############ Table A1 - bias of largest estimates ###########
 
@@ -180,19 +173,6 @@ bias_df2 <- dcast(bias_df[,c("whichbeta","mod_names","nsamp","bias")],whichbeta 
 
 bias_xtable <- xtable(bias_df2)
 write(print(bias_xtable,floating=FALSE,include.rownames = FALSE),file="figures_and_tables/tableA1.tex")
-
-############ Table A2 - coverage of moretrees estimates ###########
-
-cov_res <- simres[,c("whichbeta","nsamp","groups_cov","indiv_cov"),]
-digits <- 3
-frmt <- paste0("%.",digits,"f")
-cov_res$groups_cov <- sprintf(fmt=frmt,cov_res$groups_cov*100)
-cov_res$indiv_cov <- sprintf(fmt=frmt,cov_res$indiv_cov*100)
-names(cov_res) <- c("Scenario","n","ssMOReTreeS Collapsed","ssMOReTreeS Individual")
-
-cov_xtable <- xtable(cov_res)
-write(print(cov_xtable,floating=FALSE,include.rownames = FALSE),file="figures_and_tables/tableA2.tex")
-
 
 ############ RMSE of group estimates for individual true betas ###########
 

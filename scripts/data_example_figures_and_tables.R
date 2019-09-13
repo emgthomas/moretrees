@@ -240,7 +240,7 @@ cv.plot <- ggplot(cv.df,aes(x=mod,y=ll)) +
   xlab("Model") +
   ylab("Mean log likelihood in test set")
 
-pdf("figures_and_tables/figure5.pdf",width=12,height=5)
+pdf("figures_and_tables/figure4.pdf",width=12,height=5)
 cv.plot
 dev.off()
 
@@ -376,13 +376,14 @@ for(i in 0:10){
   if(i > 0){
     plot.list[[i]] <- plot.groups + plot.smc +
       plot_layout(ncol=2,widths=c(7,1))
-  } else {
-    pdf(file = paste0("./figures_and_tables/figureA4_",i,".pdf"),
-        width=4,height=3.5)
-    print(plot.groups + plot.smc +
-            plot_layout(ncol=2,widths=c(7,1)))
-    dev.off()
-  }
+  } 
+  # else {
+  #   pdf(file = paste0("./figures_and_tables/figureA4_",i,".pdf"),
+  #       width=4,height=3.5)
+  #   print(plot.groups + plot.smc +
+  #           plot_layout(ncol=2,widths=c(7,1)))
+  #   dev.off()
+  # }
 }
 
 ## interactive plot
@@ -920,6 +921,7 @@ for(i in 1:max(VIsims$sim)){
 # what's our conditional sample size for each group?
 nsamp_g <- sapply(coverage_ML,length)
 
+########### Table A.2 #############
 # compute group-specific coverage
 cov_groups_VI <- sapply(coverage_VI,mean)
 cov_groups_ML <- sapply(coverage_ML,mean)

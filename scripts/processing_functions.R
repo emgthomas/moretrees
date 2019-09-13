@@ -182,24 +182,6 @@ bias_n_fun <- function(beta_sim,beta_true,n=20){
   mean(abs((beta_true_n-beta_est_n)/beta_true_n))
 }
 
-groups.coverage.fun <- function(sim,betasims,VIsims,beta_true,tree){
-  beta <- betasims$moretrees_est[betasims$sim==sim]
-  VIparams <- VIsims[VIsims$sim==sim,2:4]
-  tree_ci <- groups.calc.fun(tree=tree,beta_groups=as.factor(beta),
-                             beta=beta,VI_params=VIparams)
-  ci.lb <- V(tree_ci)$beta_grouped_cil[V(tree_ci)$leaf]
-  ci.ub <- V(tree_ci)$beta_grouped_ciu[V(tree_ci)$leaf]
-  return(mean(ci.lb <= beta_true & ci.ub >= beta_true))
-}
-
-indiv.coverage.fun <- function(sim,VIsims,beta_true,ancestors,pL,p){
-  VIparams <- VIsims[VIsims$sim==sim,2:4]
-  indiv_ci <- indiv.beta.ci.calc(VI_params=VIparams,ancestors=ancestors,pL=pL,p=p)
-  ci.lb <- indiv_ci$cil_indiv
-  ci.ub <- indiv_ci$ciu_indiv
-  return(mean(ci.lb <= beta_true & ci.ub >= beta_true))
-}
-
 GRI_fun <- function(x,y){
   # Compute the Group-Specific Rand Index
   
