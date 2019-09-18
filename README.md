@@ -3,7 +3,7 @@ Code for implementing Multi-outcome regression with Tree-Structured Shrinkage (M
 
 This repository contains the following directories. The most important directory is scripts, which contains R files for implementing the model.
 
-Data analyses cannot be fully reproduced as Medicare data cannot be made publicly available. However, simulations can be reproduced via the scripts/simulations.R script.
+Data analyses cannot be fully reproduced as Medicare data cannot be made publicly available. However, our simulation study (Section 4 of the manuscript) can be reproduced via the scripts/simulations.R script.
 
 ## data
 Should contain case-crossover study data examining the effect of short-term exposure to PM2.5 on hospitalizations for cardiovascular disease (CVD) among Medicare enrollees. For data privacy reasons we are not able to make these data publicly available.
